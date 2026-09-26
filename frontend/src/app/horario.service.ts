@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { API_URL } from './api-config';
+import id from '@angular/common/locales/extra/id';
 
 export interface Profesor {
   id: number;
@@ -65,4 +66,11 @@ export class HorarioService {
   generarHorario(): Observable<Horario[]> {
     return this.http.post<Horario[]>(`${API_URL}/generar-horario`, {});
   }
+
+
+   moverHorario(id: number, cambio: { dia_semana: string; hora_inicio: string }): Observable<Horario> {
+    return this.http.put<Horario>(`${API_URL}/horarios/${id}`, cambio);
+  }
+
 }
+  
