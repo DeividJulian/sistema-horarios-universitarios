@@ -196,16 +196,42 @@ export class App implements OnInit {
     }
 
     const horaTexto = `${horaDestino.toString().padStart(2, '0')}:00:00`;
+    const estadoAnterior = {
+      dia_semana: horario.dia_semana,
+      hora_inicio: horario.hora_inicio,
+      hora_fin: horario.hora_fin,
+    };
+
+    // Actualización optimista: mueve el bloque de inmediato en pantalla
+    this.horarios.update((lista) =>
+      lista.map((h) =>
+        h.id === horario.id
+          ? {
+              ...h,
+              dia_semana: diaDestino,
+              hora_inicio: horaTexto,
+              hora_fin: `${(horaDestino + 1).toString().padStart(2, '0')}:00:00`,
+            }
+          : h
+      )
+    );
 
     this.horarioService
       .moverHorario(horario.id, { dia_semana: diaDestino, hora_inicio: horaTexto })
       .subscribe({
         next: (actualizado) => {
+          // Confirma con los datos reales que devolvió el servidor
           this.horarios.update((lista) =>
             lista.map((h) => (h.id === actualizado.id ? actualizado : h))
           );
         },
-        error: (err) => alert(err.error?.detail || 'No se pudo mover el horario'),
+        error: (err) => {
+          // Si el servidor lo rechaza, revierte al estado anterior
+          this.horarios.update((lista) =>
+            lista.map((h) => (h.id === horario.id ? { ...h, ...estadoAnterior } : h))
+          );
+          alert(err.error?.detail || 'No se pudo mover el horario');
+        },
       });
   }
 }
