@@ -113,6 +113,7 @@ import { HorarioService, Horario, Materia, Aula } from './horario.service';
       cursor: grab;
       display: flex;
       flex-direction: column;
+      touch-action: none;
     }
     .cdk-drag-preview {
       box-shadow: 0 4px 8px rgba(0,0,0,0.3);
@@ -199,7 +200,11 @@ export class App implements OnInit {
     this.horarioService
       .moverHorario(horario.id, { dia_semana: diaDestino, hora_inicio: horaTexto })
       .subscribe({
-        next: () => this.cargarDatos(),
+        next: (actualizado) => {
+          this.horarios.update((lista) =>
+            lista.map((h) => (h.id === actualizado.id ? actualizado : h))
+          );
+        },
         error: (err) => alert(err.error?.detail || 'No se pudo mover el horario'),
       });
   }
