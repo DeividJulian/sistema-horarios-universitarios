@@ -2,7 +2,7 @@ import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { DragDropModule, CdkDragDrop } from '@angular/cdk/drag-drop';
 import { forkJoin } from 'rxjs';
-import { HorarioService, Horario, Materia, Aula } from './horario.service';
+import { HorarioService, Horario, Materia, Aula, Grupo, Profesor } from './horario.service';
 
 @Component({
   selector: 'app-root',
@@ -13,6 +13,34 @@ import { HorarioService, Horario, Materia, Aula } from './horario.service';
       <h1>Sistema de Horarios y Aulas Universitarias</h1>
       <button (click)="generarHorario()">Generar Horario Automáticamente</button>
       <p class="ayuda">Arrastra un bloque a otra casilla vacía para moverlo manualmente.</p>
+
+      <div class="filtros">
+        <label>
+          Profesor:
+          <select (change)="onFiltroProfesor($any($event.target).value)">
+            <option value="">Todos</option>
+            <option *ngFor="let p of profesores()" [value]="p.id">{{ p.nombre }}</option>
+          </select>
+        </label>
+
+        <label>
+          Grupo:
+          <select (change)="onFiltroGrupo($any($event.target).value)">
+            <option value="">Todos</option>
+            <option *ngFor="let g of grupos()" [value]="g.id">{{ g.nombre }}</option>
+          </select>
+        </label>
+
+        <label>
+          Aula:
+          <select (change)="onFiltroAula($any($event.target).value)">
+            <option value="">Todas</option>
+            <option *ngFor="let a of aulas()" [value]="a.id">{{ a.nombre }}</option>
+          </select>
+        </label>
+
+        <button class="btn-limpiar" (click)="limpiarFiltros()">Limpiar filtros</button>
+      </div>
 
       <div cdkDropListGroup class="calendario">
         <div class="fila fila-header">
@@ -64,6 +92,37 @@ import { HorarioService, Horario, Materia, Aula } from './horario.service';
       color: #555;
       font-size: 13px;
       margin: 8px 0 16px 0;
+    }
+    .filtros {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      margin-bottom: 20px;
+      padding: 12px;
+      background-color: #f7f5fa;
+      border-radius: 6px;
+      flex-wrap: wrap;
+    }
+    .filtros label {
+      display: flex;
+      flex-direction: column;
+      font-size: 12px;
+      font-weight: bold;
+      color: #444;
+      gap: 4px;
+    }
+    .filtros select {
+      padding: 6px 8px;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+      font-size: 13px;
+      min-width: 160px;
+    }
+    .btn-limpiar {
+      background-color: #999;
+      padding: 6px 12px;
+      font-size: 12px;
+      align-self: flex-end;
     }
     .calendario {
       display: flex;
@@ -131,6 +190,14 @@ export class App implements OnInit {
   materiasMap = signal<Map<number, Materia>>(new Map());
   aulasMap = signal<Map<number, Aula>>(new Map());
 
+  profesores = signal<Profesor[]>([]);
+  grupos = signal<Grupo[]>([]);
+  aulas = signal<Aula[]>([]);
+
+  filtroProfesor = signal<number | null>(null);
+  filtroGrupo = signal<number | null>(null);
+  filtroAula = signal<number | null>(null);
+
   todasLasCeldas: string[] = [];
 
   constructor(private horarioService: HorarioService) {}
@@ -149,10 +216,15 @@ export class App implements OnInit {
       materias: this.horarioService.getMaterias(),
       aulas: this.horarioService.getAulas(),
       horarios: this.horarioService.getHorarios(),
-    }).subscribe(({ materias, aulas, horarios }) => {
+      profesores: this.horarioService.getProfesores(),
+      grupos: this.horarioService.getGrupos(),
+    }).subscribe(({ materias, aulas, horarios, profesores, grupos }) => {
       this.materiasMap.set(new Map(materias.map((m) => [m.id, m])));
       this.aulasMap.set(new Map(aulas.map((a) => [a.id, a])));
       this.horarios.set(horarios);
+      this.profesores.set(profesores);
+      this.grupos.set(grupos);
+      this.aulas.set(aulas);
     });
   }
 
@@ -163,14 +235,44 @@ export class App implements OnInit {
     });
   }
 
+  onFiltroProfesor(valor: string): void {
+    this.filtroProfesor.set(valor === '' ? null : Number(valor));
+  }
+
+  onFiltroGrupo(valor: string): void {
+    this.filtroGrupo.set(valor === '' ? null : Number(valor));
+  }
+
+  onFiltroAula(valor: string): void {
+    this.filtroAula.set(valor === '' ? null : Number(valor));
+  }
+
+  limpiarFiltros(): void {
+    this.filtroProfesor.set(null);
+    this.filtroGrupo.set(null);
+    this.filtroAula.set(null);
+  }
+
   idCelda(dia: string, hora: number): string {
     return `${dia}-${hora}`;
+  }
+
+  horarioVisible(h: Horario): boolean {
+    const materia = this.materiasMap().get(h.materia_id);
+    if (!materia) return false;
+    if (this.filtroProfesor() !== null && materia.profesor_id !== this.filtroProfesor()) return false;
+    if (this.filtroGrupo() !== null && materia.grupo_id !== this.filtroGrupo()) return false;
+    if (this.filtroAula() !== null && h.aula_id !== this.filtroAula()) return false;
+    return true;
   }
 
   obtenerHorario(dia: string, hora: number): Horario | null {
     return (
       this.horarios().find(
-        (h) => h.dia_semana === dia && parseInt(h.hora_inicio.split(':')[0], 10) === hora
+        (h) =>
+          h.dia_semana === dia &&
+          parseInt(h.hora_inicio.split(':')[0], 10) === hora &&
+          this.horarioVisible(h)
       ) ?? null
     );
   }
@@ -202,7 +304,6 @@ export class App implements OnInit {
       hora_fin: horario.hora_fin,
     };
 
-    // Actualización optimista: mueve el bloque de inmediato en pantalla
     this.horarios.update((lista) =>
       lista.map((h) =>
         h.id === horario.id
@@ -220,13 +321,11 @@ export class App implements OnInit {
       .moverHorario(horario.id, { dia_semana: diaDestino, hora_inicio: horaTexto })
       .subscribe({
         next: (actualizado) => {
-          // Confirma con los datos reales que devolvió el servidor
           this.horarios.update((lista) =>
             lista.map((h) => (h.id === actualizado.id ? actualizado : h))
           );
         },
         error: (err) => {
-          // Si el servidor lo rechaza, revierte al estado anterior
           this.horarios.update((lista) =>
             lista.map((h) => (h.id === horario.id ? { ...h, ...estadoAnterior } : h))
           );
