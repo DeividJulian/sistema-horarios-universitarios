@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { DragDropModule, CdkDragDrop } from '@angular/cdk/drag-drop';
 import { forkJoin } from 'rxjs';
 import { HorarioService, Horario, Materia, Aula, Grupo, Profesor } from './horario.service';
+import { ResultadoAnalisis } from './analisis-horario.worker';
 
 @Component({
   selector: 'app-root',
@@ -15,9 +16,10 @@ import { HorarioService, Horario, Materia, Aula, Grupo, Profesor } from './horar
           <p class="etiqueta">Panel de programación académica</p>
           <h1>Sistema de Horarios y Aulas</h1>
         </div>
-        <button class="btn-primario" (click)="generarHorario()">
-          Generar horario automáticamente
-        </button>
+        <div class="cabecera-botones">
+          <button class="btn-secundario" (click)="analizarHorario()">Analizar horario</button>
+          <button class="btn-primario" (click)="generarHorario()">Generar horario automáticamente</button>
+        </div>
       </header>
 
       <section class="panel-filtros">
@@ -46,6 +48,23 @@ import { HorarioService, Horario, Materia, Aula, Grupo, Profesor } from './horar
         </div>
 
         <button class="btn-secundario" (click)="limpiarFiltros()">Quitar filtros</button>
+      </section>
+
+      <section class="panel-analisis" *ngIf="analisis() as r">
+        <div class="analisis-columna">
+          <h3>Franjas muertas por profesor</h3>
+          <p class="analisis-fila" *ngFor="let p of r.huecosPorProfesor">
+            <span>{{ p.profesorNombre }}</span>
+            <strong [class.alerta]="p.horasLibresEntreClases > 0">{{ p.horasLibresEntreClases }}h libres entre clases</strong>
+          </p>
+        </div>
+        <div class="analisis-columna">
+          <h3>Ocupación por aula</h3>
+          <p class="analisis-fila" *ngFor="let a of r.ocupacionPorAula">
+            <span>{{ a.aulaNombre }}</span>
+            <strong>{{ a.horasOcupadas }}h · {{ a.porcentajeOcupacion }}%</strong>
+          </p>
+        </div>
       </section>
 
       <p class="ayuda">Arrastra un bloque a una casilla vacía para reprogramarlo.</p>
@@ -97,6 +116,7 @@ import { HorarioService, Horario, Materia, Aula, Grupo, Profesor } from './horar
       --texto: #eef1f5;
       --texto-tenue: #8592a3;
       --acento: #f5a623;
+      --alerta: #fb7185;
     }
 
     .app {
@@ -115,6 +135,11 @@ import { HorarioService, Horario, Materia, Aula, Grupo, Profesor } from './horar
       flex-wrap: wrap;
       gap: 16px;
       margin-bottom: 28px;
+    }
+
+    .cabecera-botones {
+      display: flex;
+      gap: 10px;
     }
 
     .etiqueta {
@@ -197,6 +222,48 @@ import { HorarioService, Horario, Materia, Aula, Grupo, Profesor } from './horar
     .btn-secundario:hover {
       color: var(--texto);
       border-color: var(--texto-tenue);
+    }
+
+    .panel-analisis {
+      display: flex;
+      gap: 20px;
+      background-color: var(--panel);
+      border: 1px solid var(--borde);
+      border-radius: 10px;
+      padding: 16px 20px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    .analisis-columna {
+      flex: 1;
+      min-width: 220px;
+    }
+
+    .analisis-columna h3 {
+      margin: 0 0 10px 0;
+      font-size: 13px;
+      color: var(--texto-tenue);
+      font-weight: 700;
+    }
+
+    .analisis-fila {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      margin: 0 0 6px 0;
+      font-size: 13px;
+    }
+
+    .analisis-fila strong {
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 600;
+      color: var(--texto);
+      white-space: nowrap;
+    }
+
+    .analisis-fila strong.alerta {
+      color: var(--alerta);
     }
 
     .ayuda {
@@ -335,7 +402,10 @@ export class App implements OnInit {
   filtroGrupo = signal<number | null>(null);
   filtroAula = signal<number | null>(null);
 
+  analisis = signal<ResultadoAnalisis | null>(null);
+
   todasLasCeldas: string[] = [];
+  private worker?: Worker;
 
   private paletaMaterias = ['#f5a623', '#2dd4bf', '#fb7185', '#38bdf8', '#a78bfa', '#a3e635'];
 
@@ -347,6 +417,14 @@ export class App implements OnInit {
         this.todasLasCeldas.push(this.idCelda(dia, hora));
       }
     }
+
+    if (typeof Worker !== 'undefined') {
+      this.worker = new Worker(new URL('./analisis-horario.worker', import.meta.url));
+      this.worker.onmessage = ({ data }: { data: ResultadoAnalisis }) => {
+        this.analisis.set(data);
+      };
+    }
+
     this.cargarDatos();
   }
 
@@ -371,6 +449,19 @@ export class App implements OnInit {
     this.horarioService.generarHorario().subscribe({
       next: () => this.cargarDatos(),
       error: (err) => alert(err.error?.detail || 'No se pudo generar el horario'),
+    });
+  }
+
+  analizarHorario(): void {
+    if (!this.worker) {
+      alert('Tu navegador no soporta Web Workers.');
+      return;
+    }
+    this.worker.postMessage({
+      horarios: this.horarios(),
+      materias: Array.from(this.materiasMap().values()),
+      profesores: this.profesores(),
+      aulas: this.aulas(),
     });
   }
 
