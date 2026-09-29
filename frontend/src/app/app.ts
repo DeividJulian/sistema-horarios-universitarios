@@ -9,46 +9,54 @@ import { HorarioService, Horario, Materia, Aula, Grupo, Profesor } from './horar
   standalone: true,
   imports: [CommonModule, DragDropModule],
   template: `
-    <div class="contenedor">
-      <h1>Sistema de Horarios y Aulas Universitarias</h1>
-      <button (click)="generarHorario()">Generar Horario Automáticamente</button>
-      <p class="ayuda">Arrastra un bloque a otra casilla vacía para moverlo manualmente.</p>
+    <div class="app">
+      <header class="cabecera">
+        <div class="cabecera-texto">
+          <p class="etiqueta">Panel de programación académica</p>
+          <h1>Sistema de Horarios y Aulas</h1>
+        </div>
+        <button class="btn-primario" (click)="generarHorario()">
+          Generar horario automáticamente
+        </button>
+      </header>
 
-      <div class="filtros">
-        <label>
-          Profesor:
+      <section class="panel-filtros">
+        <div class="filtro">
+          <span class="filtro-label">Profesor</span>
           <select (change)="onFiltroProfesor($any($event.target).value)">
             <option value="">Todos</option>
             <option *ngFor="let p of profesores()" [value]="p.id">{{ p.nombre }}</option>
           </select>
-        </label>
+        </div>
 
-        <label>
-          Grupo:
+        <div class="filtro">
+          <span class="filtro-label">Grupo</span>
           <select (change)="onFiltroGrupo($any($event.target).value)">
             <option value="">Todos</option>
             <option *ngFor="let g of grupos()" [value]="g.id">{{ g.nombre }}</option>
           </select>
-        </label>
+        </div>
 
-        <label>
-          Aula:
+        <div class="filtro">
+          <span class="filtro-label">Aula</span>
           <select (change)="onFiltroAula($any($event.target).value)">
             <option value="">Todas</option>
             <option *ngFor="let a of aulas()" [value]="a.id">{{ a.nombre }}</option>
           </select>
-        </label>
+        </div>
 
-        <button class="btn-limpiar" (click)="limpiarFiltros()">Limpiar filtros</button>
-      </div>
+        <button class="btn-secundario" (click)="limpiarFiltros()">Quitar filtros</button>
+      </section>
 
-      <div cdkDropListGroup class="calendario">
-        <div class="fila fila-header">
+      <p class="ayuda">Arrastra un bloque a una casilla vacía para reprogramarlo.</p>
+
+      <section class="tablero" cdkDropListGroup>
+        <div class="fila fila-cabecera">
           <div class="celda-hora"></div>
           <div class="celda-dia" *ngFor="let dia of dias">{{ dia }}</div>
         </div>
 
-        <div class="fila" *ngFor="let hora of horas">
+        <div class="fila" [class.fila-par]="esFilaPar(hora)" *ngFor="let hora of horas">
           <div class="celda-hora">{{ hora }}:00</div>
 
           <div
@@ -65,120 +73,249 @@ import { HorarioService, Horario, Materia, Aula, Grupo, Profesor } from './horar
               cdkDrag
               [cdkDragData]="h"
               class="bloque"
+              [style.borderLeftColor]="colorMateria(h.materia_id)"
             >
-              <strong>{{ nombreMateria(h.materia_id) }}</strong>
-              <span>{{ nombreAula(h.aula_id) }}</span>
+              <span class="bloque-punto" [style.backgroundColor]="colorMateria(h.materia_id)"></span>
+              <div class="bloque-texto">
+                <strong>{{ nombreMateria(h.materia_id) }}</strong>
+                <span>{{ nombreAula(h.aula_id) }}</span>
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      </section>
     </div>
   `,
   styles: [`
-    .contenedor {
-      font-family: Arial, sans-serif;
-      padding: 20px;
+    @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@500;700;800&family=JetBrains+Mono:wght@400;600&display=swap');
+
+    :host {
+      --fondo: #12181f;
+      --panel: #1c2530;
+      --panel-alt: #202a37;
+      --borde: #2b3644;
+      --texto: #eef1f5;
+      --texto-tenue: #8592a3;
+      --acento: #f5a623;
     }
-    button {
-      background-color: #6a1b9a;
-      color: white;
-      border: none;
-      padding: 10px 16px;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 14px;
+
+    .app {
+      font-family: 'Manrope', sans-serif;
+      background-color: var(--fondo);
+      color: var(--texto);
+      min-height: 100vh;
+      padding: 32px 40px 60px;
+      box-sizing: border-box;
     }
-    .ayuda {
-      color: #555;
-      font-size: 13px;
-      margin: 8px 0 16px 0;
-    }
-    .filtros {
+
+    .cabecera {
       display: flex;
-      align-items: center;
-      gap: 20px;
-      margin-bottom: 20px;
-      padding: 12px;
-      background-color: #f7f5fa;
-      border-radius: 6px;
+      justify-content: space-between;
+      align-items: flex-end;
       flex-wrap: wrap;
+      gap: 16px;
+      margin-bottom: 28px;
     }
-    .filtros label {
+
+    .etiqueta {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      color: var(--acento);
+      letter-spacing: 0.04em;
+      margin: 0 0 6px 0;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 30px;
+      font-weight: 800;
+      letter-spacing: -0.01em;
+    }
+
+    .btn-primario {
+      background-color: var(--acento);
+      color: #1a1305;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 14px;
+      cursor: pointer;
+      font-family: 'Manrope', sans-serif;
+    }
+
+    .btn-primario:hover {
+      filter: brightness(1.08);
+    }
+
+    .panel-filtros {
+      display: flex;
+      align-items: flex-end;
+      gap: 20px;
+      flex-wrap: wrap;
+      background-color: var(--panel);
+      border: 1px solid var(--borde);
+      border-radius: 10px;
+      padding: 16px 20px;
+      margin-bottom: 10px;
+    }
+
+    .filtro {
       display: flex;
       flex-direction: column;
-      font-size: 12px;
-      font-weight: bold;
-      color: #444;
-      gap: 4px;
+      gap: 6px;
     }
-    .filtros select {
-      padding: 6px 8px;
-      border-radius: 4px;
-      border: 1px solid #ccc;
+
+    .filtro-label {
+      font-size: 12px;
+      color: var(--texto-tenue);
+      font-weight: 700;
+    }
+
+    .filtro select {
+      background-color: var(--panel-alt);
+      color: var(--texto);
+      border: 1px solid var(--borde);
+      border-radius: 6px;
+      padding: 8px 10px;
       font-size: 13px;
-      min-width: 160px;
+      min-width: 170px;
+      font-family: 'Manrope', sans-serif;
     }
-    .btn-limpiar {
-      background-color: #999;
-      padding: 6px 12px;
-      font-size: 12px;
-      align-self: flex-end;
+
+    .btn-secundario {
+      background: transparent;
+      color: var(--texto-tenue);
+      border: 1px solid var(--borde);
+      padding: 8px 14px;
+      border-radius: 6px;
+      font-size: 13px;
+      cursor: pointer;
+      font-family: 'Manrope', sans-serif;
     }
-    .calendario {
+
+    .btn-secundario:hover {
+      color: var(--texto);
+      border-color: var(--texto-tenue);
+    }
+
+    .ayuda {
+      color: var(--texto-tenue);
+      font-size: 13px;
+      margin: 10px 0 20px 0;
+    }
+
+    .tablero {
       display: flex;
       flex-direction: column;
-      border: 1px solid #ccc;
+      border: 1px solid var(--borde);
+      border-radius: 10px;
+      overflow: hidden;
       width: fit-content;
     }
+
     .fila {
       display: flex;
     }
-    .fila-header {
-      background-color: #f0f0f0;
-      font-weight: bold;
+
+    .fila-cabecera {
+      background-color: var(--panel-alt);
     }
+
+    .fila-par {
+      background-color: rgba(255, 255, 255, 0.02);
+    }
+
     .celda-hora {
-      width: 70px;
-      min-width: 70px;
-      padding: 8px;
+      width: 76px;
+      min-width: 76px;
+      padding: 10px 8px;
       text-align: center;
-      border: 1px solid #ddd;
+      border-right: 1px solid var(--borde);
+      border-bottom: 1px solid var(--borde);
       box-sizing: border-box;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      color: var(--texto-tenue);
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
+
+    .fila-cabecera .celda-hora {
+      border-bottom: none;
+    }
+
     .celda-dia {
-      width: 150px;
-      min-width: 150px;
-      padding: 8px;
+      width: 160px;
+      min-width: 160px;
+      padding: 12px 8px;
       text-align: center;
-      border: 1px solid #ddd;
+      border-right: 1px solid var(--borde);
       box-sizing: border-box;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.02em;
     }
+
     .celda {
-      width: 150px;
-      min-width: 150px;
-      height: 60px;
-      border: 1px solid #ddd;
+      width: 160px;
+      min-width: 160px;
+      height: 64px;
+      border-right: 1px solid var(--borde);
+      border-bottom: 1px solid var(--borde);
       box-sizing: border-box;
-      padding: 4px;
+      padding: 5px;
     }
+
     .bloque {
-      background-color: #ede7f6;
-      border-left: 4px solid #6a1b9a;
-      border-radius: 4px;
-      padding: 6px;
+      background-color: var(--panel-alt);
+      border-left: 3px solid var(--acento);
+      border-radius: 6px;
+      padding: 6px 8px;
       font-size: 12px;
       height: 100%;
       box-sizing: border-box;
       cursor: grab;
       display: flex;
-      flex-direction: column;
+      align-items: flex-start;
+      gap: 6px;
       touch-action: none;
     }
-    .cdk-drag-preview {
-      box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+
+    .bloque-punto {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      margin-top: 4px;
+      flex-shrink: 0;
     }
+
+    .bloque-texto {
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .bloque-texto strong {
+      font-size: 12px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .bloque-texto span {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      color: var(--texto-tenue);
+    }
+
+    .cdk-drag-preview {
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
+    }
+
     .cdk-drag-placeholder {
-      opacity: 0.3;
+      opacity: 0.25;
     }
   `]
 })
@@ -199,6 +336,8 @@ export class App implements OnInit {
   filtroAula = signal<number | null>(null);
 
   todasLasCeldas: string[] = [];
+
+  private paletaMaterias = ['#f5a623', '#2dd4bf', '#fb7185', '#38bdf8', '#a78bfa', '#a3e635'];
 
   constructor(private horarioService: HorarioService) {}
 
@@ -255,6 +394,14 @@ export class App implements OnInit {
 
   idCelda(dia: string, hora: number): string {
     return `${dia}-${hora}`;
+  }
+
+  esFilaPar(hora: number): boolean {
+    return this.horas.indexOf(hora) % 2 === 1;
+  }
+
+  colorMateria(materiaId: number): string {
+    return this.paletaMaterias[materiaId % this.paletaMaterias.length];
   }
 
   horarioVisible(h: Horario): boolean {
