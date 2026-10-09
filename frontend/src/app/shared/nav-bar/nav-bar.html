@@ -1,0 +1,29 @@
+<nav class="nav" aria-label="Navegación principal">
+  <a class="brand" routerLink="/horario">
+    <span class="brand-mark" aria-hidden="true">H</span>
+    <span class="brand-name">Horarios y Aulas</span>
+  </a>
+  <ul>
+    @for (item of items(); track item.path) {
+      <li>
+        <a [routerLink]="item.path" routerLinkActive="active" ariaCurrentWhenActive="page">{{ item.label }}</a>
+      </li>
+    }
+  </ul>
+  <div class="right">
+    <button type="button" class="tutorial" (click)="tutorial.open()" aria-haspopup="dialog">
+      <span class="tutorial-mark" aria-hidden="true">?</span>
+      Tutorial
+    </button>
+    @if (auth.user(); as user) {
+      <div class="account">
+        <span class="avatar" aria-hidden="true">{{ initials() }}</span>
+        <span class="who">
+          <span class="name">{{ user.nombre }}</span>
+          <span class="role" [class.admin]="user.rol === 'admin'">{{ roleLabels[user.rol] }}</span>
+        </span>
+        <button type="button" class="logout" (click)="logout()">Salir</button>
+      </div>
+    }
+  </div>
+</nav>

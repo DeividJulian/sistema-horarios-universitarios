@@ -1,0 +1,11 @@
+<ul class="bars" [attr.aria-label]="label()">
+  @for (item of items(); track item.label) {
+    <li class="bar-row" [attr.title]="item.label + ': ' + item.display">
+      <span class="bar-label">{{ item.label }}</span>
+      <span class="track" aria-hidden="true">
+        <span class="fill" [style.width.%]="width(item.value)"></span>
+      </span>
+      <span class="bar-value">{{ item.display }}</span>
+    </li>
+  }
+</ul>

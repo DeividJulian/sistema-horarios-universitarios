@@ -1,0 +1,86 @@
+<p class="section-help">
+  <strong>Usuarios.</strong> Las personas que pueden entrar a la aplicación. Un <strong>administrador</strong> puede cambiar
+  todos los datos y generar el horario; un <strong>usuario</strong> solo puede consultar el horario y el análisis.
+</p>
+
+<div class="crud-layout">
+  <section class="panel" aria-labelledby="users-title">
+    <h2 id="users-title">Usuarios <span class="badge">{{ users().length }}</span></h2>
+    @if (loading()) {
+      <p class="muted">Cargando usuarios…</p>
+    } @else {
+      <div class="table-scroll">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th scope="col">Nombre</th>
+              <th scope="col">Correo</th>
+              <th scope="col">Rol</th>
+              <th scope="col"><span class="sr-only">Acciones</span></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (u of users(); track u.id) {
+              <tr>
+                <td>
+                  {{ u.nombre }}
+                  @if (u.id === auth.user()?.id) {
+                    <span class="muted">(tú)</span>
+                  }
+                </td>
+                <td class="muted">{{ u.email }}</td>
+                <td><span class="role-pill" [class.admin]="u.rol === 'admin'">{{ roleLabels[u.rol] }}</span></td>
+                <td>
+                  <div class="row-actions">
+                    @if (u.id !== auth.user()?.id) {
+                      <button type="button" class="btn-danger" (click)="remove(u)" [attr.aria-label]="'Eliminar ' + u.nombre">Eliminar</button>
+                    }
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </section>
+
+  <section class="panel" aria-labelledby="user-form-title">
+    <h2 id="user-form-title">Nuevo usuario</h2>
+    <form class="form-stack" [formGroup]="form" (ngSubmit)="save()" novalidate>
+      <label class="field">
+        <span class="field-label">Nombre</span>
+        <input formControlName="nombre" autocomplete="off" [attr.aria-invalid]="!!errorMessage(form.controls.nombre, 'El nombre')" />
+        @if (errorMessage(form.controls.nombre, 'El nombre'); as msg) {
+          <p class="field-error">{{ msg }}</p>
+        }
+      </label>
+      <label class="field">
+        <span class="field-label">Correo</span>
+        <input formControlName="email" type="email" autocomplete="off" [attr.aria-invalid]="!!errorMessage(form.controls.email, 'El correo')" />
+        @if (errorMessage(form.controls.email, 'El correo'); as msg) {
+          <p class="field-error">{{ msg }}</p>
+        }
+      </label>
+      <label class="field">
+        <span class="field-label">Contraseña (mínimo 8 caracteres)</span>
+        <input formControlName="password" type="password" autocomplete="new-password" [attr.aria-invalid]="!!errorMessage(form.controls.password, 'La contraseña')" />
+        @if (errorMessage(form.controls.password, 'La contraseña'); as msg) {
+          <p class="field-error">{{ msg }}</p>
+        }
+      </label>
+      <label class="field">
+        <span class="field-label">Rol</span>
+        <select formControlName="rol">
+          @for (r of roles; track r) {
+            <option [value]="r">{{ roleLabels[r] }}</option>
+          }
+        </select>
+        <span class="field-hint">Usuario: solo consulta. Administrador: puede modificar todo.</span>
+      </label>
+      <div class="form-actions">
+        <button type="submit" class="btn-primary" [disabled]="saving()">{{ saving() ? 'Creando…' : 'Crear usuario' }}</button>
+      </div>
+    </form>
+  </section>
+</div>

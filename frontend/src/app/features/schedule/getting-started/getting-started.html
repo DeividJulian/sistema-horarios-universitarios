@@ -1,0 +1,61 @@
+@if (!allDone()) {
+  <section class="panel guide" aria-labelledby="guide-title">
+    <header class="guide-head">
+      <div>
+        <h2 id="guide-title">Primeros pasos <span class="badge">{{ doneCount() }} de {{ steps().length }}</span></h2>
+        <p class="muted">Sigue estos pasos en orden. Cuando todos tengan ✓ podrás generar el horario sin problemas.</p>
+      </div>
+      <button type="button" class="btn-secondary" (click)="expanded.set(!expanded())" [attr.aria-expanded]="expanded()">
+        {{ expanded() ? 'Ocultar' : 'Mostrar' }}
+      </button>
+    </header>
+
+    @if (expanded()) {
+      <ol class="steps">
+        @for (step of steps(); track step.title; let i = $index) {
+          <li [class.done]="step.done">
+            <span class="step-mark" aria-hidden="true">{{ step.done ? '✓' : i + 1 }}</span>
+            <div class="step-text">
+              <strong>{{ step.title }}</strong>
+              <span class="sr-only">{{ step.done ? '(listo)' : '(pendiente)' }}</span>
+              <p>{{ step.hint }}</p>
+            </div>
+            @if (!step.done && step.link !== '/horario') {
+              <a class="btn-secondary small" [routerLink]="step.link">Ir</a>
+            }
+          </li>
+        }
+      </ol>
+
+      @if (readiness()?.problemas?.length) {
+        <div class="problems">
+          <h3>Antes de generar, arregla esto:</h3>
+          <ul>
+            @for (p of readiness()!.problemas; track $index) {
+              @let fix = fixLink(p);
+              <li>
+                <span class="problem-icon" aria-hidden="true">!</span>
+                <span class="problem-text">{{ p.mensaje }}</span>
+                <a class="btn-secondary small" [routerLink]="fix.path" [queryParams]="fix.query">Arreglar</a>
+              </li>
+            }
+          </ul>
+        </div>
+      }
+    }
+  </section>
+}
+
+@if (stale() && (readiness()?.listo ?? true)) {
+  <section class="stale" role="status">
+    <span class="problem-icon" aria-hidden="true">!</span>
+    <p>
+      <strong>El horario quedó desactualizado.</strong>
+      Cambiaste datos (disponibilidad, jornadas, materias…) después de generarlo, por eso hay clases marcadas en rojo.
+      Genéralo de nuevo para que coincida con los datos actuales.
+    </p>
+    <button type="button" class="btn-primary" (click)="generate.emit()" [disabled]="generating()">
+      {{ generating() ? 'Generando…' : 'Generar de nuevo' }}
+    </button>
+  </section>
+}

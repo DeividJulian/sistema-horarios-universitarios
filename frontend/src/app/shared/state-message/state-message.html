@@ -1,0 +1,16 @@
+<div class="state panel" [class]="'state panel ' + kind()" [attr.role]="kind() === 'error' ? 'alert' : 'status'">
+  @if (kind() === 'loading') {
+    <span class="spinner" aria-hidden="true"></span>
+  } @else {
+    <span class="icon" aria-hidden="true">{{ kind() === 'error' ? '!' : '∅' }}</span>
+  }
+  <div class="text">
+    <strong>{{ title() }}</strong>
+    @if (message()) {
+      <p>{{ message() }}</p>
+    }
+  </div>
+  @if (actionText()) {
+    <button type="button" class="btn-secondary" (click)="action.emit()">{{ actionText() }}</button>
+  }
+</div>

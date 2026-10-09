@@ -1,0 +1,79 @@
+<p class="section-help"><strong>Profesores.</strong> Crea a cada profesor con su nombre y correo. Después pulsa <strong>Disponibilidad</strong> y marca en la cuadrícula las horas en que puede dar clase: el generador solo le pondrá clases en esas horas.</p>
+
+<div class="crud-layout">
+  <section class="panel" aria-labelledby="teachers-title">
+    <h2 id="teachers-title">Profesores <span class="badge">{{ store.teachers().length }}</span></h2>
+    @if (store.teachers().length === 0) {
+      <p class="muted">Todavía no hay profesores. Crea el primero con el formulario.</p>
+    } @else {
+      <div class="table-scroll">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th scope="col">Nombre</th>
+              <th scope="col">Correo</th>
+              <th scope="col">Materias</th>
+              <th scope="col"><span class="sr-only">Acciones</span></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (t of store.teachers(); track t.id) {
+              <tr>
+                <td>{{ t.nombre }}</td>
+                <td class="muted">{{ t.email }}</td>
+                <td class="num">{{ subjectCount().get(t.id) ?? 0 }}</td>
+                <td>
+                  <div class="row-actions">
+                    <button type="button" class="btn-secondary" (click)="edit(t)" [attr.aria-label]="'Editar ' + t.nombre">Editar</button>
+                    <button
+                      type="button"
+                      class="btn-secondary"
+                      (click)="availabilityOf.set(t)"
+                      [attr.aria-pressed]="availabilityOf()?.id === t.id"
+                      [attr.aria-label]="'Disponibilidad de ' + t.nombre"
+                    >
+                      Disponibilidad
+                    </button>
+                    <button type="button" class="btn-danger" (click)="remove(t)" [attr.aria-label]="'Eliminar ' + t.nombre">Eliminar</button>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </section>
+
+  <section class="panel" aria-labelledby="teacher-form-title">
+    <h2 id="teacher-form-title">{{ editing() ? 'Editar profesor' : 'Nuevo profesor' }}</h2>
+    <form class="form-stack" [formGroup]="form" (ngSubmit)="save()" novalidate>
+      <label class="field">
+        <span class="field-label">Nombre</span>
+        <input formControlName="nombre" autocomplete="name" [attr.aria-invalid]="!!errorMessage(form.controls.nombre, 'El nombre')" />
+        @if (errorMessage(form.controls.nombre, 'El nombre'); as msg) {
+          <p class="field-error">{{ msg }}</p>
+        }
+      </label>
+      <label class="field">
+        <span class="field-label">Correo</span>
+        <input formControlName="email" type="email" autocomplete="email" [attr.aria-invalid]="!!errorMessage(form.controls.email, 'El correo')" />
+        @if (errorMessage(form.controls.email, 'El correo'); as msg) {
+          <p class="field-error">{{ msg }}</p>
+        }
+      </label>
+      <div class="form-actions">
+        @if (editing()) {
+          <button type="button" class="btn-secondary" (click)="cancel()">Cancelar</button>
+        }
+        <button type="submit" class="btn-primary" [disabled]="saving()">
+          {{ saving() ? 'Guardando…' : editing() ? 'Guardar cambios' : 'Crear profesor' }}
+        </button>
+      </div>
+    </form>
+  </section>
+</div>
+
+@if (availabilityOf(); as teacher) {
+  <app-availability-panel [teacher]="teacher" (closed)="availabilityOf.set(null)" />
+}

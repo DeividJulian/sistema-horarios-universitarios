@@ -1,0 +1,20 @@
+<section class="panel analysis" aria-label="Análisis del horario">
+  <div class="column">
+    <h3>Franjas muertas por profesor</h3>
+    @for (t of result().idleHoursByTeacher; track t.teacherName) {
+      <p class="row">
+        <span>{{ t.teacherName }}</span>
+        <strong [class.warning]="t.idleHours > 0">{{ t.idleHours }}h libres entre clases</strong>
+      </p>
+    }
+  </div>
+  <div class="column">
+    <h3>Ocupación por aula</h3>
+    @for (c of result().classroomUsage; track c.classroomName) {
+      <p class="row">
+        <span>{{ c.classroomName }}</span>
+        <strong>{{ c.hoursUsed }}h · {{ c.usagePercent }}%</strong>
+      </p>
+    }
+  </div>
+</section>

@@ -1,0 +1,49 @@
+<aside class="panel details" aria-labelledby="details-title">
+  <header class="head">
+    <h2 id="details-title">{{ subject()?.nombre ?? 'Bloque' }}</h2>
+    <button type="button" class="close" (click)="closed.emit()" aria-label="Cerrar detalle">×</button>
+  </header>
+
+  <dl>
+    <div><dt>Horario</dt><dd>{{ entry().dia_semana }}, {{ startHour() | hour }} – {{ startHour() + 1 | hour }}</dd></div>
+    <div><dt>Aula</dt><dd>{{ classroom()?.nombre ?? '—' }} @if (classroom(); as c) {<span class="muted">(aforo {{ c.aforo }})</span>}</dd></div>
+    <div><dt>Grupo</dt><dd>{{ group()?.nombre ?? '—' }} @if (group(); as g) {<span class="muted">({{ g.num_estudiantes }} estudiantes)</span>}</dd></div>
+    @if (group(); as g) {
+      <div><dt>Jornada del grupo</dt><dd>{{ shiftText(g.jornada) }}</dd></div>
+    }
+    <div><dt>Profesor</dt><dd>{{ teacher()?.nombre ?? '—' }}</dd></div>
+  </dl>
+
+  @if (conflicts().length) {
+    <ul class="problems" aria-label="Conflictos de este bloque">
+      @for (c of conflicts(); track c) {
+        <li><span class="icon" aria-hidden="true">!</span>{{ c }}</li>
+      }
+    </ul>
+  }
+
+  @if (!readonly()) {
+    <fieldset class="move">
+      <legend>Mover a</legend>
+      <label class="field">
+        <span class="field-label">Día</span>
+        <select [value]="targetDay()" (change)="targetDay.set($any($event.target).value)">
+          @for (d of weekdays; track d) {
+            <option [value]="d" [selected]="d === targetDay()">{{ d }}</option>
+          }
+        </select>
+      </label>
+      <label class="field">
+        <span class="field-label">Hora</span>
+        <select (change)="targetHour.set(+$any($event.target).value)">
+          @for (h of hours; track h) {
+            <option [value]="h" [selected]="h === targetHour()">{{ h | hour }}</option>
+          }
+        </select>
+      </label>
+      <button type="button" class="btn-primary" (click)="move()" [disabled]="isSameSlot()">Mover bloque</button>
+    </fieldset>
+
+    <button type="button" class="btn-danger delete" (click)="deleteRequested.emit(entry())">Eliminar este bloque</button>
+  }
+</aside>

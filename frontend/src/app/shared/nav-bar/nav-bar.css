@@ -1,0 +1,205 @@
+.nav {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+  padding: 12px 40px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+  background: rgba(11, 16, 32, 0.72);
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  backdrop-filter: blur(14px) saturate(140%);
+  flex-wrap: wrap;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--text);
+  text-decoration: none;
+  font-weight: 800;
+}
+
+.brand-mark {
+  width: 30px;
+  height: 30px;
+  border-radius: 9px;
+  display: grid;
+  place-items: center;
+  background: var(--gradient-accent);
+  color: #1a1305;
+  font-size: 14px;
+  box-shadow: 0 6px 18px rgba(245, 158, 11, 0.3);
+}
+
+ul {
+  display: flex;
+  gap: 4px;
+  list-style: none;
+  margin: 0;
+  padding: 4px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+ul a {
+  display: block;
+  padding: 7px 16px;
+  border-radius: 8px;
+  color: var(--text-muted);
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 700;
+  transition: color 0.15s, background 0.15s;
+}
+
+ul a:hover {
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+ul a.active {
+  color: #1a1305;
+  background: var(--gradient-accent);
+  box-shadow: 0 4px 14px rgba(245, 158, 11, 0.3);
+}
+
+/* Always visible, pushed to the right end of the bar */
+.right {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.tutorial {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px 6px 6px;
+  border-radius: 999px;
+  border: 1px solid rgba(245, 158, 11, 0.6);
+  background: rgba(245, 158, 11, 0.1);
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.tutorial:hover {
+  background: rgba(245, 158, 11, 0.2);
+}
+
+.tutorial-mark {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--accent);
+  color: #1a1305;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.account {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-left: 14px;
+  border-left: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: 13px;
+  font-weight: 800;
+  color: #fff;
+  background: linear-gradient(135deg, #7c3aed, #06b6d4);
+}
+
+.who {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+}
+
+.name {
+  font-size: 13px;
+  font-weight: 700;
+  max-width: 160px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.role {
+  font-size: 11px;
+  font-weight: 700;
+  color: #67e8f9;
+}
+
+.role.admin {
+  color: #fcd34d;
+}
+
+.logout {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.logout:hover {
+  color: var(--text);
+  border-color: var(--text-muted);
+}
+
+@media (max-width: 900px) {
+  .who {
+    display: none;
+  }
+}
+
+/* On phones the right group shares the first row with the brand and the links wrap below */
+@media (max-width: 700px) {
+  .nav {
+    padding: 10px 16px;
+    gap: 10px;
+  }
+
+  .right {
+    order: 1;
+    gap: 8px;
+  }
+
+  .account {
+    padding-left: 8px;
+  }
+
+  .tutorial {
+    padding-right: 10px;
+  }
+
+  ul {
+    order: 2;
+    width: 100%;
+  }
+}
+
+/* Very narrow phones: only the logo, so the brand and the buttons fit in one row */
+@media (max-width: 480px) {
+  .brand-name {
+    display: none;
+  }
+}

@@ -1,0 +1,14 @@
+<dialog #dialog class="dialog" aria-labelledby="confirm-title" aria-describedby="confirm-message" (close)="onClose()">
+  @if (confirm.pending(); as request) {
+    <h2 id="confirm-title">{{ request.title }}</h2>
+    <p id="confirm-message">{{ request.message }}</p>
+    <div class="actions">
+      <button type="button" class="btn-secondary" (click)="confirm.answer(false)" autofocus>
+        {{ request.cancelText ?? 'Cancelar' }}
+      </button>
+      <button type="button" [class]="request.danger ? 'btn-danger' : 'btn-primary'" (click)="confirm.answer(true)">
+        {{ request.confirmText ?? 'Aceptar' }}
+      </button>
+    </div>
+  }
+</dialog>

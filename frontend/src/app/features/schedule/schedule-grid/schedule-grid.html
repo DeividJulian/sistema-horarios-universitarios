@@ -1,0 +1,57 @@
+<div class="grid-scroll">
+  <section class="board" cdkDropListGroup aria-label="Calendario semanal">
+    <div class="row header-row">
+      <div class="hour-cell"></div>
+      @for (day of weekdays; track day) {
+        <div class="day-cell">{{ day }}</div>
+      }
+    </div>
+
+    @for (hour of hours; track hour; let odd = $odd) {
+      <div class="row" [class.row-alt]="odd">
+        <div class="hour-cell">{{ hour | hour }}</div>
+
+        @for (day of weekdays; track day) {
+          <div
+            class="cell"
+            cdkDropList
+            [id]="cellId(day, hour)"
+            [cdkDropListConnectedTo]="allCellIds"
+            [cdkDropListData]="entryAt(day, hour)"
+            (cdkDropListDropped)="onDrop($event, day, hour)"
+          >
+            @if (entryAt(day, hour); as entry) {
+              @let problems = conflictsOf(entry);
+              <div
+                cdkDrag
+                [cdkDragData]="entry"
+                [cdkDragDisabled]="readonly()"
+                class="block"
+                tabindex="0"
+                role="button"
+                [attr.aria-label]="ariaLabel(entry)"
+                [class.selected]="selectedId() === entry.id"
+                (click)="selected.emit(entry)"
+                (keydown.enter)="selected.emit(entry)"
+                (keydown.space)="$event.preventDefault(); selected.emit(entry)"
+                [class.has-conflict]="problems.length > 0"
+                [style.borderLeftColor]="color(entry)"
+                [attr.title]="problems.length ? problems.join(' · ') : null"
+              >
+                <span class="block-dot" [style.backgroundColor]="color(entry)"></span>
+                <div class="block-text">
+                  <strong>{{ subjectName(entry) }}</strong>
+                  <span>{{ classroomName(entry) }}</span>
+                </div>
+                @if (problems.length) {
+                  <span class="conflict-icon" aria-hidden="true">!</span>
+                  <span class="sr-only">Conflicto: {{ problems.join('. ') }}</span>
+                }
+              </div>
+            }
+          </div>
+        }
+      </div>
+    }
+  </section>
+</div>

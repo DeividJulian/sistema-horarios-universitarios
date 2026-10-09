@@ -1,0 +1,112 @@
+<section class="panel availability" aria-labelledby="availability-title">
+  <header class="head">
+    <div>
+      <h2 id="availability-title">¿Cuándo puede dar clase {{ teacher().nombre }}?</h2>
+      <p class="muted">
+        Marca las horas en que el profesor está disponible. El generador solo le pondrá clases en esas horas.
+        <strong>Haz clic</strong> en una casilla o <strong>arrastra</strong> para marcar varias; clic en un día o una hora marca toda la fila.
+      </p>
+    </div>
+    <button type="button" class="btn-secondary" (click)="close()">Cerrar</button>
+  </header>
+
+  @if (teacherShifts().length) {
+    <p class="tip">
+      <span class="tip-icon" aria-hidden="true">i</span>
+      <span>
+        Sus grupos estudian en:
+        @for (s of teacherShifts(); track s.value; let last = $last) {
+          <strong>{{ s.label }} ({{ rangeText(s.start, s.end) }})</strong>{{ last ? '.' : ', ' }}
+        }
+        Marca horas dentro de esa franja (aparece resaltada).
+      </span>
+      <button type="button" class="btn-secondary" (click)="markTeacherShifts()">Marcar la jornada de sus grupos</button>
+    </p>
+  }
+
+  <div class="quick" role="group" aria-label="Marcar rápido de lunes a viernes">
+    <span class="field-label">Marcar rápido (lunes a viernes):</span>
+    @for (s of shifts; track s.value) {
+      <button type="button" class="chip-button" (click)="markShift(s)">{{ s.label }} <small>{{ rangeText(s.start, s.end) }}</small></button>
+    }
+    <button type="button" class="chip-button" (click)="markAllDay()">Todo el día</button>
+    <button type="button" class="chip-button danger" (click)="clearAll()">Limpiar todo</button>
+  </div>
+
+  @if (loading()) {
+    <p class="muted">Cargando disponibilidad…</p>
+  } @else {
+    <div class="grid-scroll">
+      <table class="week" aria-label="Disponibilidad semanal">
+        <thead>
+          <tr>
+            <th scope="col"></th>
+            @for (day of weekdays; track day) {
+              <th scope="col">
+                <button type="button" class="header-button" (click)="toggleDay(day)" [attr.aria-label]="'Marcar o quitar todo el ' + day">
+                  {{ day }}
+                </button>
+              </th>
+            }
+          </tr>
+        </thead>
+        <tbody>
+          @for (hour of hours; track hour) {
+            <tr [class.in-shift]="inTeacherShift(hour)">
+              <th scope="row">
+                <button
+                  type="button"
+                  class="header-button hour"
+                  (click)="toggleHour(hour)"
+                  [attr.aria-label]="'Marcar o quitar las ' + (hour | hour) + ' de lunes a viernes'"
+                >
+                  {{ hour | hour }}
+                </button>
+              </th>
+              @for (day of weekdays; track day) {
+                <td>
+                  <button
+                    type="button"
+                    class="cell"
+                    [class.on]="isOn(day, hour)"
+                    [attr.aria-pressed]="isOn(day, hour)"
+                    [attr.aria-label]="day + ' de ' + (hour | hour) + ' a ' + (hour + 1 | hour)"
+                    (pointerdown)="startPaint(day, hour, $event)"
+                    (pointerenter)="continuePaint(day, hour)"
+                    (keydown.enter)="$event.preventDefault(); toggle(day, hour)"
+                    (keydown.space)="$event.preventDefault(); toggle(day, hour)"
+                  >
+                    @if (isOn(day, hour)) {
+                      <span aria-hidden="true">✓</span>
+                    }
+                  </button>
+                </td>
+              }
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+
+  <footer class="foot">
+    <p class="summary" [class.warn]="weeklyHours() < hoursNeeded()">
+      <strong>{{ weeklyHours() }} horas por semana</strong>
+      @if (subjectsCount() > 0) {
+        · sus {{ subjectsCount() }} {{ subjectsCount() === 1 ? 'materia necesita' : 'materias necesitan' }} {{ hoursNeeded() }} h
+        @if (weeklyHours() < hoursNeeded()) {
+          <span>— faltan {{ hoursNeeded() - weeklyHours() }} h para que el generador pueda ubicarlas.</span>
+        }
+      }
+    </p>
+    <div class="actions">
+      @if (dirty()) {
+        <span class="unsaved">Cambios sin guardar</span>
+        <button type="button" class="btn-secondary" (click)="discard()" [disabled]="saving()">Descartar</button>
+      }
+      <button type="button" class="btn-primary" (click)="save()" [disabled]="!dirty() || saving()">
+        {{ saving() ? 'Guardando…' : 'Guardar disponibilidad' }}
+      </button>
+    </div>
+  </footer>
+</section>

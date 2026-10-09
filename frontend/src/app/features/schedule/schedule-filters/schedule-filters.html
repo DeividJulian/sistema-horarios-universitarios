@@ -1,0 +1,33 @@
+<section class="panel filters" aria-label="Filtros del horario">
+  <label class="field">
+    <span class="field-label">Profesor</span>
+    <select (change)="update('teacherId', $any($event.target).value)">
+      <option value="" [selected]="filter().teacherId === null">Todos</option>
+      @for (t of teachers(); track t.id) {
+        <option [value]="t.id" [selected]="filter().teacherId === t.id">{{ t.nombre }}</option>
+      }
+    </select>
+  </label>
+
+  <label class="field">
+    <span class="field-label">Grupo</span>
+    <select (change)="update('groupId', $any($event.target).value)">
+      <option value="" [selected]="filter().groupId === null">Todos</option>
+      @for (g of groups(); track g.id) {
+        <option [value]="g.id" [selected]="filter().groupId === g.id">{{ groupLabel(g) }}</option>
+      }
+    </select>
+  </label>
+
+  <label class="field">
+    <span class="field-label">Aula</span>
+    <select (change)="update('classroomId', $any($event.target).value)">
+      <option value="" [selected]="filter().classroomId === null">Todas</option>
+      @for (c of classrooms(); track c.id) {
+        <option [value]="c.id" [selected]="filter().classroomId === c.id">{{ c.nombre }}</option>
+      }
+    </select>
+  </label>
+
+  <button type="button" class="btn-secondary" (click)="clear()">Quitar filtros</button>
+</section>

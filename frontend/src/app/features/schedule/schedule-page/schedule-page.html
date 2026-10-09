@@ -1,0 +1,125 @@
+<header class="hero">
+  <div class="hero-text">
+    <p class="eyebrow">Panel de programación académica</p>
+    <h1>Hola, {{ firstName() }}</h1>
+    <p class="muted lead">
+      @if (auth.isAdmin()) {
+        Genera el horario, revisa los conflictos y ajusta cada bloque arrastrándolo en el calendario.
+      } @else {
+        Consulta el horario de la semana y filtra por profesor, grupo o aula.
+      }
+    </p>
+  </div>
+  <div class="actions">
+    <button type="button" class="btn-secondary" (click)="analyze()" [disabled]="!store.loaded()">Analizar horario</button>
+    @if (auth.isAdmin()) {
+      <button type="button" class="btn-primary" (click)="generate()" [disabled]="store.generating() || !store.loaded()">
+        {{ store.generating() ? 'Generando…' : 'Generar horario automáticamente' }}
+      </button>
+    }
+  </div>
+</header>
+
+@if (store.loaded()) {
+  <section class="kpis" aria-label="Resumen">
+    @for (k of kpis(); track k.label) {
+      <div class="kpi" [style.--kpi-color]="k.color">
+        <span class="kpi-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path [attr.d]="k.icon" /></svg>
+        </span>
+        <span class="kpi-value">{{ k.value }}</span>
+        <span class="kpi-label">{{ k.label }}</span>
+      </div>
+    }
+  </section>
+}
+
+@if (!auth.isAdmin()) {
+  <p class="readonly-note" role="note">
+    <strong>Modo consulta.</strong> Tu cuenta es de solo lectura: puedes ver el horario y el análisis, pero solo un administrador puede modificarlos.
+  </p>
+}
+
+@if (store.loadError() && !store.loaded()) {
+  <app-state-message
+    kind="error"
+    title="No se pudo cargar el horario"
+    [message]="store.loadError()!"
+    actionText="Reintentar"
+    (action)="reload()"
+  />
+} @else if (!store.loaded()) {
+  <app-state-message kind="loading" title="Cargando horario…" message="Consultando profesores, aulas, grupos y materias." />
+} @else {
+  @if (auth.isAdmin()) {
+    <app-getting-started
+      [counts]="counts()"
+      [readiness]="readiness()"
+      [conflicts]="conflicts()"
+      [generating]="store.generating()"
+      (generate)="generate()"
+    />
+  }
+
+  <app-schedule-filters
+    [teachers]="store.teachers()"
+    [groups]="store.groups()"
+    [classrooms]="store.classrooms()"
+    [(filter)]="filter"
+  />
+
+  @if (analysis(); as result) {
+    <app-analysis-panel [result]="result" />
+  }
+
+  @if (conflictsByEntry().size > 0) {
+    <p class="conflict-summary" role="status">
+      <span class="conflict-dot" aria-hidden="true">!</span>
+      {{ conflictsByEntry().size }} {{ conflictsByEntry().size === 1 ? 'bloque tiene' : 'bloques tienen' }} conflictos (marcados en rojo).
+      <a routerLink="/analisis">Ver detalle</a>
+    </p>
+  }
+
+  @if (store.entries().length === 0) {
+    <app-state-message
+      kind="empty"
+      title="Todavía no hay un horario"
+      [message]="auth.isAdmin() ? 'Pulsa «Generar horario automáticamente» para que el algoritmo asigne todas las materias sin cruces.' : 'Un administrador todavía no ha generado el horario.'"
+    />
+  } @else {
+    <p class="hint muted">
+      {{ auth.isAdmin() ? 'Arrastra un bloque a una casilla vacía para reprogramarlo, o haz clic en él para ver el detalle.' : 'Haz clic en un bloque para ver su detalle.' }}
+    </p>
+  }
+
+  <div class="calendar-layout">
+    <app-schedule-grid
+      [entries]="store.entries()"
+      [subjectsById]="store.subjectsById()"
+      [classroomsById]="store.classroomsById()"
+      [filter]="filter()"
+      [conflicts]="conflictsByEntry()"
+      (moved)="move($event)"
+      (occupiedDrop)="occupiedDrop()"
+      [selectedId]="selectedId()"
+      [readonly]="!auth.isAdmin()"
+      (selected)="selectedId.set($event.id)"
+    />
+
+    @if (selectedEntry(); as entry) {
+      @let subject = store.subjectsById().get(entry.materia_id);
+      <app-entry-details
+        [entry]="entry"
+        [subject]="subject"
+        [group]="subject ? store.groupsById().get(subject.grupo_id) : undefined"
+        [teacher]="subject ? store.teachersById().get(subject.profesor_id) : undefined"
+        [classroom]="store.classroomsById().get(entry.aula_id)"
+        [conflicts]="conflictsByEntry().get(entry.id) ?? []"
+        [readonly]="!auth.isAdmin()"
+        (closed)="selectedId.set(null)"
+        (moveRequested)="move($event)"
+        (deleteRequested)="deleteEntry($event)"
+      />
+    }
+  </div>
+}

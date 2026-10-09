@@ -1,0 +1,129 @@
+<p class="section-help"><strong>Materias.</strong> Lo que se dicta a cada grupo: el grupo, el profesor que la dicta y cuántas <strong>horas por semana</strong> tiene. La columna de horas programadas compara lo que hay en el horario con lo que se necesita.</p>
+
+<div class="crud-layout">
+  <section class="panel" aria-labelledby="subjects-title">
+    <h2 id="subjects-title">Materias <span class="badge">{{ store.subjects().length }}</span></h2>
+    @if (store.subjects().length === 0) {
+      <p class="muted">Todavía no hay materias. Cada materia necesita un grupo y un profesor.</p>
+    } @else {
+      <div class="table-scroll">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th scope="col">Materia</th>
+              <th scope="col">Grupo</th>
+              <th scope="col">Profesor</th>
+              <th scope="col">Aula requerida</th>
+              <th scope="col">Horas programadas</th>
+              <th scope="col"><span class="sr-only">Acciones</span></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (s of store.subjects(); track s.id) {
+              <tr>
+                <td>{{ s.nombre }}</td>
+                <td class="muted">{{ groupName(s.grupo_id) }}</td>
+                <td class="muted">{{ teacherName(s.profesor_id) }}</td>
+                <td>
+                  @if (fittingClassrooms(s) === 0) {
+                    <span class="field-error" title="Ninguna aula tiene el tipo y el aforo necesarios: la materia no se podrá programar">
+                      {{ requiredRoomLabel(s.tipo_aula) }}: ninguna aula sirve
+                    </span>
+                  } @else {
+                    <span class="muted">{{ requiredRoomLabel(s.tipo_aula) }}</span>
+                  }
+                </td>
+                <td>
+                  <span
+                    class="num"
+                    [class.field-error]="(scheduledHours().get(s.id) ?? 0) !== s.intensidad_horaria"
+                    [attr.title]="(scheduledHours().get(s.id) ?? 0) !== s.intensidad_horaria ? 'No coincide con las horas requeridas' : null"
+                  >
+                    {{ scheduledHours().get(s.id) ?? 0 }} / {{ s.intensidad_horaria }} h
+                  </span>
+                </td>
+                <td>
+                  <div class="row-actions">
+                    <button type="button" class="btn-secondary" (click)="edit(s)" [attr.aria-label]="'Editar ' + s.nombre">Editar</button>
+                    <button type="button" class="btn-danger" (click)="remove(s)" [attr.aria-label]="'Eliminar ' + s.nombre">Eliminar</button>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </section>
+
+  <section class="panel" aria-labelledby="subject-form-title">
+    <h2 id="subject-form-title">{{ editing() ? 'Editar materia' : 'Nueva materia' }}</h2>
+    @if (!canCreate()) {
+      <p class="muted">Primero crea al menos un grupo y un profesor.</p>
+    } @else {
+      <form class="form-stack" [formGroup]="form" (ngSubmit)="save()" novalidate>
+        <label class="field">
+          <span class="field-label">Nombre</span>
+          <input formControlName="nombre" placeholder="Bases de Datos" [attr.aria-invalid]="!!errorMessage(form.controls.nombre, 'El nombre')" />
+          @if (errorMessage(form.controls.nombre, 'El nombre'); as msg) {
+            <p class="field-error">{{ msg }}</p>
+          }
+        </label>
+        <label class="field">
+          <span class="field-label">Horas semanales (1 a 5)</span>
+          <input
+            formControlName="intensidad_horaria"
+            type="number"
+            min="1"
+            max="5"
+            [attr.aria-invalid]="!!errorMessage(form.controls.intensidad_horaria, 'La intensidad horaria')"
+          />
+          @if (errorMessage(form.controls.intensidad_horaria, 'La intensidad horaria'); as msg) {
+            <p class="field-error">{{ msg }}</p>
+          }
+        </label>
+        <label class="field">
+          <span class="field-label">Grupo</span>
+          <select formControlName="grupo_id" [attr.aria-invalid]="!!errorMessage(form.controls.grupo_id, 'El grupo')">
+            <option [ngValue]="null" disabled>Elige un grupo</option>
+            @for (g of store.groups(); track g.id) {
+              <option [ngValue]="g.id">{{ g.nombre }} ({{ g.num_estudiantes }} est.)</option>
+            }
+          </select>
+          @if (errorMessage(form.controls.grupo_id, 'El grupo'); as msg) {
+            <p class="field-error">{{ msg }}</p>
+          }
+        </label>
+        <label class="field">
+          <span class="field-label">Profesor</span>
+          <select formControlName="profesor_id" [attr.aria-invalid]="!!errorMessage(form.controls.profesor_id, 'El profesor')">
+            <option [ngValue]="null" disabled>Elige un profesor</option>
+            @for (t of store.teachers(); track t.id) {
+              <option [ngValue]="t.id">{{ t.nombre }}</option>
+            }
+          </select>
+          @if (errorMessage(form.controls.profesor_id, 'El profesor'); as msg) {
+            <p class="field-error">{{ msg }}</p>
+          }
+        </label>
+        <label class="field">
+          <span class="field-label">Aula requerida</span>
+          <select formControlName="tipo_aula">
+            @for (t of requiredRoomTypes; track t.value) {
+              <option [value]="t.value">{{ t.label }}</option>
+            }
+          </select>
+          <span class="field-hint">Por ejemplo, Programación va en sala de informática y Física en laboratorio.</span>
+        </label>
+        <div class="form-actions">
+          @if (editing()) {
+            <button type="button" class="btn-secondary" (click)="cancel()">Cancelar</button>
+          }
+          <button type="submit" class="btn-primary" [disabled]="saving()">
+            {{ saving() ? 'Guardando…' : editing() ? 'Guardar cambios' : 'Crear materia' }}
+          </button>
+        </div>
+      </form>
+    }
+  </section>
+</div>

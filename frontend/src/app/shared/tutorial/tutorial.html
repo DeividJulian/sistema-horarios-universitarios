@@ -1,0 +1,43 @@
+<dialog #dialog class="dialog" aria-labelledby="tutorial-title" (close)="onClose()">
+  <header class="head">
+    <p class="eyebrow">Tutorial · paso {{ index() + 1 }} de {{ steps().length }}</p>
+    <button type="button" class="close" (click)="tutorial.close()" aria-label="Cerrar tutorial">×</button>
+  </header>
+
+  <h2 id="tutorial-title">{{ step().title }}</h2>
+  @for (p of step().paragraphs; track $index) {
+    <p>{{ p }}</p>
+  }
+  @if (step().tips; as tips) {
+    <ul class="tips">
+      @for (tip of tips; track $index) {
+        <li>{{ tip }}</li>
+      }
+    </ul>
+  }
+  @if (step().link; as link) {
+    <button type="button" class="btn-secondary go" (click)="visit(link.path)">{{ link.text }} →</button>
+  }
+
+  <nav class="dots" aria-label="Pasos del tutorial">
+    @for (s of steps(); track $index) {
+      <button
+        type="button"
+        class="dot"
+        [class.active]="$index === index()"
+        (click)="goTo($index)"
+        [attr.aria-label]="'Paso ' + ($index + 1) + ': ' + s.title"
+        [attr.aria-current]="$index === index() ? 'step' : null"
+      ></button>
+    }
+  </nav>
+
+  <footer class="actions">
+    <button type="button" class="btn-secondary" (click)="goTo(index() - 1)" [disabled]="isFirst()">Anterior</button>
+    @if (isLast()) {
+      <button type="button" class="btn-primary" (click)="tutorial.close()">Terminar</button>
+    } @else {
+      <button type="button" class="btn-primary" (click)="goTo(index() + 1)" autofocus>Siguiente</button>
+    }
+  </footer>
+</dialog>

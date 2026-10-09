@@ -1,0 +1,9 @@
+<div class="toasts" role="status" aria-live="polite">
+  @for (n of notifications.items(); track n.id) {
+    <div class="toast" [class]="'toast ' + n.kind" [attr.role]="n.kind === 'error' ? 'alert' : null">
+      <span class="icon" aria-hidden="true">{{ n.kind === 'success' ? '✓' : n.kind === 'error' ? '!' : 'i' }}</span>
+      <p>{{ n.message }}</p>
+      <button type="button" class="close" (click)="notifications.dismiss(n.id)" aria-label="Cerrar aviso">×</button>
+    </div>
+  }
+</div>

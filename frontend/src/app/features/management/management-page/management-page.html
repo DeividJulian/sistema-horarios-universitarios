@@ -1,0 +1,25 @@
+<header class="page-header">
+  <p class="eyebrow">Datos académicos</p>
+  <h1>Gestión</h1>
+  <p class="muted">Registra profesores, aulas, grupos y materias. El generador de horarios usa estos datos.</p>
+</header>
+
+<nav class="tabs" aria-label="Secciones de gestión">
+  @for (tab of tabs; track tab.path) {
+    <a [routerLink]="tab.path" routerLinkActive="active" ariaCurrentWhenActive="page">{{ tab.label }}</a>
+  }
+</nav>
+
+@if (store.loadError() && !store.loaded()) {
+  <app-state-message
+    kind="error"
+    title="No se pudieron cargar los datos"
+    [message]="store.loadError()!"
+    actionText="Reintentar"
+    (action)="reload()"
+  />
+} @else if (!store.loaded()) {
+  <app-state-message kind="loading" title="Cargando datos…" />
+} @else {
+  <router-outlet />
+}

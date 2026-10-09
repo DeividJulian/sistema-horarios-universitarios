@@ -1,0 +1,133 @@
+.grid-scroll {
+  overflow-x: auto;
+}
+
+.board {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+  width: fit-content;
+}
+
+.row {
+  display: flex;
+}
+
+.header-row {
+  background-color: var(--panel-alt);
+}
+
+.row-alt {
+  background-color: rgba(255, 255, 255, 0.02);
+}
+
+.hour-cell {
+  width: 104px;
+  min-width: 104px;
+  white-space: nowrap;
+  padding: 10px 8px;
+  border-right: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.header-row .hour-cell {
+  border-bottom: none;
+}
+
+.day-cell {
+  width: 160px;
+  min-width: 160px;
+  padding: 12px 8px;
+  text-align: center;
+  border-right: 1px solid var(--border);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.cell {
+  width: 160px;
+  min-width: 160px;
+  height: 64px;
+  border-right: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  padding: 5px;
+}
+
+.block {
+  background-color: var(--panel-alt);
+  border-left: 3px solid var(--accent);
+  border-radius: 6px;
+  padding: 6px 8px;
+  font-size: 12px;
+  height: 100%;
+  cursor: grab;
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  touch-action: none;
+}
+
+.block-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  margin-top: 4px;
+  flex-shrink: 0;
+}
+
+.block-text {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.block-text strong {
+  font-size: 12px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.block-text span {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+
+.block {
+  position: relative;
+}
+
+.block.has-conflict {
+  outline: 1px solid var(--danger);
+  background-color: rgba(251, 113, 133, 0.1);
+}
+
+.conflict-icon {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: 10px;
+  font-weight: 800;
+  color: #1a0a0d;
+  background: var(--danger);
+}
+
+.block.selected {
+  box-shadow: 0 0 0 2px var(--accent);
+}

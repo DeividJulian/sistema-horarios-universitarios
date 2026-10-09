@@ -1,0 +1,145 @@
+<div class="login">
+  <div class="glow glow-a" aria-hidden="true"></div>
+  <div class="glow glow-b" aria-hidden="true"></div>
+  <div class="glow glow-c" aria-hidden="true"></div>
+  <div class="grid-pattern" aria-hidden="true"></div>
+
+  <section class="hero" aria-labelledby="hero-title">
+    <div class="brand">
+      <span class="brand-mark" aria-hidden="true">H</span>
+      <span>Horarios y Aulas</span>
+    </div>
+
+    <p class="kicker">Programación académica inteligente</p>
+    <h1 id="hero-title">Horarios universitarios <span class="gradient-text">sin cruces</span>, en segundos.</h1>
+    <p class="lead">
+      Registra profesores, aulas, grupos y materias. El algoritmo reparte todas las clases respetando la disponibilidad,
+      el aforo y la jornada de cada grupo.
+    </p>
+
+    <ul class="features">
+      <li>
+        <span class="feature-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="M13 2 4 14h7l-1 8 9-12h-7z" /></svg>
+        </span>
+        <div><strong>Generación automática</strong><span>Algoritmo CSP con backtracking que evita todos los cruces.</span></div>
+      </li>
+      <li>
+        <span class="feature-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="M5 9h14M5 15h14M9 5v14M15 5v14" /></svg>
+        </span>
+        <div><strong>Calendario interactivo</strong><span>Arrastra un bloque para moverlo y detecta conflictos al instante.</span></div>
+      </li>
+      <li>
+        <span class="feature-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2" /></svg>
+        </span>
+        <div><strong>Análisis del horario</strong><span>Ocupación de aulas, carga docente y horas muertas.</span></div>
+      </li>
+    </ul>
+
+    <div class="preview" aria-hidden="true">
+      <div class="preview-head">
+        <span></span><span>Lun</span><span>Mar</span><span>Mié</span><span>Jue</span><span>Vie</span>
+      </div>
+      <div class="preview-body">
+        <span class="hour">7 a. m.</span>
+        <i class="b b1">Cálculo</i><i></i><i class="b b2">Física</i><i></i><i class="b b1">Cálculo</i>
+        <span class="hour">8 a. m.</span>
+        <i></i><i class="b b3">Redes</i><i></i><i class="b b4">Bases de datos</i><i></i>
+        <span class="hour">9 a. m.</span>
+        <i class="b b5">Inglés</i><i></i><i class="b b3">Redes</i><i></i><i class="b b2">Física</i>
+      </div>
+      <div class="preview-chip ok"><b>0</b> cruces</div>
+      <div class="preview-chip time"><b>&lt; 2 s</b> para generar</div>
+    </div>
+  </section>
+
+  <section class="card-wrap" aria-labelledby="login-title">
+    <div class="card">
+      <h2 id="login-title">Inicia sesión</h2>
+      <p class="muted">Entra con tu cuenta para ver o administrar los horarios.</p>
+
+      <p class="server" [class]="'server ' + server()" role="status">
+        <span class="dot" aria-hidden="true"></span>
+        @switch (server()) {
+          @case ('waking') { Conectando con el servidor… }
+          @case ('ready') { Servidor conectado }
+          @case ('down') { No hay conexión con el servidor }
+        }
+      </p>
+
+      <form [formGroup]="form" (ngSubmit)="submit()" novalidate class="form">
+        <label class="field">
+          <span class="field-label">Correo</span>
+          <input
+            formControlName="email"
+            type="email"
+            autocomplete="username"
+            placeholder="nombre@ucc.edu.co"
+            [attr.aria-invalid]="!!errorMessage(form.controls.email, 'El correo')"
+          />
+          @if (errorMessage(form.controls.email, 'El correo'); as msg) {
+            <span class="field-error">{{ msg }}</span>
+          }
+        </label>
+
+        <label class="field">
+          <span class="field-label">Contraseña</span>
+          <span class="password">
+            <input
+              formControlName="password"
+              [type]="showPassword() ? 'text' : 'password'"
+              autocomplete="current-password"
+              placeholder="••••••••"
+              [attr.aria-invalid]="!!errorMessage(form.controls.password, 'La contraseña')"
+            />
+            <button
+              type="button"
+              class="toggle"
+              (click)="showPassword.set(!showPassword())"
+              [attr.aria-label]="showPassword() ? 'Ocultar contraseña' : 'Mostrar contraseña'"
+              [attr.aria-pressed]="showPassword()"
+            >
+              {{ showPassword() ? 'Ocultar' : 'Ver' }}
+            </button>
+          </span>
+          @if (errorMessage(form.controls.password, 'La contraseña'); as msg) {
+            <span class="field-error">{{ msg }}</span>
+          }
+        </label>
+
+        @if (error(); as msg) {
+          <p class="form-error alert" role="alert">{{ msg }}</p>
+        }
+
+        <button type="submit" class="btn-primary submit" [disabled]="submitting()">
+          @if (submitting()) {
+            <span class="spinner" aria-hidden="true"></span> Entrando…
+          } @else {
+            Entrar
+          }
+        </button>
+
+        @if (slow()) {
+          <p class="slow" role="status">
+            El servidor gratuito se está despertando después de un rato sin uso. La primera vez puede tardar hasta un minuto; no cierres la página.
+          </p>
+        }
+      </form>
+
+      <div class="demo">
+        <p class="demo-title">Cuentas de prueba</p>
+        <div class="demo-buttons">
+          @for (account of demoAccounts; track account.email) {
+            <button type="button" class="demo-account" (click)="useAccount(account)">
+              <strong>{{ account.label }}</strong>
+              <span>{{ account.hint }}</span>
+            </button>
+          }
+        </div>
+      </div>
+    </div>
+    <p class="footer muted">Universidad Cooperativa de Colombia · Programación Orientada a la Web</p>
+  </section>
+</div>

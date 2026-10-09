@@ -1,0 +1,93 @@
+<p class="section-help"><strong>Grupos.</strong> Cada curso o semestre, por ejemplo «Ingeniería de Software 7». Indica cuántos estudiantes tiene (para buscar aulas con espacio) y su <strong>jornada</strong>: mañana, tarde o noche. Sus clases solo se programan dentro de esa jornada.</p>
+
+<div class="crud-layout">
+  <section class="panel" aria-labelledby="groups-title">
+    <h2 id="groups-title">Grupos <span class="badge">{{ store.groups().length }}</span></h2>
+    @if (store.groups().length === 0) {
+      <p class="muted">Todavía no hay grupos. Crea uno para poder asignarle materias.</p>
+    } @else {
+      <div class="table-scroll">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th scope="col">Nombre</th>
+              <th scope="col">Estudiantes</th>
+              <th scope="col">Jornada</th>
+              <th scope="col">Materias</th>
+              <th scope="col">Aulas con cupo</th>
+              <th scope="col"><span class="sr-only">Acciones</span></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (g of store.groups(); track g.id) {
+              <tr>
+                <td>{{ g.nombre }}</td>
+                <td class="num">{{ g.num_estudiantes }}</td>
+                <td class="muted nowrap">{{ shiftText(g.jornada) }}</td>
+                <td class="num">{{ subjectCount().get(g.id) ?? 0 }}</td>
+                <td>
+                  @if (fittingClassrooms(g) === 0) {
+                    <span class="field-error" title="Ninguna aula tiene aforo suficiente: sus materias no se podrán programar">
+                      Ninguna
+                    </span>
+                  } @else {
+                    <span class="num">{{ fittingClassrooms(g) }}</span>
+                  }
+                </td>
+                <td>
+                  <div class="row-actions">
+                    <button type="button" class="btn-secondary" (click)="edit(g)" [attr.aria-label]="'Editar ' + g.nombre">Editar</button>
+                    <button type="button" class="btn-danger" (click)="remove(g)" [attr.aria-label]="'Eliminar ' + g.nombre">Eliminar</button>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </section>
+
+  <section class="panel" aria-labelledby="group-form-title">
+    <h2 id="group-form-title">{{ editing() ? 'Editar grupo' : 'Nuevo grupo' }}</h2>
+    <form class="form-stack" [formGroup]="form" (ngSubmit)="save()" novalidate>
+      <label class="field">
+        <span class="field-label">Nombre</span>
+        <input formControlName="nombre" placeholder="Ingeniería de Software 7A" [attr.aria-invalid]="!!errorMessage(form.controls.nombre, 'El nombre')" />
+        @if (errorMessage(form.controls.nombre, 'El nombre'); as msg) {
+          <p class="field-error">{{ msg }}</p>
+        }
+      </label>
+      <label class="field">
+        <span class="field-label">Número de estudiantes</span>
+        <input
+          formControlName="num_estudiantes"
+          type="number"
+          min="1"
+          max="500"
+          [attr.aria-invalid]="!!errorMessage(form.controls.num_estudiantes, 'El número de estudiantes')"
+        />
+        @if (errorMessage(form.controls.num_estudiantes, 'El número de estudiantes'); as msg) {
+          <p class="field-error">{{ msg }}</p>
+        }
+      </label>
+      <label class="field">
+        <span class="field-label">Jornada</span>
+        <select formControlName="jornada">
+          @for (s of shifts; track s.value) {
+            <option [value]="s.value">{{ shiftOptionText(s) }}</option>
+          }
+        </select>
+        <span class="field-hint">El generador solo programa las clases del grupo dentro de esta franja.</span>
+      </label>
+      <div class="form-actions">
+        @if (editing()) {
+          <button type="button" class="btn-secondary" (click)="cancel()">Cancelar</button>
+        }
+        <button type="submit" class="btn-primary" [disabled]="saving()">
+          {{ saving() ? 'Guardando…' : editing() ? 'Guardar cambios' : 'Crear grupo' }}
+        </button>
+      </div>
+    </form>
+  </section>
+</div>

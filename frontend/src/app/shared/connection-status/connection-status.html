@@ -1,0 +1,16 @@
+<div class="status" aria-live="polite">
+  @if (!connection.online()) {
+    <span class="chip warning">Sin conexión: solo lectura</span>
+  } @else if (connection.dataFromCache()) {
+    <span class="chip warning">Mostrando datos guardados</span>
+  }
+  @if (tabSync.available()) {
+    <span class="chip">
+      {{ tabSync.openTabs() }}
+      {{ tabSync.openTabs() === 1 ? 'pestaña sincronizada' : 'pestañas sincronizadas' }}
+    </span>
+  }
+  @if (connection.serviceWorkerReady()) {
+    <span class="chip ok">Modo offline listo</span>
+  }
+</div>

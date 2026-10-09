@@ -1,0 +1,133 @@
+<header class="page-header">
+  <div>
+    <p class="eyebrow">Calidad del horario</p>
+    <h1>Análisis</h1>
+    <p class="muted">Estadísticas y conflictos calculados por el backend sobre el horario actual.</p>
+  </div>
+  <button type="button" class="btn-secondary" (click)="refresh()" [disabled]="loading()">
+    {{ loading() ? 'Actualizando…' : 'Actualizar' }}
+  </button>
+</header>
+
+@if (error() && !stats()) {
+  <app-state-message kind="error" title="No se pudo cargar el análisis" [message]="error()!" actionText="Reintentar" (action)="refresh()" />
+} @else if (!stats()) {
+  <app-state-message kind="loading" title="Calculando estadísticas…" />
+} @else {
+  @let s = stats()!;
+  <section class="tiles" aria-label="Totales">
+    <div class="tile panel"><span class="tile-value">{{ s.totales.profesores }}</span>&ngsp;<span class="tile-label">Profesores</span></div>
+    <div class="tile panel"><span class="tile-value">{{ s.totales.aulas }}</span>&ngsp;<span class="tile-label">Aulas</span></div>
+    <div class="tile panel"><span class="tile-value">{{ s.totales.grupos }}</span>&ngsp;<span class="tile-label">Grupos</span></div>
+    <div class="tile panel"><span class="tile-value">{{ s.totales.materias }}</span>&ngsp;<span class="tile-label">Materias</span></div>
+    <div class="tile panel"><span class="tile-value">{{ s.totales.bloques_programados }}</span>&ngsp;<span class="tile-label">Bloques programados</span></div>
+  </section>
+
+  <div class="grid">
+    <section class="panel" aria-labelledby="fulfillment-title">
+      <h2 id="fulfillment-title">Cumplimiento de horas</h2>
+      <p class="hero">{{ s.cumplimiento.porcentaje | number: '1.0-1' }} %</p>
+      <div
+        class="meter"
+        role="meter"
+        aria-valuemin="0"
+        aria-valuemax="100"
+        [attr.aria-valuenow]="s.cumplimiento.porcentaje"
+        aria-label="Porcentaje de horas requeridas que están programadas"
+      >
+        <span [style.width.%]="s.cumplimiento.porcentaje"></span>
+      </div>
+      <p class="muted small">
+        {{ s.cumplimiento.horas_programadas }} de {{ s.cumplimiento.horas_requeridas }} horas semanales requeridas están programadas.
+      </p>
+    </section>
+
+    <section class="panel" aria-labelledby="conflicts-title">
+      <h2 id="conflicts-title">
+        Conflictos
+        @if (report(); as r) {
+          <span class="badge" [class.badge-danger]="r.hay_conflictos">{{ r.total }}</span>
+        }
+      </h2>
+      @if (report(); as r) {
+        @if (!r.hay_conflictos) {
+          <p class="ok-line"><span class="status-icon ok" aria-hidden="true">✓</span> Sin conflictos: no hay cruces, sobrecupos ni clases fuera de disponibilidad.</p>
+        } @else {
+          <ul class="conflicts">
+            @for (c of r.conflictos; track $index) {
+              <li>
+                <span class="status-icon danger" aria-hidden="true">!</span>
+                <div>
+                  <strong>{{ labels[c.tipo] }}</strong>
+                  <p>{{ c.descripcion }}</p>
+                </div>
+              </li>
+            }
+          </ul>
+        }
+      }
+    </section>
+
+    <section class="panel" aria-labelledby="usage-title">
+      <h2 id="usage-title">Ocupación de aulas</h2>
+      <p class="muted small">Porcentaje de las 80 franjas semanales (5 días × 16 horas) que usa cada aula.</p>
+      <app-bar-list label="Ocupación de aulas" [items]="classroomBars()" [max]="100" />
+    </section>
+
+    <section class="panel" aria-labelledby="days-title">
+      <h2 id="days-title">Bloques por día</h2>
+      <p class="muted small">Un reparto parejo evita días sobrecargados.</p>
+      <app-bar-list label="Bloques por día" [items]="dayBars()" />
+    </section>
+  </div>
+
+  @if (auth.isAdmin()) {
+    <section class="panel demo" aria-labelledby="demo-title">
+      <div>
+        <h2 id="demo-title">Datos de demostración</h2>
+        <p class="muted small">
+          <strong>Demo pequeña:</strong> 5 profesores, 4 aulas, 3 grupos y 7 materias (20 h semanales).<br />
+          <strong>Facultad:</strong> los 8 semestres de Ingeniería de Software con su jornada (mañana, tarde y noche): 18 profesores, 8 aulas y 45 materias (130 h).
+        </p>
+      </div>
+      <div class="demo-actions">
+        @if (seeded()) {
+          <a class="btn-primary" routerLink="/horario">Ir a generar el horario</a>
+        }
+        <button type="button" class="btn-secondary" (click)="loadDemoData('demo')" [disabled]="seeding()">
+          {{ seeding() ? 'Cargando…' : 'Cargar demo pequeña' }}
+        </button>
+        <button type="button" class="btn-secondary" (click)="loadDemoData('faculty')" [disabled]="seeding()">
+          Cargar facultad (8 semestres)
+        </button>
+      </div>
+    </section>
+  }
+
+  <section class="panel teachers" aria-labelledby="load-title">
+    <h2 id="load-title">Carga de profesores</h2>
+    <p class="muted small">Franjas muertas: horas libres entre dos clases del mismo día. Total: {{ totalIdleHours() }} h.</p>
+    <div class="table-scroll">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th scope="col">Profesor</th>
+            <th scope="col">Horas semanales</th>
+            <th scope="col">Días con clase</th>
+            <th scope="col">Franjas muertas</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (t of s.carga_profesores; track t.profesor_id) {
+            <tr>
+              <td>{{ t.profesor }}</td>
+              <td class="num">{{ t.horas_semanales }}</td>
+              <td class="num">{{ t.dias_con_clase }}</td>
+              <td class="num" [class.field-error]="t.franjas_muertas > 0">{{ t.franjas_muertas }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </section>
+}
