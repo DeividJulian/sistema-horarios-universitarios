@@ -171,3 +171,43 @@ h2 {
 .demo-actions a {
   text-decoration: none;
 }
+
+.backup {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px 14px;
+  margin-top: 12px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: rgba(52, 211, 153, 0.08);
+  border: 1px solid rgba(52, 211, 153, 0.4);
+}
+
+.backup p {
+  flex: 1 1 320px;
+  margin: 0;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.backup strong {
+  color: #6ee7b7;
+}
+
+.backup-icon {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-weight: 800;
+  color: #0b1020;
+  background: #34d399;
+}
+
+.backup-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}

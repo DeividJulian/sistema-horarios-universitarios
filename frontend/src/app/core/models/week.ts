@@ -14,22 +14,25 @@ function fromIsoDate(iso: string): Date {
   return new Date(y, m - 1, d);
 }
 
+/** A day with classes and its date ("Viernes", "2026-10-09"). */
+export interface SchoolDay {
+  day: Weekday;
+  date: string;
+}
+
 /**
- * Dates (ISO) of the week the calendar shows: this week from Monday to Friday,
- * or the next one on Saturday and Sunday, when this week's classes are over.
+ * The next school days, starting today: on Friday 9 they are Friday 9, Monday 12, Tuesday 13,
+ * Wednesday 14 and Thursday 15. Days already gone and weekends are not shown.
  */
-export function displayedWeek(today = new Date()): Record<Weekday, string> {
-  const monday = new Date(today.getFullYear(), today.getMonth(), today.getDate());
-  const day = monday.getDay(); // 0 Sunday ... 6 Saturday
-  const offset = day === 0 ? 1 : day === 6 ? 2 : 1 - day;
-  monday.setDate(monday.getDate() + offset);
-  const week = {} as Record<Weekday, string>;
-  WEEKDAYS.forEach((weekday, i) => {
-    const date = new Date(monday);
-    date.setDate(monday.getDate() + i);
-    week[weekday] = toIsoDate(date);
-  });
-  return week;
+export function upcomingSchoolDays(count = 5, today = new Date()): SchoolDay[] {
+  const date = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+  const days: SchoolDay[] = [];
+  while (days.length < count) {
+    const weekday = date.getDay(); // 0 Sunday ... 6 Saturday
+    if (weekday >= 1 && weekday <= 5) days.push({ day: WEEKDAYS[weekday - 1], date: toIsoDate(date) });
+    date.setDate(date.getDate() + 1);
+  }
+  return days;
 }
 
 /** Next dates (today included) on which a class of that weekday takes place. */

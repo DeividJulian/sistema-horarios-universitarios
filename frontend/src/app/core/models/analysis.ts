@@ -55,6 +55,14 @@ export interface ConflictReport {
 export interface SeedResult {
   mensaje: string;
   resumen: { profesores: number; aulas: number; grupos: number; materias: number; horas_semanales: number };
+  respaldo?: BackupInfo;
+}
+
+/** Copy of the data that the demo replaced (GET /seed/backup). */
+export interface BackupInfo {
+  existe: boolean;
+  creado_en?: string;
+  resumen?: { profesores: number; aulas: number; grupos: number; materias: number; bloques: number };
 }
 
 export type ReadinessSection = 'aulas' | 'grupos' | 'profesores' | 'materias';

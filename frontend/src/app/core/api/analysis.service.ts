@@ -2,7 +2,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 
-import { ConflictReport, Readiness, SeedResult, Statistics } from '../models';
+import { BackupInfo, ConflictReport, Readiness, SeedResult, Statistics } from '../models';
 import { API_URL } from './api-url';
 
 /** demo: small example. faculty: 8 semesters of Software Engineering with their shifts. */
@@ -25,7 +25,22 @@ export class AnalysisService {
     return this.http.get<Readiness>(`${API_URL}/diagnostics`);
   }
 
-  /** Loads demo data. With reset=true the backend first DELETES every record. */
+  /** Copy of the data the demo replaced, if any. */
+  backup(): Observable<BackupInfo> {
+    return this.http.get<BackupInfo>(`${API_URL}/seed/backup`);
+  }
+
+  /** Goes back to the data that was there before loading the demo. */
+  restoreBackup(): Observable<{ mensaje: string }> {
+    return this.http.post<{ mensaje: string }>(`${API_URL}/seed/restore`, {});
+  }
+
+  /** Keeps the demo and forgets the copy. */
+  discardBackup(): Observable<{ mensaje: string }> {
+    return this.http.delete<{ mensaje: string }>(`${API_URL}/seed/backup`);
+  }
+
+  /** Loads demo data. With reset=true the backend first saves a copy of the current data and then replaces it. */
   seed(dataset: SeedDataset = 'demo', reset = false): Observable<SeedResult> {
     let params = new HttpParams().set('dataset', dataset);
     if (reset) params = params.set('reset', 'true');

@@ -135,7 +135,7 @@
     />
   } @else {
     <div class="calendar-head">
-      <h2 class="week">{{ weekLabel }}</h2>
+      <h2 class="week">{{ daysLabel() }}</h2>
       <p class="hint muted">
         @switch (auth.role()) {
           @case ('admin') { Arrastra un bloque a una casilla vacía para moverlo, o haz clic en él para ver el detalle. }
@@ -152,7 +152,7 @@
         [classroomsById]="store.classroomsById()"
         [filter]="effectiveFilter()"
         [conflicts]="conflictsByEntry()"
-        [weekDates]="weekDates"
+        [days]="days()"
         [cancelledKeys]="cancelledKeys()"
         [trimEmptyHours]="!auth.isAdmin()"
         (moved)="move($event)"

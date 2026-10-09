@@ -2,11 +2,11 @@
   <section class="board" cdkDropListGroup aria-label="Calendario semanal">
     <div class="row header-row">
       <div class="hour-cell"></div>
-      @for (day of weekdays; track day) {
-        <div class="day-cell" [class.today]="weekDates()[day] === todayIso">
-          <span>{{ day }}</span>
-          @if (weekDates()[day]; as date) {
-            <small>{{ shortDate(date) }}</small>
+      @for (column of days(); track column.day) {
+        <div class="day-cell" [class.today]="column.date === todayIso">
+          <span>{{ column.day }}</span>
+          @if (column.date; as date) {
+            <small>{{ date === todayIso ? 'Hoy · ' : '' }}{{ shortDate(date) }}</small>
           }
         </div>
       }
@@ -16,7 +16,8 @@
       <div class="row" [class.row-alt]="odd">
         <div class="hour-cell">{{ hour | hour }}</div>
 
-        @for (day of weekdays; track day) {
+        @for (column of days(); track column.day) {
+          @let day = column.day;
           <div
             class="cell"
             cdkDropList
@@ -27,7 +28,7 @@
           >
             @if (entryAt(day, hour); as entry) {
               @let problems = conflictsOf(entry);
-              @let cancelled = isCancelled(entry, day);
+              @let cancelled = isCancelled(entry, column.date);
               <div
                 cdkDrag
                 [cdkDragData]="entry"

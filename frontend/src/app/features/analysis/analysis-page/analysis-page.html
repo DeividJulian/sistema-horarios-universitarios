@@ -87,8 +87,25 @@
         <h2 id="demo-title">Datos de demostración</h2>
         <p class="muted small">
           <strong>Demo pequeña:</strong> 5 profesores, 4 aulas, 3 grupos y 7 materias (20 h semanales).<br />
-          <strong>Facultad:</strong> los 8 semestres de Ingeniería de Software con su jornada (mañana, tarde y noche): 18 profesores, 8 aulas y 45 materias (130 h).
+          <strong>Facultad:</strong> los 8 semestres de Ingeniería de Software con su jornada (mañana, tarde y noche): 18 profesores, 8 aulas y 45 materias (130 h).<br />
+          Antes de reemplazar tus datos se guarda una copia, así que siempre puedes volver atrás.
         </p>
+        @if (backup().existe) {
+          @let r = backup().resumen;
+          <div class="backup" role="status">
+            <span class="backup-icon" aria-hidden="true">↺</span>
+            <p>
+              <strong>Tus datos están guardados.</strong>
+              Copia del {{ backupDate() }}: {{ r?.profesores }} profesores, {{ r?.aulas }} aulas, {{ r?.grupos }} grupos, {{ r?.materias }} materias y {{ r?.bloques }} clases.
+            </p>
+            <div class="backup-actions">
+              <button type="button" class="btn-primary" (click)="restoreBackup()" [disabled]="restoring()">
+                {{ restoring() ? 'Restaurando…' : 'Volver a mis datos' }}
+              </button>
+              <button type="button" class="btn-secondary" (click)="discardBackup()" [disabled]="restoring()">Quedarme con la demo</button>
+            </div>
+          </div>
+        }
       </div>
       <div class="demo-actions">
         @if (seeded()) {

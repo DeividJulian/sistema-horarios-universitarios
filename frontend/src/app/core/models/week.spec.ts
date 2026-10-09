@@ -1,20 +1,21 @@
-import { displayedWeek, formatLongDate, formatShortDate, upcomingDates } from './week';
+import { formatLongDate, formatShortDate, upcomingDates, upcomingSchoolDays } from './week';
 
 describe('week helpers', () => {
-  it('shows the current week from Monday to Friday', () => {
-    const week = displayedWeek(new Date(2026, 9, 14)); // Wednesday 14 October 2026
-    expect(week).toEqual({
-      Lunes: '2026-10-12',
-      Martes: '2026-10-13',
-      Miércoles: '2026-10-14',
-      Jueves: '2026-10-15',
-      Viernes: '2026-10-16',
-    });
+  it('shows the next five school days starting today', () => {
+    const friday = new Date(2026, 9, 9); // Friday 9 October 2026
+    expect(upcomingSchoolDays(5, friday)).toEqual([
+      { day: 'Viernes', date: '2026-10-09' },
+      { day: 'Lunes', date: '2026-10-12' },
+      { day: 'Martes', date: '2026-10-13' },
+      { day: 'Miércoles', date: '2026-10-14' },
+      { day: 'Jueves', date: '2026-10-15' },
+    ]);
   });
 
-  it('jumps to next week on Saturday and Sunday', () => {
-    expect(displayedWeek(new Date(2026, 9, 17)).Lunes).toBe('2026-10-19'); // Saturday
-    expect(displayedWeek(new Date(2026, 9, 18)).Lunes).toBe('2026-10-19'); // Sunday
+  it('starts on Monday during the weekend, and is a normal week on Monday', () => {
+    expect(upcomingSchoolDays(5, new Date(2026, 9, 10))[0]).toEqual({ day: 'Lunes', date: '2026-10-12' }); // Saturday
+    expect(upcomingSchoolDays(5, new Date(2026, 9, 11))[0]).toEqual({ day: 'Lunes', date: '2026-10-12' }); // Sunday
+    expect(upcomingSchoolDays(5, new Date(2026, 9, 12)).map((d) => d.day)).toEqual(['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes']);
   });
 
   it('lists the next dates of a weekday, today included', () => {

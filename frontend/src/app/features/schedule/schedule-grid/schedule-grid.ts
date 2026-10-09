@@ -4,6 +4,7 @@ import { Component, computed, input, output } from '@angular/core';
 import {
   Classroom,
   ScheduleEntry,
+  SchoolDay,
   START_HOURS,
   Subject,
   WEEKDAYS,
@@ -47,14 +48,13 @@ export class ScheduleGrid {
   readonly selectedId = input<number | null>(null);
   /** Read-only users can look at the blocks but not drag them. */
   readonly readonly = input(false);
-  /** Date (ISO) of each day of the week shown, for the headers and the cancellations. */
-  readonly weekDates = input<Partial<Record<Weekday, string>>>({});
+  /** Columns in order, with their date (the next school days). Without dates, Monday to Friday. */
+  readonly days = input<(SchoolDay | { day: Weekday; date: null })[]>(WEEKDAYS.map((day) => ({ day, date: null })));
   /** Cancelled classes as "entryId|YYYY-MM-DD". */
   readonly cancelledKeys = input<Set<string>>(new Set());
   /** Only the hours that have classes (for people who cannot drag blocks to empty hours). */
   readonly trimEmptyHours = input(false);
 
-  protected readonly weekdays = WEEKDAYS;
   protected readonly todayIso = toIsoDate(new Date());
   protected readonly shortDate = formatShortDate;
   protected readonly allCellIds = WEEKDAYS.flatMap((d) => START_HOURS.map((h) => cellId(d, h)));
@@ -83,8 +83,7 @@ export class ScheduleGrid {
     return START_HOURS.filter((h) => h >= first && h <= last);
   });
 
-  protected isCancelled(entry: ScheduleEntry, day: Weekday): boolean {
-    const date = this.weekDates()[day];
+  protected isCancelled(entry: ScheduleEntry, date: string | null): boolean {
     return !!date && this.cancelledKeys().has(`${entry.id}|${date}`);
   }
 

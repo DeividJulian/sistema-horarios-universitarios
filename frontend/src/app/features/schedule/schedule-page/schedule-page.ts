@@ -9,11 +9,11 @@ import {
   Conflict,
   Readiness,
   ScheduleEntry,
-  displayedWeek,
   formatLongDate,
   hourOf,
   shiftText,
   toIsoDate,
+  upcomingSchoolDays,
 } from '../../../core/models';
 import { ConfirmService } from '../../../core/services/confirm.service';
 import { NotificationService } from '../../../core/services/notification.service';
@@ -101,17 +101,22 @@ export class SchedulePage {
 
   protected readonly firstName = computed(() => this.auth.user()?.nombre.split(/\s+/)[0] ?? '');
 
-  // ---------- Week shown, and its cancelled classes ----------
-  protected readonly weekDates = displayedWeek();
-  protected readonly weekLabel = `Semana del ${formatLongDate(this.weekDates.Lunes)} al ${formatLongDate(this.weekDates.Viernes)}`;
-  private readonly todayIso = toIsoDate(new Date());
+  // ---------- Days shown (the next five school days), and their cancelled classes ----------
+  /** Today's date; checked every minute so the calendar moves on by itself after midnight. */
+  private readonly todayIso = signal(toIsoDate(new Date()));
+  protected readonly days = computed(() => upcomingSchoolDays(5, new Date(`${this.todayIso()}T00:00:00`)));
+  private readonly dateOf = computed(() => new Map(this.days().map((d) => [d.day, d.date])));
+  protected readonly daysLabel = computed(() => {
+    const days = this.days();
+    return `Próximos días de clase: del ${formatLongDate(days[0].date)} al ${formatLongDate(days[days.length - 1].date)}`;
+  });
 
   protected readonly cancelledKeys = computed(
     () => new Set(this.notices.cancellations().map((c) => `${c.horario_id}|${c.fecha}`)),
   );
 
   private readonly cancelledThisWeek = computed(
-    () => this.visibleEntries().filter((e) => this.cancelledKeys().has(`${e.id}|${this.weekDates[e.dia_semana]}`)).length,
+    () => this.visibleEntries().filter((e) => this.cancelledKeys().has(`${e.id}|${this.dateOf().get(e.dia_semana)}`)).length,
   );
 
   /** Summary cards: the faculty for administrators, "my week" for teachers and students. */
@@ -137,7 +142,7 @@ export class SchedulePage {
       kpis.push({ label: 'Grupos', value: groups.size, color: '#34d399', icon: ICONS.group });
     }
     kpis.push(
-      { label: 'Canceladas esta semana', value: this.cancelledThisWeek(), color: '#fb7185', icon: ICONS.cancelled },
+      { label: 'Canceladas próximos días', value: this.cancelledThisWeek(), color: '#fb7185', icon: ICONS.cancelled },
       { label: 'Avisos nuevos', value: this.notices.unread(), color: '#38bdf8', icon: ICONS.bell },
     );
     return kpis;
@@ -151,7 +156,7 @@ export class SchedulePage {
   protected readonly selectedCancellations = computed(() => {
     const entry = this.selectedEntry();
     if (!entry) return [];
-    return (this.notices.cancellationsByEntry().get(entry.id) ?? []).filter((c) => c.fecha >= this.todayIso);
+    return (this.notices.cancellationsByEntry().get(entry.id) ?? []).filter((c) => c.fecha >= this.todayIso());
   });
 
   /** The block's own teacher, or an administrator. */
@@ -200,7 +205,11 @@ export class SchedulePage {
   constructor() {
     this.reload();
     this.notices.refresh();
-    inject(DestroyRef).onDestroy(() => this.worker?.terminate());
+    const clock = setInterval(() => this.todayIso.set(toIsoDate(new Date())), 60_000);
+    inject(DestroyRef).onDestroy(() => {
+      clearInterval(clock);
+      this.worker?.terminate();
+    });
   }
 
   protected async generate(): Promise<void> {
