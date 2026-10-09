@@ -17,8 +17,8 @@ export class Tutorial {
 
   private readonly auth = inject(AuthService);
 
-  /** Administrators see how to set everything up; read-only users only how to consult. */
-  protected readonly steps = computed(() => stepsFor(this.auth.isAdmin()));
+  /** Each role sees its own steps (an administrator sets everything up, a student only consults). */
+  protected readonly steps = computed(() => stepsFor(this.auth.role()));
   protected readonly index = signal(0);
   protected readonly step = computed(() => this.steps()[this.index()]);
   protected readonly isFirst = computed(() => this.index() === 0);

@@ -1,7 +1,18 @@
 import { CdkDrag, CdkDragDrop, CdkDropList, CdkDropListGroup } from '@angular/cdk/drag-drop';
 import { Component, computed, input, output } from '@angular/core';
 
-import { Classroom, ScheduleEntry, START_HOURS, Subject, WEEKDAYS, Weekday, formatHour, hourOf } from '../../../core/models';
+import {
+  Classroom,
+  ScheduleEntry,
+  START_HOURS,
+  Subject,
+  WEEKDAYS,
+  Weekday,
+  formatHour,
+  formatShortDate,
+  hourOf,
+  toIsoDate,
+} from '../../../core/models';
 import { HourPipe } from '../../../shared/pipes/hour.pipe';
 import { ScheduleFilter, matchesFilter } from '../schedule-filter';
 
@@ -36,9 +47,16 @@ export class ScheduleGrid {
   readonly selectedId = input<number | null>(null);
   /** Read-only users can look at the blocks but not drag them. */
   readonly readonly = input(false);
+  /** Date (ISO) of each day of the week shown, for the headers and the cancellations. */
+  readonly weekDates = input<Partial<Record<Weekday, string>>>({});
+  /** Cancelled classes as "entryId|YYYY-MM-DD". */
+  readonly cancelledKeys = input<Set<string>>(new Set());
+  /** Only the hours that have classes (for people who cannot drag blocks to empty hours). */
+  readonly trimEmptyHours = input(false);
 
   protected readonly weekdays = WEEKDAYS;
-  protected readonly hours = START_HOURS;
+  protected readonly todayIso = toIsoDate(new Date());
+  protected readonly shortDate = formatShortDate;
   protected readonly allCellIds = WEEKDAYS.flatMap((d) => START_HOURS.map((h) => cellId(d, h)));
   protected readonly cellId = cellId;
 
@@ -54,6 +72,21 @@ export class ScheduleGrid {
     }
     return index;
   });
+
+  /** All the hours, or from the first to the last hour with a visible class. */
+  protected readonly visibleHours = computed(() => {
+    if (!this.trimEmptyHours()) return START_HOURS;
+    const used = [...this.cells().keys()].map((key) => Number(key.split('-')[1]));
+    if (!used.length) return START_HOURS;
+    const first = Math.min(...used);
+    const last = Math.max(...used);
+    return START_HOURS.filter((h) => h >= first && h <= last);
+  });
+
+  protected isCancelled(entry: ScheduleEntry, day: Weekday): boolean {
+    const date = this.weekDates()[day];
+    return !!date && this.cancelledKeys().has(`${entry.id}|${date}`);
+  }
 
   protected entryAt(day: Weekday, hour: number): ScheduleEntry | null {
     return this.cells().get(cellId(day, hour)) ?? null;

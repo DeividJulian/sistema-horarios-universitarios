@@ -1,14 +1,20 @@
+:host {
+  display: block;
+}
+
 .grid-scroll {
   overflow-x: auto;
 }
 
+/* Fluid board: the day columns share the width, up to a comfortable maximum */
 .board {
   display: flex;
   flex-direction: column;
   border: 1px solid var(--border);
-  border-radius: 10px;
+  border-radius: 12px;
   overflow: hidden;
-  width: fit-content;
+  min-width: 640px;
+  background: rgba(18, 26, 46, 0.6);
 }
 
 .row {
@@ -24,14 +30,14 @@
 }
 
 .hour-cell {
-  width: 104px;
-  min-width: 104px;
+  width: 84px;
+  min-width: 84px;
   white-space: nowrap;
-  padding: 10px 8px;
+  padding: 6px;
   border-right: 1px solid var(--border);
   border-bottom: 1px solid var(--border);
   font-family: var(--font-mono);
-  font-size: 12px;
+  font-size: 11px;
   color: var(--text-muted);
   display: flex;
   align-items: center;
@@ -43,44 +49,75 @@
 }
 
 .day-cell {
-  width: 160px;
-  min-width: 160px;
-  padding: 12px 8px;
+  flex: 1 1 0;
+  min-width: 0;
+  padding: 8px 6px;
   text-align: center;
   border-right: 1px solid var(--border);
   font-size: 13px;
   font-weight: 700;
-  letter-spacing: 0.02em;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.day-cell small {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.day-cell.today {
+  color: var(--accent);
+  box-shadow: inset 0 -2px 0 var(--accent);
+}
+
+.day-cell.today small {
+  color: var(--accent);
+}
+
+.day-cell:last-child,
+.cell:last-child {
+  border-right: none;
 }
 
 .cell {
-  width: 160px;
-  min-width: 160px;
-  height: 64px;
+  flex: 1 1 0;
+  min-width: 0;
+  height: 50px;
   border-right: 1px solid var(--border);
   border-bottom: 1px solid var(--border);
-  padding: 5px;
+  padding: 4px;
 }
 
 .block {
+  position: relative;
   background-color: var(--panel-alt);
   border-left: 3px solid var(--accent);
   border-radius: 6px;
-  padding: 6px 8px;
-  font-size: 12px;
+  padding: 4px 7px;
   height: 100%;
-  cursor: grab;
+  cursor: pointer;
   display: flex;
   align-items: flex-start;
   gap: 6px;
   touch-action: none;
+  transition: background-color 0.15s;
+}
+
+.block:hover {
+  background-color: #1f2a47;
+}
+
+.block:not(.cdk-drag-disabled) {
+  cursor: grab;
 }
 
 .block-dot {
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  margin-top: 4px;
+  margin-top: 5px;
   flex-shrink: 0;
 }
 
@@ -88,6 +125,7 @@
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  min-width: 0;
 }
 
 .block-text strong {
@@ -99,18 +137,32 @@
 
 .block-text span {
   font-family: var(--font-mono);
-  font-size: 11px;
+  font-size: 10.5px;
   color: var(--text-muted);
-}
-
-
-.block {
-  position: relative;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .block.has-conflict {
   outline: 1px solid var(--danger);
   background-color: rgba(251, 113, 133, 0.1);
+}
+
+/* Cancelled on the date shown: striped and faded, with the word "Cancelada" instead of the room */
+.block.cancelled {
+  background-image: repeating-linear-gradient(135deg, rgba(251, 113, 133, 0.12) 0 6px, transparent 6px 12px);
+  border-left-color: var(--danger) !important;
+}
+
+.block.cancelled strong {
+  text-decoration: line-through;
+  color: var(--text-muted);
+}
+
+.block.cancelled .block-text span {
+  color: var(--danger);
+  font-weight: 700;
 }
 
 .conflict-icon {
@@ -130,4 +182,10 @@
 
 .block.selected {
   box-shadow: 0 0 0 2px var(--accent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .block {
+    transition: none;
+  }
 }

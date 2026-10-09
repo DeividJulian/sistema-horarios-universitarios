@@ -1,0 +1,45 @@
+<header class="page-header">
+  <p class="eyebrow">Novedades de tus clases</p>
+  <h1>Avisos</h1>
+  <p class="muted">
+    @switch (auth.role()) {
+      @case ('estudiante') { Cancelaciones y cambios de aula u horario de las clases de tu grupo. }
+      @case ('profesor') { Los avisos que tus estudiantes recibieron sobre tus clases. }
+      @default { Todos los avisos enviados a los grupos. }
+    }
+  </p>
+</header>
+
+@if (items().length === 0) {
+  <app-state-message kind="empty" title="No hay avisos" message="Cuando un profesor cancele una clase o la cambie de aula, el aviso aparecerá aquí." />
+} @else {
+  <ul class="notices">
+    @for (n of items(); track n.id) {
+      <li class="notice panel" [class]="'notice panel ' + n.tipo" [class.unread]="n.unread">
+        <span class="kind-icon" aria-hidden="true">
+          @switch (n.tipo) {
+            @case ('cancelacion') { ✕ }
+            @case ('restablecida') { ✓ }
+            @case ('cambio_aula') { ⇄ }
+            @default { ↻ }
+          }
+        </span>
+        <div class="body">
+          <p class="meta">
+            <span class="kind">{{ kindLabels[n.tipo] }}</span>
+            @if (n.group && !auth.isStudent()) {
+              <span class="muted">· {{ n.group }}</span>
+            }
+            <span class="muted">· {{ n.when }}</span>
+            @if (n.unread) {
+              <span class="new">Nuevo</span>
+            }
+          </p>
+          <h2>{{ n.titulo }}</h2>
+          <p class="message">{{ n.mensaje }}</p>
+        </div>
+      </li>
+    }
+  </ul>
+  <p class="back"><a routerLink="/horario">← Volver al horario</a></p>
+}

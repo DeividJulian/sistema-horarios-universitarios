@@ -1,16 +1,22 @@
-import { Injectable, signal } from '@angular/core';
+import { Injectable, inject, signal } from '@angular/core';
+
+import { AuthService } from '../auth/auth.service';
 
 const SEEN_KEY = 'horarios.tutorial-visto';
 
-/** Opens and closes the "how to use the app" tutorial. It opens by itself on the user's first visit. */
+/**
+ * Opens and closes the "how to use the app" tutorial. It opens by itself the first time each role
+ * signs in on this browser (an administrator and a student see different tutorials).
+ */
 @Injectable({ providedIn: 'root' })
 export class TutorialService {
+  private readonly auth = inject(AuthService);
   readonly isOpen = signal(false);
 
-  /** Shows the tutorial if this browser has never seen it (storage may be blocked: then it just stays closed). */
+  /** Shows the tutorial if this role has never seen it here (storage may be blocked: then it just stays closed). */
   openIfFirstVisit(): void {
     try {
-      if (!localStorage.getItem(SEEN_KEY)) this.open();
+      if (!localStorage.getItem(this.key())) this.open();
     } catch {
       // Private mode or blocked storage: the Tutorial button is still there
     }
@@ -25,9 +31,13 @@ export class TutorialService {
     this.isOpen.set(false);
     if (!remember) return;
     try {
-      localStorage.setItem(SEEN_KEY, '1');
+      localStorage.setItem(this.key(), '1');
     } catch {
       // Nothing to remember without storage
     }
+  }
+
+  private key(): string {
+    return `${SEEN_KEY}.${this.auth.role() ?? 'anonimo'}`;
   }
 }

@@ -84,6 +84,73 @@ dd .muted {
   margin-top: 1px;
 }
 
+.cancelled {
+  margin: 0 0 14px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid rgba(251, 113, 133, 0.4);
+  background: rgba(251, 113, 133, 0.07);
+}
+
+.cancelled h3 {
+  margin: 0 0 8px;
+  font-size: 13px;
+  color: var(--danger);
+}
+
+.cancelled ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.cancelled li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+}
+
+.cancelled li div {
+  display: flex;
+  flex-direction: column;
+}
+
+.cancelled li .muted {
+  font-size: 12px;
+}
+
+.small {
+  padding: 5px 10px;
+  font-size: 12px;
+}
+
+.action {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 12px 12px;
+  margin: 0 0 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.action legend {
+  font-size: 12px;
+  color: var(--text-muted);
+  font-weight: 700;
+  padding: 0 4px;
+}
+
+.small-text {
+  margin: 0;
+  font-size: 12px;
+}
+
 .move {
   border: 1px solid var(--border);
   border-radius: 8px;

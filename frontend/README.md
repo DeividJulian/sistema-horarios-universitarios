@@ -15,23 +15,21 @@ Proyecto final de Programación Orientada a la Web — Universidad Cooperativa d
 | Inicio de sesión | `/login` | Correo y contraseña, indicador de conexión con el servidor y cuentas de prueba |
 | Horario | `/horario` | Calendario semanal, generación automática, arrastrar y soltar bloques, filtros por profesor/grupo/aula, detalle de cada bloque, mover por teclado, eliminar bloques, conflictos resaltados en rojo |
 | Gestión | `/gestion/...` | CRUD de profesores (con su disponibilidad), aulas, grupos, materias y usuarios, con las mismas validaciones que el backend. Solo administradores. |
+| Avisos | `/avisos` | Cancelaciones y cambios de aula u horario de las clases (cada rol ve los suyos) |
 | Análisis | `/analisis` | Totales, cumplimiento de horas, ocupación de aulas, bloques por día, carga de profesores, lista de conflictos y carga de datos de demostración |
 
 ## Inicio de sesión y roles
 
-Toda la aplicación exige iniciar sesión. El backend devuelve un token JWT que se guarda en el navegador y un interceptor lo envía en cada petición; si expira, la aplicación vuelve al login.
+Toda la aplicación exige iniciar sesión. El backend devuelve un token JWT que se guarda en el navegador y un interceptor lo envía en cada petición; si expira, la aplicación vuelve al login. El login muestra un botón de prueba por cada rol.
 
 | Rol | Qué ve y qué puede hacer |
 |---|---|
-| **Administrador** | Todo: Gestión (incluidos los usuarios), generar el horario, arrastrar, mover y eliminar bloques, cargar datos de demostración. |
-| **Usuario** | Solo consulta: el horario con sus filtros, el detalle de cada bloque y el análisis. No ve Gestión ni los botones que modifican datos. |
+| **Administrador** | Todo: Gestión (incluidos los usuarios), generar el horario, arrastrar, mover, cancelar, cambiar de aula y eliminar bloques. |
+| **Profesor** | «Mis clases»: solo sus clases de la semana. Puede cancelar una clase en una fecha (con motivo) o cambiarla a un aula libre; sus estudiantes reciben un aviso. Entra con el correo registrado y la contraseña inicial `Profesor2026*`. |
+| **Estudiante** | «Mi horario»: solo el horario de su grupo (su semestre), con las clases canceladas tachadas, y la página de Avisos con un contador de no leídos. |
+| **Consulta** | Ve el horario de toda la facultad y el análisis, sin modificar nada. |
 
-Cuentas de prueba (también aparecen como botones en el login):
-
-| Rol | Correo | Contraseña |
-|---|---|---|
-| Administrador | `admin@horarios.edu.co` | `Admin2026*` |
-| Usuario | `usuario@horarios.edu.co` | `Usuario2026*` |
+Cualquier usuario puede cambiar su contraseña con el botón de la llave, junto a «Salir».
 
 Las rutas están protegidas con *guards* (`core/auth/auth.guards.ts`), pero la seguridad real está en el backend, que responde `401` sin sesión y `403` si el rol no alcanza.
 
@@ -116,4 +114,4 @@ Abre `http://localhost:8080`, espera el aviso "Modo offline listo" y, en las her
 npm test -- --watch=false
 ```
 
-43 pruebas unitarias que cubren las validaciones, los mensajes de error, la lógica del Web Worker, los filtros, las notificaciones, el diálogo de confirmación, el estado compartido (incluida la actualización optimista con reversión), los interceptores y el inicio de sesión con sus guards por rol.
+47 pruebas unitarias que cubren las validaciones, los mensajes de error, la lógica del Web Worker, los filtros, las notificaciones, el diálogo de confirmación, el estado compartido (incluida la actualización optimista con reversión), los interceptores, el inicio de sesión con sus guards por rol y el cálculo de las fechas de la semana.

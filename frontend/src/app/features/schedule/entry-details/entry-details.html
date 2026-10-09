@@ -22,6 +22,74 @@
     </ul>
   }
 
+  @if (cancellations().length) {
+    <section class="cancelled" aria-label="Clases canceladas">
+      <h3>Clases canceladas</h3>
+      <ul>
+        @for (c of cancellations(); track c.id) {
+          <li>
+            <div>
+              <strong>{{ longDate(c.fecha) }}</strong>
+              <span class="muted">{{ c.motivo }}</span>
+            </div>
+            @if (canAdjust()) {
+              <button type="button" class="btn-secondary small" (click)="restoreRequested.emit(c)">Restablecer</button>
+            }
+          </li>
+        }
+      </ul>
+    </section>
+  }
+
+  @if (canAdjust()) {
+    <fieldset class="action">
+      <legend>Cancelar una clase</legend>
+      @if (cancellableDates().length) {
+        <label class="field">
+          <span class="field-label">Fecha</span>
+          <select (change)="cancelDate.set($any($event.target).value)">
+            @for (d of cancellableDates(); track d) {
+              <option [value]="d" [selected]="d === cancelDate()">{{ longDate(d) }}</option>
+            }
+          </select>
+        </label>
+        <label class="field">
+          <span class="field-label">Motivo (lo verán los estudiantes)</span>
+          <input
+            [value]="reason()"
+            (input)="reason.set($any($event.target).value)"
+            maxlength="200"
+            placeholder="Ej.: cita médica, reunión académica…"
+          />
+        </label>
+        <button type="button" class="btn-danger" (click)="requestCancel()" [disabled]="reason().trim().length < 3">
+          Cancelar clase y avisar
+        </button>
+      } @else {
+        <p class="muted small-text">Las próximas fechas ya están canceladas.</p>
+      }
+    </fieldset>
+
+    <fieldset class="action">
+      <legend>Cambiar de aula</legend>
+      @if (classroomOptions().length) {
+        <label class="field">
+          <span class="field-label">Aulas libres a esa hora con espacio suficiente</span>
+          <select (change)="targetClassroom.set(+$any($event.target).value)">
+            @for (c of classroomOptions(); track c.id) {
+              <option [value]="c.id" [selected]="c.id === targetClassroom()">{{ c.nombre }} (aforo {{ c.aforo }})</option>
+            }
+          </select>
+        </label>
+        <button type="button" class="btn-primary" (click)="requestClassroomChange()" [disabled]="targetClassroom() === null">
+          Cambiar aula y avisar
+        </button>
+      } @else {
+        <p class="muted small-text">No hay otra aula libre que sirva para esta clase a esa hora.</p>
+      }
+    </fieldset>
+  }
+
   @if (!readonly()) {
     <fieldset class="move">
       <legend>Mover a</legend>

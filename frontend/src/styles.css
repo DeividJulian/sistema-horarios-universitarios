@@ -346,3 +346,30 @@ app-availability-panel {
     transition: none;
   }
 }
+
+.role-pill.profesor {
+  color: #c4b5fd;
+  background: rgba(124, 58, 237, 0.12);
+  border-color: rgba(167, 139, 250, 0.4);
+}
+
+.role-pill.estudiante {
+  color: #6ee7b7;
+  background: rgba(52, 211, 153, 0.1);
+  border-color: rgba(52, 211, 153, 0.4);
+}
+
+.inline-select {
+  background-color: var(--panel-alt);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 5px 8px;
+  font-size: 13px;
+  max-width: 220px;
+}
+
+.section-help code {
+  font-family: var(--font-mono);
+  color: var(--text);
+}

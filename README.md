@@ -26,7 +26,9 @@ Cada carpeta tiene su propio README con la instalación, los endpoints y las pru
 | Rol | Correo | Contraseña | Puede |
 |---|---|---|---|
 | Administrador | `admin@horarios.edu.co` | `Admin2026*` | Todo: gestionar datos y usuarios, generar y ajustar el horario |
-| Usuario | `usuario@horarios.edu.co` | `Usuario2026*` | Solo consultar el horario y el análisis |
+| Profesor | el correo registrado de cada profesor | `Profesor2026*` | Ver sus clases, cancelarlas en una fecha o cambiarlas de aula (avisa a los estudiantes) |
+| Estudiante | `estudiante@horarios.edu.co` | `Estudiante2026*` | Ver solo el horario de su grupo y sus avisos |
+| Consulta | `usuario@horarios.edu.co` | `Usuario2026*` | Ver todo sin modificar |
 
 ## Ejecución local
 

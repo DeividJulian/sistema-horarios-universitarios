@@ -5,6 +5,7 @@ import { AuthService } from './core/auth/auth.service';
 import { TabSyncService } from './core/services/tab-sync.service';
 import { TutorialService } from './core/services/tutorial.service';
 import { CatalogStore } from './core/state/catalog.store';
+import { NoticeStore } from './core/state/notice.store';
 import { ConfirmDialog } from './shared/confirm-dialog/confirm-dialog';
 import { ConnectionStatus } from './shared/connection-status/connection-status';
 import { NavBar } from './shared/nav-bar/nav-bar';
@@ -22,17 +23,22 @@ export class App {
   private readonly store = inject(CatalogStore);
   private readonly tabSync = inject(TabSyncService);
   private readonly tutorial = inject(TutorialService);
+  private readonly notices = inject(NoticeStore);
 
   constructor() {
     effect(() => {
       if (this.auth.isLoggedIn()) {
         // The tutorial opens by itself the first time someone signs in on this browser
-        untracked(() => this.tutorial.openIfFirstVisit());
+        untracked(() => {
+          this.tutorial.openIfFirstVisit();
+          this.notices.start(); // notices and cancellations, refreshed every minute
+        });
       } else {
         // Signing out forgets the data, so the next account loads its own
         untracked(() => {
           this.tutorial.close(false);
           this.store.reset();
+          this.notices.reset();
         });
       }
     });

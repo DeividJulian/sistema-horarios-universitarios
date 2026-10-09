@@ -1,0 +1,113 @@
+:host {
+  display: block;
+  max-width: 820px;
+  margin: 0 auto;
+}
+
+.page-header {
+  margin-bottom: 18px;
+}
+
+h1 {
+  margin: 0 0 4px;
+  font-size: clamp(24px, 2.2vw, 30px);
+}
+
+.page-header .muted {
+  margin: 0;
+  font-size: 14px;
+}
+
+.notices {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.notice {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  padding: 14px 16px;
+  --kind-color: #38bdf8;
+}
+
+.notice.cancelacion {
+  --kind-color: #fb7185;
+}
+
+.notice.restablecida {
+  --kind-color: #34d399;
+}
+
+.notice.cambio_aula {
+  --kind-color: #fbbf24;
+}
+
+.notice.unread {
+  border-color: color-mix(in srgb, var(--kind-color) 55%, var(--border));
+}
+
+.kind-icon {
+  flex: none;
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  font-weight: 800;
+  color: var(--kind-color);
+  background: color-mix(in srgb, var(--kind-color) 14%, transparent);
+}
+
+.body {
+  min-width: 0;
+}
+
+.meta {
+  margin: 0 0 2px;
+  font-size: 12px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  align-items: center;
+}
+
+.kind {
+  font-weight: 800;
+  color: var(--kind-color);
+}
+
+.new {
+  margin-left: 4px;
+  padding: 1px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 800;
+  color: #0b1020;
+  background: var(--kind-color);
+}
+
+h2 {
+  margin: 0 0 4px;
+  font-size: 15px;
+}
+
+.message {
+  margin: 0;
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: var(--text-muted);
+}
+
+.back {
+  margin: 16px 0 0;
+  font-size: 13px;
+}
+
+.back a {
+  color: var(--accent);
+}

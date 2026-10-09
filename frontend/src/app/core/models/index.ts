@@ -10,3 +10,5 @@ export * from './time-format';
 export * from './teacher';
 export * from './weekday';
 export * from './user';
+export * from './class-change';
+export * from './week';

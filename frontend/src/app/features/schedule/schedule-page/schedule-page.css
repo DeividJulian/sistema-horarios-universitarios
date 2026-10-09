@@ -3,20 +3,28 @@
   justify-content: space-between;
   align-items: flex-end;
   flex-wrap: wrap;
-  gap: 20px;
-  margin-bottom: 24px;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+.hero .eyebrow {
+  margin-bottom: 4px;
 }
 
 h1 {
   margin: 0;
-  font-size: clamp(30px, 3.4vw, 40px);
+  font-size: clamp(24px, 2.2vw, 30px);
   font-weight: 800;
 }
 
 .lead {
-  margin: 8px 0 0;
-  font-size: 15px;
-  max-width: 60ch;
+  margin: 6px 0 0;
+  font-size: 14px;
+  max-width: 70ch;
+}
+
+.lead strong {
+  color: var(--text);
 }
 
 .actions {
@@ -25,11 +33,12 @@ h1 {
   flex-wrap: wrap;
 }
 
+/* ---------- Summary cards ---------- */
 .kpis {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-  gap: 14px;
-  margin-bottom: 24px;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 12px;
+  margin-bottom: 18px;
 }
 
 .kpi {
@@ -37,10 +46,10 @@ h1 {
   display: grid;
   grid-template-columns: auto 1fr;
   grid-template-rows: auto auto;
-  column-gap: 14px;
+  column-gap: 12px;
   align-items: center;
-  padding: 16px 18px;
-  border-radius: 14px;
+  padding: 11px 14px;
+  border-radius: 12px;
   background: linear-gradient(160deg, rgba(24, 33, 58, 0.9), rgba(18, 26, 46, 0.9));
   border: 1px solid var(--border);
   box-shadow: var(--shadow-panel);
@@ -65,17 +74,17 @@ h1 {
 
 .kpi-icon {
   grid-row: span 2;
-  width: 42px;
-  height: 42px;
-  border-radius: 12px;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
   display: grid;
   place-items: center;
   background: color-mix(in srgb, var(--kpi-color) 14%, transparent);
 }
 
 .kpi-icon svg {
-  width: 22px;
-  height: 22px;
+  width: 19px;
+  height: 19px;
   fill: none;
   stroke: var(--kpi-color);
   stroke-width: 2;
@@ -84,27 +93,90 @@ h1 {
 }
 
 .kpi-value {
-  font-size: 26px;
+  font-size: 21px;
   font-weight: 800;
   font-family: var(--font-mono);
   line-height: 1.1;
 }
 
 .kpi-label {
-  font-size: 12px;
+  font-size: 11.5px;
   font-weight: 700;
   color: var(--text-muted);
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .kpi {
-    transition: none;
-  }
+/* ---------- New notices (teachers and students) ---------- */
+.notice-banner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0 0 16px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  text-decoration: none;
+  color: var(--text);
+  font-size: 13.5px;
+  background: rgba(56, 189, 248, 0.08);
+  border: 1px solid rgba(56, 189, 248, 0.35);
+}
+
+.notice-banner.cancelacion {
+  background: rgba(251, 113, 133, 0.08);
+  border-color: rgba(251, 113, 133, 0.4);
+}
+
+.notice-banner:hover {
+  filter: brightness(1.15);
+}
+
+.notice-count {
+  flex: none;
+  min-width: 26px;
+  height: 26px;
+  padding: 0 6px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  font-weight: 800;
+  font-size: 13px;
+  color: #0b1020;
+  background: #38bdf8;
+}
+
+.notice-banner.cancelacion .notice-count {
+  background: var(--danger);
+}
+
+.notice-text {
+  flex: 1;
+}
+
+.notice-go {
+  flex: none;
+  font-weight: 700;
+  color: var(--accent);
+}
+
+/* ---------- Calendar ---------- */
+.calendar-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+  max-width: 1080px;
+  margin: 14px auto 10px;
+}
+
+.week {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 800;
 }
 
 .hint {
-  font-size: 13px;
-  margin: 10px 0 20px;
+  font-size: 12.5px;
+  margin: 0;
 }
 
 .conflict-summary {
@@ -132,14 +204,27 @@ h1 {
   background: var(--danger);
 }
 
+/* The calendar is centred; with the details open both share the row */
 .calendar-layout {
   display: flex;
+  justify-content: center;
   gap: 16px;
   align-items: flex-start;
   flex-wrap: wrap;
 }
 
 .calendar-layout app-schedule-grid {
+  flex: 1 1 640px;
   min-width: 0;
-  max-width: 100%;
+  max-width: 1080px;
+}
+
+.calendar-layout.with-details app-schedule-grid {
+  max-width: 860px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .kpi {
+    transition: none;
+  }
 }

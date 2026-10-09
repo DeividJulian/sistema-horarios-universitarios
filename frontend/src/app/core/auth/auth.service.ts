@@ -4,7 +4,7 @@ import { Router } from '@angular/router';
 import { Observable, tap } from 'rxjs';
 
 import { API_URL } from '../api/api-url';
-import { LoginResponse, User } from '../models';
+import { DemoAccount, LoginResponse, Role, User } from '../models';
 
 const SESSION_KEY = 'horarios.sesion';
 
@@ -46,7 +46,15 @@ export class AuthService {
   readonly user = computed(() => this.session()?.user ?? null);
   readonly token = computed(() => this.session()?.token ?? null);
   readonly isLoggedIn = computed(() => this.session() !== null);
-  readonly isAdmin = computed(() => this.user()?.rol === 'admin');
+  readonly role = computed<Role | null>(() => this.user()?.rol ?? null);
+  readonly isAdmin = computed(() => this.role() === 'admin');
+  readonly isTeacher = computed(() => this.role() === 'profesor');
+  readonly isStudent = computed(() => this.role() === 'estudiante');
+
+  hasRole(...roles: Role[]): boolean {
+    const role = this.role();
+    return role !== null && roles.includes(role);
+  }
 
   login(email: string, password: string): Observable<LoginResponse> {
     return this.http.post<LoginResponse>(`${API_URL}/auth/login`, { email, password }).pipe(
@@ -58,6 +66,15 @@ export class AuthService {
   logout(returnUrl?: string): void {
     this.store(null);
     this.router.navigate(['/login'], returnUrl ? { queryParams: { volver: returnUrl } } : {});
+  }
+
+  /** Test accounts for every role, shown as buttons on the login page (public endpoint). */
+  demoAccounts(): Observable<DemoAccount[]> {
+    return this.http.get<DemoAccount[]>(`${API_URL}/auth/demo-accounts`);
+  }
+
+  changePassword(actual: string, nueva: string): Observable<unknown> {
+    return this.http.post(`${API_URL}/auth/change-password`, { actual, nueva });
   }
 
   /** Wakes the backend up (Render's free tier sleeps) while the user types; /health is public. */

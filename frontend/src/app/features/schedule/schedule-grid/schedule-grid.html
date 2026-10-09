@@ -3,11 +3,16 @@
     <div class="row header-row">
       <div class="hour-cell"></div>
       @for (day of weekdays; track day) {
-        <div class="day-cell">{{ day }}</div>
+        <div class="day-cell" [class.today]="weekDates()[day] === todayIso">
+          <span>{{ day }}</span>
+          @if (weekDates()[day]; as date) {
+            <small>{{ shortDate(date) }}</small>
+          }
+        </div>
       }
     </div>
 
-    @for (hour of hours; track hour; let odd = $odd) {
+    @for (hour of visibleHours(); track hour; let odd = $odd) {
       <div class="row" [class.row-alt]="odd">
         <div class="hour-cell">{{ hour | hour }}</div>
 
@@ -22,6 +27,7 @@
           >
             @if (entryAt(day, hour); as entry) {
               @let problems = conflictsOf(entry);
+              @let cancelled = isCancelled(entry, day);
               <div
                 cdkDrag
                 [cdkDragData]="entry"
@@ -35,13 +41,14 @@
                 (keydown.enter)="selected.emit(entry)"
                 (keydown.space)="$event.preventDefault(); selected.emit(entry)"
                 [class.has-conflict]="problems.length > 0"
+                [class.cancelled]="cancelled"
                 [style.borderLeftColor]="color(entry)"
                 [attr.title]="problems.length ? problems.join(' · ') : null"
               >
                 <span class="block-dot" [style.backgroundColor]="color(entry)"></span>
                 <div class="block-text">
                   <strong>{{ subjectName(entry) }}</strong>
-                  <span>{{ classroomName(entry) }}</span>
+                  <span>{{ cancelled ? 'Cancelada' : classroomName(entry) }}</span>
                 </div>
                 @if (problems.length) {
                   <span class="conflict-icon" aria-hidden="true">!</span>

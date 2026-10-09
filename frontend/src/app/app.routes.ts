@@ -1,10 +1,11 @@
 import { Routes } from '@angular/router';
 
-import { adminGuard, authGuard, guestGuard } from './core/auth/auth.guards';
+import { adminGuard, authGuard, guestGuard, roleGuard } from './core/auth/auth.guards';
 
 // Paths are what the user sees in the address bar, so they are in Spanish.
 // Every page is lazy loaded: its code is only downloaded when the user opens it.
-// Everything needs a session; data management (Gestión) is only for administrators.
+// Everything needs a session; data management (Gestión) is only for administrators and the
+// faculty-wide analysis is not for teachers or students.
 export const routes: Routes = [
   { path: '', pathMatch: 'full', redirectTo: 'horario' },
   {
@@ -56,8 +57,14 @@ export const routes: Routes = [
   {
     path: 'analisis',
     title: 'Análisis',
-    canActivate: [authGuard],
+    canActivate: [authGuard, roleGuard('admin', 'usuario')],
     loadComponent: () => import('./features/analysis/analysis-page/analysis-page').then((m) => m.AnalysisPage),
+  },
+  {
+    path: 'avisos',
+    title: 'Avisos',
+    canActivate: [authGuard],
+    loadComponent: () => import('./features/notices/notices-page/notices-page').then((m) => m.NoticesPage),
   },
   { path: '**', redirectTo: 'horario' },
 ];

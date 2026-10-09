@@ -6,15 +6,10 @@ import { finalize } from 'rxjs';
 
 import { AuthService } from '../../../core/auth/auth.service';
 import { apiErrorMessage } from '../../../core/http/api-error';
+import { DemoAccount } from '../../../core/models';
 import { errorMessage } from '../../../shared/forms/error-message';
 
 type ServerState = 'waking' | 'ready' | 'down';
-
-/** Demo accounts created by the backend (backend/services/users.py), so the app can be tried with both roles. */
-const DEMO_ACCOUNTS = [
-  { label: 'Administrador', hint: 'Puede modificar todo', email: 'admin@horarios.edu.co', password: 'Admin2026*' },
-  { label: 'Usuario', hint: 'Solo consulta', email: 'usuario@horarios.edu.co', password: 'Usuario2026*' },
-];
 
 /** After this long without an answer, explain that the free server is waking up. */
 const SLOW_MS = 4000;
@@ -37,7 +32,8 @@ export class LoginPage {
     password: ['', Validators.required],
   });
 
-  protected readonly demoAccounts = DEMO_ACCOUNTS;
+  /** Test accounts for every role, given by the backend (GET /auth/demo-accounts). */
+  protected readonly demoAccounts = signal<DemoAccount[]>([]);
   protected readonly errorMessage = errorMessage;
   protected readonly submitting = signal(false);
   protected readonly slow = signal(false);
@@ -46,15 +42,19 @@ export class LoginPage {
   protected readonly server = signal<ServerState>('waking');
 
   constructor() {
-    // Start waking the backend up right away, so it is ready by the time the user finishes typing
-    const ping = this.auth.ping().subscribe({
-      next: () => this.server.set('ready'),
+    // Asking for the test accounts also wakes the backend up (Render sleeps), so it is ready by the time the
+    // user finishes typing
+    const ping = this.auth.demoAccounts().subscribe({
+      next: (accounts) => {
+        this.demoAccounts.set(accounts);
+        this.server.set('ready');
+      },
       error: () => this.server.set('down'),
     });
     inject(DestroyRef).onDestroy(() => ping.unsubscribe());
   }
 
-  protected useAccount(account: (typeof DEMO_ACCOUNTS)[number]): void {
+  protected useAccount(account: DemoAccount): void {
     this.form.setValue({ email: account.email, password: account.password });
     this.error.set(null);
   }

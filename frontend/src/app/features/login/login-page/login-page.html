@@ -128,17 +128,19 @@
         }
       </form>
 
-      <div class="demo">
-        <p class="demo-title">Cuentas de prueba</p>
-        <div class="demo-buttons">
-          @for (account of demoAccounts; track account.email) {
-            <button type="button" class="demo-account" (click)="useAccount(account)">
-              <strong>{{ account.label }}</strong>
-              <span>{{ account.hint }}</span>
-            </button>
-          }
+      @if (demoAccounts().length) {
+        <div class="demo">
+          <p class="demo-title">Prueba cada rol</p>
+          <div class="demo-buttons">
+            @for (account of demoAccounts(); track account.email) {
+              <button type="button" class="demo-account" [class]="'demo-account ' + account.rol" (click)="useAccount(account)">
+                <strong>{{ account.etiqueta }}</strong>
+                <span>{{ account.descripcion }}</span>
+              </button>
+            }
+          </div>
         </div>
-      </div>
+      }
     </div>
     <p class="footer muted">Universidad Cooperativa de Colombia · Programación Orientada a la Web</p>
   </section>

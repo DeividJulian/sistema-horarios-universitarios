@@ -1,7 +1,10 @@
 .app {
   min-height: calc(100vh - 57px);
-  padding: 28px 40px 60px;
+  padding: 22px 40px 48px;
   outline: none;
+  /* Centred content on wide screens */
+  max-width: 1360px;
+  margin: 0 auto;
 }
 
 .skip-link {

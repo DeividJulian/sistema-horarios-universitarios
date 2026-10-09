@@ -6,7 +6,12 @@
   <ul>
     @for (item of items(); track item.path) {
       <li>
-        <a [routerLink]="item.path" routerLinkActive="active" ariaCurrentWhenActive="page">{{ item.label }}</a>
+        <a [routerLink]="item.path" routerLinkActive="active" ariaCurrentWhenActive="page">
+          {{ item.label }}
+          @if (item.badge && notices.unread() > 0) {
+            <span class="badge-count" [attr.aria-label]="notices.unread() + ' sin leer'">{{ notices.unread() }}</span>
+          }
+        </a>
       </li>
     }
   </ul>
@@ -20,10 +25,14 @@
         <span class="avatar" aria-hidden="true">{{ initials() }}</span>
         <span class="who">
           <span class="name">{{ user.nombre }}</span>
-          <span class="role" [class.admin]="user.rol === 'admin'">{{ roleLabels[user.rol] }}</span>
+          <span class="role" [class]="'role ' + user.rol">{{ roleLabels[user.rol] }}</span>
         </span>
+        <button type="button" class="icon-button" (click)="password.open()" title="Cambiar contraseña" aria-label="Cambiar contraseña">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 7a4 4 0 1 1-3.87 5H9v2H7v2H4v-3l6.13-6.13A4 4 0 0 1 15 7zM16 8h.01" /></svg>
+        </button>
         <button type="button" class="logout" (click)="logout()">Salir</button>
       </div>
     }
   </div>
 </nav>
+<app-password-dialog #password />

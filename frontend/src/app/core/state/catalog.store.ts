@@ -171,6 +171,11 @@ export class CatalogStore {
     );
   }
 
+  /** Puts a block saved by another endpoint (for example a classroom change) into the local state. */
+  applyEntry(updated: ScheduleEntry): void {
+    this.replaceEntry(updated);
+  }
+
   private replaceEntry(updated: ScheduleEntry): void {
     this.entries.update((list) => list.map((e) => (e.id === updated.id ? updated : e)));
   }
