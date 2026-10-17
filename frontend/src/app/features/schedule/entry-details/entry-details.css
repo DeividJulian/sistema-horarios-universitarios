@@ -1,7 +1,55 @@
+/* Inspector panel on the right of the calendar */
 .details {
-  width: 300px;
+  flex: none;
+  width: 320px;
   position: sticky;
-  top: 76px;
+  top: 72px;
+  max-height: calc(100vh - 88px);
+  overflow-y: auto;
+  border-color: var(--border-strong);
+}
+
+.inspector-eyebrow {
+  margin: 0 0 8px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #71717a;
+}
+
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0 0 14px;
+}
+
+.tag {
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+}
+
+.tag.ok {
+  color: var(--success);
+  background: var(--pastel-mint);
+  border-color: rgba(74, 222, 128, 0.35);
+}
+
+.tag.warn {
+  color: var(--warning);
+  background: var(--pastel-amber);
+  border-color: rgba(251, 191, 36, 0.35);
+}
+
+.tag.bad {
+  color: var(--danger);
+  background: var(--pastel-rose);
+  border-color: rgba(248, 113, 113, 0.35);
 }
 
 .head {
@@ -33,7 +81,19 @@ dl {
   margin: 0 0 14px;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 0;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+dl > div {
+  padding: 8px 12px;
+  background: var(--panel-alt);
+}
+
+dl > div + div {
+  border-top: 1px solid var(--border);
 }
 
 dt {
@@ -176,9 +236,10 @@ dd .muted {
   width: 100%;
 }
 
-@media (max-width: 1200px) {
+@media (max-width: 1280px) {
   .details {
     width: 100%;
     position: static;
+    max-height: none;
   }
 }

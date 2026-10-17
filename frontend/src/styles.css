@@ -1,17 +1,30 @@
 /* Design tokens and base styles shared by every component */
 :root {
-  --bg: #0b1020;
-  --panel: #121a2e;
-  --panel-alt: #18213a;
-  --border: #253154;
-  --text: #eef1f8;
-  --text-muted: #8f9bbd;
-  --accent: #f5a623;
-  --gradient-accent: linear-gradient(135deg, #fbbf24, #f59e0b 55%, #fb923c);
-  --shadow-panel: 0 10px 30px rgba(2, 6, 23, 0.35);
-  --danger: #fb7185;
-  --success: #34d399;
-  --font-sans: 'Manrope', system-ui, sans-serif;
+  /* Technical dark mode (Linear / Vercel style) */
+  --bg: #09090b;
+  --sidebar: #050506;
+  --panel: #18181b;
+  --panel-alt: #1f1f23;
+  --border: #27272a;
+  --border-strong: #3f3f46;
+  --text: #f4f4f5;
+  --text-muted: #a1a1aa;
+  /* AI accent: violet / blue, only on active borders and action buttons */
+  --accent: #a78bfa;
+  --accent-strong: #8b5cf6;
+  --gradient-accent: linear-gradient(135deg, #8b5cf6, #3b82f6);
+  --shadow-panel: none;
+  --danger: #f87171;
+  --success: #4ade80;
+  --warning: #fbbf24;
+  /* Soft pastel fills for the schedule cards */
+  --pastel-mint: rgba(74, 222, 128, 0.12);
+  --pastel-blue: rgba(96, 165, 250, 0.14);
+  --pastel-violet: rgba(167, 139, 250, 0.14);
+  --pastel-amber: rgba(251, 191, 36, 0.14);
+  --pastel-rose: rgba(248, 113, 113, 0.14);
+  --radius: 12px;
+  --font-sans: 'Inter', system-ui, sans-serif;
   --font-mono: 'JetBrains Mono', ui-monospace, monospace;
   color-scheme: dark;
 }
@@ -24,23 +37,16 @@ body {
   font-family: var(--font-sans);
 }
 
-/* Soft colour glows behind the whole app (fixed, so they stay put while scrolling) */
 body {
   min-height: 100vh;
-  background-image:
-    radial-gradient(900px 500px at 0% -10%, rgba(245, 158, 11, 0.1), transparent 60%),
-    radial-gradient(800px 500px at 100% 0%, rgba(124, 58, 237, 0.13), transparent 60%),
-    radial-gradient(700px 500px at 50% 110%, rgba(6, 182, 212, 0.08), transparent 60%);
-  background-attachment: fixed;
+  font-size: 14px;
+  -webkit-font-smoothing: antialiased;
 }
 
-/* Page titles: large with a subtle gradient */
+/* Page titles: plain, tight and bold */
 h1 {
   letter-spacing: -0.02em;
-  background: linear-gradient(90deg, #ffffff, #c7d2fe 70%, #a5b4fc);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
+  color: var(--text);
 }
 
 *,
@@ -71,16 +77,18 @@ select {
   border: 1px solid transparent;
 }
 
+/* Main action: dark fill with a violet/blue gradient border */
 .btn-primary {
-  background: var(--gradient-accent);
-  color: #1a1305;
-  box-shadow: 0 6px 18px rgba(245, 158, 11, 0.25);
-  transition: transform 0.15s, box-shadow 0.15s, filter 0.15s;
+  color: var(--text);
+  border: 1px solid transparent;
+  background:
+    linear-gradient(var(--panel-alt), var(--panel-alt)) padding-box,
+    var(--gradient-accent) border-box;
+  transition: filter 0.2s ease, box-shadow 0.2s ease;
 }
 
 .btn-primary:hover:not(:disabled) {
-  transform: translateY(-1px);
-  box-shadow: 0 10px 24px rgba(245, 158, 11, 0.35);
+  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.15);
 }
 
 .btn-secondary {
@@ -115,12 +123,10 @@ button:disabled {
 }
 
 .panel {
-  background: linear-gradient(180deg, rgba(24, 33, 58, 0.85), rgba(18, 26, 46, 0.85));
+  background: var(--panel);
   border: 1px solid var(--border);
-  border-radius: 14px;
-  padding: 18px 22px;
-  box-shadow: var(--shadow-panel);
-  backdrop-filter: blur(6px);
+  border-radius: var(--radius);
+  padding: 18px 20px;
 }
 
 .eyebrow {
@@ -372,4 +378,34 @@ app-availability-panel {
 .section-help code {
   font-family: var(--font-mono);
   color: var(--text);
+}
+
+/* ---------- Loading skeletons (shimmer instead of a spinner) ---------- */
+.skeleton {
+  display: block;
+  border-radius: 8px;
+  background: linear-gradient(90deg, #18181b 0%, #232328 40%, #18181b 80%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s ease-in-out infinite;
+}
+
+.skeleton-badge {
+  width: 84px;
+  height: 18px;
+  border-radius: 999px;
+}
+
+@keyframes shimmer {
+  from {
+    background-position: 100% 0;
+  }
+  to {
+    background-position: -100% 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton {
+    animation: none;
+  }
 }

@@ -1,4 +1,4 @@
-import { formatLongDate, formatShortDate, upcomingDates, upcomingSchoolDays } from './week';
+import { formatLongDate, formatShortDate, relativeTime, upcomingDates, upcomingSchoolDays } from './week';
 
 describe('week helpers', () => {
   it('shows the next five school days starting today', () => {
@@ -27,5 +27,13 @@ describe('week helpers', () => {
   it('writes dates in Spanish', () => {
     expect(formatLongDate('2026-10-13')).toBe('martes 13 de octubre');
     expect(formatShortDate('2026-12-01')).toBe('1 dic');
+  });
+
+  it('writes how long ago something happened', () => {
+    const now = new Date('2026-10-17T12:00:00Z');
+    expect(relativeTime('2026-10-17T11:59:40Z', now)).toBe('hace un momento');
+    expect(relativeTime('2026-10-17T11:58:00Z', now)).toBe('hace 2 min');
+    expect(relativeTime('2026-10-17T09:00:00Z', now)).toBe('hace 3 h');
+    expect(relativeTime('2026-10-14T12:00:00Z', now)).toBe('hace 3 días');
   });
 });

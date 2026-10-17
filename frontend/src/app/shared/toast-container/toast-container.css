@@ -1,6 +1,7 @@
 .toasts {
+  /* Bottom right, above the status chips: never on top of the top bar or the account menu */
   position: fixed;
-  top: 76px; /* below the sticky nav bar, so the Tutorial button stays clickable */
+  bottom: 56px;
   right: 16px;
   display: flex;
   flex-direction: column;
@@ -80,10 +81,3 @@ p {
   }
 }
 
-/* On phones the nav bar wraps to two rows, so the toasts go to the bottom (above the status chips) */
-@media (max-width: 700px) {
-  .toasts {
-    top: auto;
-    bottom: 52px;
-  }
-}

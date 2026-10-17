@@ -11,7 +11,7 @@ export interface TutorialStep {
   roles: Role[];
 }
 
-const REOPEN_TIP = 'Puedes volver a abrir este tutorial cuando quieras con el botón «Tutorial» de la barra de arriba.';
+const REOPEN_TIP = 'Puedes volver a abrir este tutorial cuando quieras con el botón «Tutorial» de la barra superior.';
 
 export const TUTORIAL_STEPS: TutorialStep[] = [
   // ---------- Administrator ----------
@@ -121,7 +121,7 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
     title: '3. Revisa los avisos',
     roles: ['profesor'],
     paragraphs: ['En «Avisos» ves todo lo que tus estudiantes recibieron sobre tus clases.'],
-    tips: ['Tu contraseña inicial es la misma para todos los profesores: cámbiala con el botón de la llave, junto a «Salir».', REOPEN_TIP],
+    tips: ['Tu contraseña inicial es la misma para todos los profesores: cámbiala en el menú de tu cuenta (tu nombre, arriba a la derecha) → «Cambiar contraseña».', REOPEN_TIP],
     link: { path: '/avisos', text: 'Ir a Avisos' },
   },
 

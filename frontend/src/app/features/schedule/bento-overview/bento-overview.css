@@ -1,0 +1,348 @@
+.bento {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.card {
+  min-width: 0;
+  padding: 14px 16px;
+  border-radius: var(--radius);
+  background: var(--panel);
+  border: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  transition: border-color 0.2s ease;
+}
+
+.card:hover {
+  border-color: var(--border-strong);
+}
+
+.card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.card-head h2 {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+  white-space: nowrap;
+}
+
+.badge .dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.badge.optimizado {
+  color: var(--success);
+  background: var(--pastel-mint);
+  border-color: rgba(74, 222, 128, 0.35);
+}
+
+.badge.con-conflictos,
+.badge.incompleto {
+  color: var(--warning);
+  background: var(--pastel-amber);
+  border-color: rgba(251, 191, 36, 0.35);
+}
+
+/* ---------- Hero ---------- */
+.hero-body {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.ring {
+  width: 84px;
+  height: 84px;
+  flex: none;
+}
+
+.ring-track {
+  fill: none;
+  stroke: var(--border);
+  stroke-width: 7;
+}
+
+.ring-value {
+  fill: none;
+  stroke: url(#ring-gradient);
+  stroke-width: 7;
+  stroke-linecap: round;
+  transform: rotate(-90deg);
+  transform-origin: 40px 40px;
+  transition: stroke-dashoffset 0.6s ease;
+}
+
+.ring text {
+  fill: var(--text);
+  font-size: 15px;
+  font-weight: 700;
+  font-family: var(--font-sans);
+}
+
+.hero-lines {
+  min-width: 0;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.metric-label,
+.metric,
+.metric-sub {
+  margin: 0;
+}
+
+.metric-label {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.metric {
+  font-size: 14px;
+}
+
+.metric strong {
+  font-size: 18px;
+  font-variant-numeric: tabular-nums;
+}
+
+.metric-sub {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+/* ---------- Checklist ---------- */
+.checks {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.checks li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+}
+
+.check-icon {
+  width: 20px;
+  height: 20px;
+  flex: none;
+  border-radius: 6px;
+  display: grid;
+  place-items: center;
+  color: var(--success);
+  background: var(--pastel-mint);
+}
+
+.checks li.warn .check-icon {
+  color: var(--warning);
+  background: var(--pastel-amber);
+}
+
+.check-icon svg {
+  width: 13px;
+  height: 13px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.check-label {
+  flex: 1;
+  min-width: 0;
+}
+
+.check-value {
+  color: var(--text-muted);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+.checks li.warn .check-value {
+  color: var(--warning);
+}
+
+/* ---------- Quick action ---------- */
+.last-run {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.last-run strong {
+  font-size: 15px;
+  color: var(--text);
+}
+
+.action-buttons {
+  margin-top: auto;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.action-buttons button {
+  flex: 1;
+  padding: 8px 12px;
+  font-size: 13px;
+}
+
+/* While the schedule is being computed the card border pulses */
+.action-card.working {
+  animation: pulse-border 1.4s ease-in-out infinite;
+}
+
+@keyframes pulse-border {
+  0%,
+  100% {
+    border-color: var(--border);
+    box-shadow: 0 0 0 0 rgba(139, 92, 246, 0);
+  }
+  50% {
+    border-color: rgba(139, 92, 246, 0.7);
+    box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.12);
+  }
+}
+
+.see-all {
+  font-size: 12px;
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.see-all:hover {
+  text-decoration: underline;
+}
+
+.empty {
+  margin: 0;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.recent {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.recent li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.recent li.unread {
+  color: var(--text);
+  font-weight: 500;
+}
+
+.recent-dot {
+  width: 8px;
+  height: 8px;
+  flex: none;
+  border-radius: 50%;
+  background: #60a5fa;
+}
+
+.recent-dot.cancelacion {
+  background: var(--danger);
+}
+
+.recent-dot.restablecida {
+  background: var(--success);
+}
+
+.recent-dot.cambio_aula {
+  background: var(--warning);
+}
+
+.recent-title {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ---------- Skeletons ---------- */
+.skeleton-ring {
+  width: 84px;
+  height: 84px;
+  border-radius: 50%;
+  flex: none;
+}
+
+.skeleton-line {
+  height: 14px;
+  width: 100%;
+}
+
+.skeleton-line.short {
+  width: 60%;
+}
+
+@media (max-width: 1100px) {
+  .bento {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .action-card {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 640px) {
+  .bento {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ring-value,
+  .card {
+    transition: none;
+  }
+
+  .action-card.working {
+    animation: none;
+  }
+}

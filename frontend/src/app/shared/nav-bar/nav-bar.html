@@ -1,13 +1,16 @@
-<nav class="nav" aria-label="Navegación principal">
-  <a class="brand" routerLink="/horario">
+<nav class="sidebar" aria-label="Navegación principal">
+  <a class="brand" routerLink="/horario" (click)="layout.closeSidebar()">
     <span class="brand-mark" aria-hidden="true">H</span>
     <span class="brand-name">Horarios y Aulas</span>
   </a>
+
+  <p class="section-title">Vistas</p>
   <ul>
-    @for (item of items(); track item.path) {
+    @for (item of views(); track item.path) {
       <li>
-        <a [routerLink]="item.path" routerLinkActive="active" ariaCurrentWhenActive="page">
-          {{ item.label }}
+        <a [routerLink]="item.path" routerLinkActive="active" ariaCurrentWhenActive="page" (click)="layout.closeSidebar()">
+          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path [attr.d]="item.icon" /></svg>
+          <span class="label">{{ item.label }}</span>
           @if (item.badge && notices.unread() > 0) {
             <span class="badge-count" [attr.aria-label]="notices.unread() + ' sin leer'">{{ notices.unread() }}</span>
           }
@@ -15,24 +18,48 @@
       </li>
     }
   </ul>
-  <div class="right">
-    <button type="button" class="tutorial" (click)="tutorial.open()" aria-haspopup="dialog">
-      <span class="tutorial-mark" aria-hidden="true">?</span>
-      Tutorial
-    </button>
-    @if (auth.user(); as user) {
-      <div class="account">
-        <span class="avatar" aria-hidden="true">{{ initials() }}</span>
-        <span class="who">
-          <span class="name">{{ user.nombre }}</span>
-          <span class="role" [class]="'role ' + user.rol">{{ roleLabels[user.rol] }}</span>
-        </span>
-        <button type="button" class="icon-button" (click)="password.open()" title="Cambiar contraseña" aria-label="Cambiar contraseña">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 7a4 4 0 1 1-3.87 5H9v2H7v2H4v-3l6.13-6.13A4 4 0 0 1 15 7zM16 8h.01" /></svg>
-        </button>
-        <button type="button" class="logout" (click)="logout()">Salir</button>
+
+  @if (auth.isAdmin()) {
+    <p class="section-title">Gestión</p>
+    <ul>
+      @for (item of management; track item.path) {
+        <li>
+          <a [routerLink]="item.path" routerLinkActive="active" ariaCurrentWhenActive="page" (click)="layout.closeSidebar()">
+            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path [attr.d]="item.icon" /></svg>
+            <span class="label">{{ item.label }}</span>
+          </a>
+        </li>
+      }
+    </ul>
+  }
+
+  @if (optimization.available()) {
+    <section class="status" aria-label="Estado del horario">
+      <div class="status-row">
+        <span class="status-title">Estado</span>
+        @if (optimization.loaded()) {
+          <span class="status-badge" [class]="'status-badge ' + optimization.status()">
+            <span class="dot" aria-hidden="true"></span>{{ statusLabels[optimization.status()] }}
+          </span>
+        } @else {
+          <span class="skeleton skeleton-badge" aria-label="Calculando"></span>
+        }
       </div>
-    }
-  </div>
+      <p class="efficiency">
+        <span>Eficiencia</span>
+        <strong>{{ optimization.loaded() ? efficiencyText() : '—' }}</strong>
+      </p>
+      @if (auth.isAdmin()) {
+        <button
+          type="button"
+          class="btn-primary optimize"
+          [class.working]="optimization.generating()"
+          [disabled]="optimization.generating()"
+          (click)="optimization.generate()"
+        >
+          {{ optimization.generating() ? 'Optimizando…' : 'Re-optimizar horario' }}
+        </button>
+      }
+    </section>
+  }
 </nav>
-<app-password-dialog #password />

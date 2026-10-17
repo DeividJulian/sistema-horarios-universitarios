@@ -2,19 +2,22 @@ import { Component, effect, inject, untracked } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 
 import { AuthService } from './core/auth/auth.service';
+import { LayoutService } from './core/services/layout.service';
 import { TabSyncService } from './core/services/tab-sync.service';
 import { TutorialService } from './core/services/tutorial.service';
 import { CatalogStore } from './core/state/catalog.store';
 import { NoticeStore } from './core/state/notice.store';
+import { OptimizationStore } from './core/state/optimization.store';
 import { ConfirmDialog } from './shared/confirm-dialog/confirm-dialog';
 import { ConnectionStatus } from './shared/connection-status/connection-status';
 import { NavBar } from './shared/nav-bar/nav-bar';
 import { ToastContainer } from './shared/toast-container/toast-container';
+import { TopBar } from './shared/top-bar/top-bar';
 import { Tutorial } from './shared/tutorial/tutorial';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, NavBar, ConnectionStatus, ToastContainer, ConfirmDialog, Tutorial],
+  imports: [RouterOutlet, NavBar, TopBar, ConnectionStatus, ToastContainer, ConfirmDialog, Tutorial],
   templateUrl: './app.html',
   styleUrl: './app.css',
 })
@@ -24,6 +27,8 @@ export class App {
   private readonly tabSync = inject(TabSyncService);
   private readonly tutorial = inject(TutorialService);
   private readonly notices = inject(NoticeStore);
+  private readonly optimization = inject(OptimizationStore);
+  protected readonly layout = inject(LayoutService);
 
   constructor() {
     effect(() => {
@@ -32,6 +37,7 @@ export class App {
         untracked(() => {
           this.tutorial.openIfFirstVisit();
           this.notices.start(); // notices and cancellations, refreshed every minute
+          this.optimization.refresh(); // efficiency and constraints for the sidebar
         });
       } else {
         // Signing out forgets the data, so the next account loads its own
@@ -39,6 +45,8 @@ export class App {
           this.tutorial.close(false);
           this.store.reset();
           this.notices.reset();
+          this.optimization.reset();
+          this.layout.closeSidebar();
         });
       }
     });

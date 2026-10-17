@@ -1,0 +1,134 @@
+<section class="bento" aria-label="Resumen del horario">
+  <!-- 1. Hero: percentage ring -->
+  <article class="card hero-card">
+    <header class="card-head">
+      <h2>{{ faculty() ? 'Rendimiento del horario' : 'Tu semana' }}</h2>
+      @if (faculty() && !loading()) {
+        <span class="badge" [class]="'badge ' + optimization.status()">
+          <span class="dot" aria-hidden="true"></span>
+          @switch (optimization.status()) {
+            @case ('optimizado') { IA activa · Optimizado }
+            @case ('con-conflictos') { Con conflictos }
+            @case ('incompleto') { Incompleto }
+            @default { Sin horario }
+          }
+        </span>
+      }
+    </header>
+    @if (loading()) {
+      <div class="hero-body">
+        <span class="skeleton skeleton-ring"></span>
+        <div class="hero-lines">
+          <span class="skeleton skeleton-line"></span>
+          <span class="skeleton skeleton-line short"></span>
+        </div>
+      </div>
+    } @else {
+      <div class="hero-body">
+        <svg class="ring" viewBox="0 0 80 80" role="img" [attr.aria-label]="percentText() + ' por ciento'">
+          <defs>
+            <linearGradient id="ring-gradient" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#8b5cf6" />
+              <stop offset="100%" stop-color="#3b82f6" />
+            </linearGradient>
+          </defs>
+          <circle class="ring-track" cx="40" cy="40" r="34" />
+          <circle
+            class="ring-value"
+            cx="40"
+            cy="40"
+            r="34"
+            [attr.stroke-dasharray]="ringLength"
+            [attr.stroke-dashoffset]="ringOffset()"
+          />
+          <text x="40" y="44" text-anchor="middle">{{ percentText() }}%</text>
+        </svg>
+        <div class="hero-lines">
+          @if (faculty()) {
+            <p class="metric-label">Eficiencia del horario</p>
+            <p class="metric">
+              <strong>{{ conflictCount() }}</strong> {{ conflictCount() === 1 ? 'conflicto' : 'conflictos' }}
+            </p>
+            @if (hours(); as h) {
+              <p class="metric-sub">{{ h.horas_programadas }} de {{ h.horas_requeridas }} horas programadas</p>
+            }
+          } @else {
+            <p class="metric-label">Clases que se dictan</p>
+            <p class="metric">
+              <strong>{{ entries().length }}</strong> {{ entries().length === 1 ? 'clase' : 'clases' }} a la semana
+            </p>
+            <p class="metric-sub">{{ cancelled() }} {{ cancelled() === 1 ? 'cancelada' : 'canceladas' }} en los próximos días</p>
+          }
+        </div>
+      </div>
+    }
+  </article>
+
+  <!-- 2. Checklist -->
+  <article class="card">
+    <header class="card-head">
+      <h2>{{ faculty() ? 'Restricciones resueltas' : 'Estado de tus clases' }}</h2>
+    </header>
+    @if (loading()) {
+      <div class="checks">
+        @for (i of [1, 2, 3]; track i) {
+          <span class="skeleton skeleton-line"></span>
+        }
+      </div>
+    } @else {
+      <ul class="checks">
+        @for (c of faculty() ? optimization.checks() : personalChecks(); track c.label) {
+          <li [class.warn]="!c.ok">
+            <span class="check-icon" aria-hidden="true">
+              @if (c.ok) {
+                <svg viewBox="0 0 24 24"><path d="M5 12l5 5 9-10" /></svg>
+              } @else {
+                <svg viewBox="0 0 24 24"><path d="M12 8v5M12 17h.01" /></svg>
+              }
+            </span>
+            <span class="check-label">{{ c.label }}</span>
+            <span class="check-value">{{ c.value }}</span>
+          </li>
+        }
+      </ul>
+    }
+  </article>
+
+  <!-- 3. Quick action -->
+  <article class="card action-card" [class.working]="optimization.generating()">
+    @if (faculty()) {
+      <header class="card-head">
+        <h2>Optimización</h2>
+      </header>
+      <p class="last-run">
+        <span>Última optimización</span>
+        <strong>{{ lastRunText() }}</strong>
+      </p>
+      <div class="action-buttons">
+        @if (auth.isAdmin()) {
+          <button type="button" class="btn-primary" (click)="optimization.generate()" [disabled]="optimization.generating() || !ready()">
+            {{ optimization.generating() ? 'Optimizando…' : 'Re-optimizar' }}
+          </button>
+        }
+        <button type="button" class="btn-secondary" (click)="analyze.emit()" [disabled]="!ready()">Analizar huecos</button>
+      </div>
+    } @else {
+      <header class="card-head">
+        <h2>Avisos recientes</h2>
+        <a routerLink="/avisos" class="see-all">Ver todos</a>
+      </header>
+      @if (notices.notices().length === 0) {
+        <p class="empty">Sin avisos por ahora.</p>
+      } @else {
+        <ul class="recent">
+          @for (n of notices.notices().slice(0, 2); track n.id) {
+            <li [class.unread]="notices.isUnread(n)">
+              <span class="recent-dot" [class]="'recent-dot ' + n.tipo" aria-hidden="true"></span>
+              <span class="recent-title">{{ n.titulo }}</span>
+            </li>
+          }
+        </ul>
+      }
+    }
+  </article>
+</section>

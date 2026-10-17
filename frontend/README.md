@@ -19,6 +19,19 @@ Proyecto final de Programación Orientada a la Web — Universidad Cooperativa d
 | Avisos | `/avisos` | Cancelaciones y cambios de aula u horario de las clases (cada rol ve los suyos) |
 | Análisis | `/analisis` | Totales, cumplimiento de horas, ocupación de aulas, bloques por día, carga de profesores, lista de conflictos y carga de datos de demostración |
 
+## Diseño
+
+Patrón **Bento Grid** con estilo **Linear/Vercel** en modo oscuro técnico (fondo `#09090b`, tarjetas `#18181b` con borde `#27272a`, tipografía Inter y acento violeta/azul solo en bordes activos y botones de acción):
+
+- **Barra lateral fija (240 px):** vistas, gestión (administradores) y, abajo, el estado del horario (Optimizado / Con conflictos), su eficiencia y el botón «Re-optimizar horario». En celular se abre con el botón de menú.
+- **Barra superior:** título de la página, Tutorial, campana de avisos con contador y menú de la cuenta.
+- **Tarjetas Bento:** rendimiento con un anillo de porcentaje, checklist de restricciones resueltas y acción rápida (Re-optimizar con pulso en el borde mientras calcula). Profesores y estudiantes ven su propia semana.
+- **Calendario:** tarjetas de clase con relleno pastel, borde de 1 px, etiquetas (Conflicto en ámbar, Cancelada) y transiciones de 0,2 s.
+- **Inspector lateral (320 px):** datos, etiquetas de estado y acciones de la clase seleccionada.
+- **Esqueletos de carga** con efecto shimmer en lugar de ruedas de carga.
+
+La eficiencia es el porcentaje de clases programadas sin conflictos sobre las horas que requieren las materias (`core/state/optimization.store.ts`).
+
 ## Inicio de sesión y roles
 
 Toda la aplicación exige iniciar sesión. El backend devuelve un token JWT que se guarda en el navegador y un interceptor lo envía en cada petición; si expira, la aplicación vuelve al login. El rol no se elige en el login: lo decide el backend y cada persona llega a su vista.
@@ -129,4 +142,4 @@ Abre `http://localhost:8080`, espera el aviso "Modo offline listo" y, en las her
 npm test -- --watch=false
 ```
 
-54 pruebas unitarias que cubren las validaciones, los mensajes de error, la lógica del Web Worker, los filtros, las notificaciones, el diálogo de confirmación, el estado compartido (incluida la actualización optimista con reversión), los interceptores, el inicio de sesión con sus guards por rol el cálculo de las fechas de la semana y los mensajes de error del login y del registro.
+58 pruebas unitarias que cubren las validaciones, los mensajes de error, la lógica del Web Worker, los filtros, las notificaciones, el diálogo de confirmación, el estado compartido (incluida la actualización optimista con reversión), los interceptores, el inicio de sesión con sus guards por rol el cálculo de las fechas de la semana los mensajes de error del login y del registro, y el cálculo de la eficiencia y las restricciones del panel.

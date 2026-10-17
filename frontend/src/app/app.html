@@ -1,12 +1,21 @@
 @if (auth.isLoggedIn()) {
   <a class="skip-link" href="#contenido">Saltar al contenido</a>
   <app-nav-bar />
+  @if (layout.sidebarOpen()) {
+    <!-- Small screens: clicking outside the sidebar closes it -->
+    <div class="scrim" (click)="layout.closeSidebar()" aria-hidden="true"></div>
+  }
 }
 
 <!-- A single outlet: signing out must not re-create the current page before the login page loads -->
-<main [class.app]="auth.isLoggedIn()" id="contenido" tabindex="-1">
-  <router-outlet />
-</main>
+<div [class.workspace]="auth.isLoggedIn()">
+  @if (auth.isLoggedIn()) {
+    <app-top-bar />
+  }
+  <main [class.app]="auth.isLoggedIn()" id="contenido" tabindex="-1">
+    <router-outlet />
+  </main>
+</div>
 
 @if (auth.isLoggedIn()) {
   <app-tutorial />

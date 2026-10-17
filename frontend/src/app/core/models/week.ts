@@ -58,3 +58,14 @@ export function formatLongDate(iso: string): string {
   const date = fromIsoDate(iso);
   return `${WEEKDAY_NAMES[date.getDay()]} ${date.getDate()} de ${MONTHS[date.getMonth()]}`;
 }
+
+/** "hace un momento", "hace 5 min", "hace 2 h", "hace 3 días". */
+export function relativeTime(iso: string, now = new Date()): string {
+  const minutes = Math.max(0, Math.round((now.getTime() - new Date(iso).getTime()) / 60000));
+  if (minutes < 1) return 'hace un momento';
+  if (minutes < 60) return `hace ${minutes} min`;
+  const hours = Math.round(minutes / 60);
+  if (hours < 24) return `hace ${hours} h`;
+  const days = Math.round(hours / 24);
+  return days === 1 ? 'hace 1 día' : `hace ${days} días`;
+}

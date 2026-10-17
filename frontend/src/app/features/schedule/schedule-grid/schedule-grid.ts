@@ -23,7 +23,8 @@ export interface EntryMove {
   hour: number;
 }
 
-const SUBJECT_COLORS = ['#f5a623', '#2dd4bf', '#fb7185', '#38bdf8', '#a78bfa', '#a3e635'];
+// Soft pastel family: each subject keeps the same colour (fill and border are derived from it in the CSS)
+const SUBJECT_COLORS = ['#60a5fa', '#4ade80', '#a78bfa', '#2dd4bf', '#f472b6', '#38bdf8', '#c084fc', '#86efac'];
 
 export const cellId = (day: Weekday, hour: number) => `${day}-${hour}`;
 
@@ -54,6 +55,8 @@ export class ScheduleGrid {
   readonly cancelledKeys = input<Set<string>>(new Set());
   /** Only the hours that have classes (for people who cannot drag blocks to empty hours). */
   readonly trimEmptyHours = input(false);
+  /** The schedule is being generated: the cards shimmer instead of a spinner. */
+  readonly busy = input(false);
 
   protected readonly todayIso = toIsoDate(new Date());
   protected readonly shortDate = formatShortDate;

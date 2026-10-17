@@ -1,29 +1,67 @@
+/* Compact toolbar: each filter is a pill with its label inside */
 .filters {
   display: flex;
-  align-items: flex-end;
-  gap: 20px;
+  align-items: center;
+  gap: 8px;
   flex-wrap: wrap;
-  margin-bottom: 10px;
+  margin-bottom: 4px;
+  padding: 8px 10px;
 }
 
 .field {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
+  flex-direction: row;
+  align-items: center;
+  gap: 4px;
+  padding-left: 10px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--panel-alt);
+  transition: border-color 0.15s ease;
+}
+
+.field:hover,
+.field:focus-within {
+  border-color: var(--border-strong);
 }
 
 .field-label {
   font-size: 12px;
+  font-weight: 500;
   color: var(--text-muted);
-  font-weight: 700;
+  white-space: nowrap;
 }
 
-select {
-  background-color: var(--panel-alt);
+.field select {
+  width: auto;
+  min-width: 150px;
+  padding: 7px 8px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
   color: var(--text);
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  padding: 8px 10px;
   font-size: 13px;
-  min-width: 170px;
+}
+
+.field select:focus-visible {
+  outline: none;
+}
+
+.filters .btn-secondary {
+  margin-left: auto;
+  padding: 7px 12px;
+  font-size: 13px;
+}
+
+@media (max-width: 640px) {
+  .field {
+    flex: 1 1 100%;
+  }
+
+  .field select {
+    flex: 1;
+  }
+
+  .filters .btn-secondary {
+    margin-left: 0;
+  }
 }

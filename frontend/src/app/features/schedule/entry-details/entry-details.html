@@ -1,8 +1,29 @@
 <aside class="panel details" aria-labelledby="details-title">
+  <p class="inspector-eyebrow">Inspector</p>
   <header class="head">
     <h2 id="details-title">{{ subject()?.nombre ?? 'Bloque' }}</h2>
     <button type="button" class="close" (click)="closed.emit()" aria-label="Cerrar detalle">×</button>
   </header>
+
+  <!-- Short status tags -->
+  <div class="tags">
+    @if (teacher()) {
+      <span class="tag ok">Profesor asignado</span>
+    }
+    @if (classroom(); as c) {
+      @if (group(); as g) {
+        <span class="tag" [class.ok]="c.aforo >= g.num_estudiantes" [class.warn]="c.aforo < g.num_estudiantes">
+          {{ c.aforo >= g.num_estudiantes ? 'Aforo suficiente' : 'Sobrecupo' }}
+        </span>
+      }
+    }
+    @if (conflicts().length) {
+      <span class="tag warn">{{ conflicts().length }} {{ conflicts().length === 1 ? 'conflicto' : 'conflictos' }}</span>
+    }
+    @if (cancellations().length) {
+      <span class="tag bad">{{ cancellations().length }} {{ cancellations().length === 1 ? 'cancelación' : 'cancelaciones' }}</span>
+    }
+  </div>
 
   <dl>
     <div><dt>Horario</dt><dd>{{ entry().dia_semana }}, {{ startHour() | hour }} – {{ startHour() + 1 | hour }}</dd></div>

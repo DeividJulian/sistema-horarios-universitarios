@@ -11,10 +11,11 @@
   margin-bottom: 4px;
 }
 
-h1 {
+.greeting {
   margin: 0;
-  font-size: clamp(24px, 2.2vw, 30px);
-  font-weight: 800;
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
 }
 
 .lead {
@@ -31,78 +32,6 @@ h1 {
   display: flex;
   gap: 10px;
   flex-wrap: wrap;
-}
-
-/* ---------- Summary cards ---------- */
-.kpis {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  gap: 12px;
-  margin-bottom: 18px;
-}
-
-.kpi {
-  position: relative;
-  display: grid;
-  grid-template-columns: auto 1fr;
-  grid-template-rows: auto auto;
-  column-gap: 12px;
-  align-items: center;
-  padding: 11px 14px;
-  border-radius: 12px;
-  background: linear-gradient(160deg, rgba(24, 33, 58, 0.9), rgba(18, 26, 46, 0.9));
-  border: 1px solid var(--border);
-  box-shadow: var(--shadow-panel);
-  overflow: hidden;
-  transition: transform 0.2s, border-color 0.2s;
-}
-
-/* Thin coloured line on top of each card */
-.kpi::before {
-  content: '';
-  position: absolute;
-  inset: 0 0 auto;
-  height: 3px;
-  background: var(--kpi-color);
-  opacity: 0.85;
-}
-
-.kpi:hover {
-  transform: translateY(-2px);
-  border-color: color-mix(in srgb, var(--kpi-color) 50%, var(--border));
-}
-
-.kpi-icon {
-  grid-row: span 2;
-  width: 36px;
-  height: 36px;
-  border-radius: 10px;
-  display: grid;
-  place-items: center;
-  background: color-mix(in srgb, var(--kpi-color) 14%, transparent);
-}
-
-.kpi-icon svg {
-  width: 19px;
-  height: 19px;
-  fill: none;
-  stroke: var(--kpi-color);
-  stroke-width: 2;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-
-.kpi-value {
-  font-size: 21px;
-  font-weight: 800;
-  font-family: var(--font-mono);
-  line-height: 1.1;
-}
-
-.kpi-label {
-  font-size: 11.5px;
-  font-weight: 700;
-  color: var(--text-muted);
 }
 
 /* ---------- New notices (teachers and students) ---------- */
@@ -164,14 +93,13 @@ h1 {
   align-items: baseline;
   flex-wrap: wrap;
   gap: 4px 16px;
-  max-width: 1080px;
-  margin: 14px auto 10px;
+  margin: 14px 0 10px;
 }
 
 .week {
   margin: 0;
-  font-size: 15px;
-  font-weight: 800;
+  font-size: 14px;
+  font-weight: 600;
 }
 
 .hint {
@@ -205,26 +133,117 @@ h1 {
 }
 
 /* The calendar is centred; with the details open both share the row */
+/* ---------- Loading skeleton ---------- */
+.calendar-skeleton {
+  margin-top: 16px;
+  padding: 12px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background: var(--panel);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.skeleton-head,
+.skeleton-row {
+  display: grid;
+  grid-template-columns: 70px repeat(5, 1fr);
+  gap: 8px;
+}
+
+.skeleton-head .skeleton {
+  height: 28px;
+}
+
+.skeleton-row .skeleton {
+  height: 42px;
+}
+
+.skeleton-row .skeleton.hour {
+  height: 14px;
+  align-self: center;
+}
+
+.skeleton-row .skeleton.empty {
+  opacity: 0.35;
+}
+
+/* Schedule canvas on the left, inspector (320 px) on the right */
 .calendar-layout {
   display: flex;
-  justify-content: center;
   gap: 16px;
   align-items: flex-start;
-  flex-wrap: wrap;
 }
 
 .calendar-layout app-schedule-grid {
-  flex: 1 1 640px;
+  flex: 1 1 auto;
   min-width: 0;
-  max-width: 1080px;
 }
 
-.calendar-layout.with-details app-schedule-grid {
-  max-width: 860px;
+.inspector-empty {
+  flex: none;
+  width: 320px;
+  position: sticky;
+  top: 72px;
+  padding: 18px;
+  border-radius: var(--radius);
+  border: 1px dashed var(--border-strong);
+  background: var(--panel);
+  text-align: center;
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .kpi {
-    transition: none;
+.inspector-eyebrow {
+  margin: 0 0 14px;
+  text-align: left;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #71717a;
+}
+
+.inspector-icon {
+  width: 40px;
+  height: 40px;
+  margin: 0 auto 10px;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  color: var(--accent);
+  background: var(--pastel-violet);
+}
+
+.inspector-icon svg {
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.inspector-title {
+  margin: 0 0 4px;
+  font-weight: 600;
+}
+
+.inspector-text {
+  margin: 0;
+  font-size: 13px;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+/* Below 1280 px the calendar uses the full width; the inspector appears under it when a class is chosen */
+@media (max-width: 1280px) {
+  .calendar-layout {
+    flex-wrap: wrap;
+  }
+
+  .inspector-empty {
+    display: none;
   }
 }
+

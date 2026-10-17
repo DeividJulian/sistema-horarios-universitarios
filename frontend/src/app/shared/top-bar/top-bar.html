@@ -1,0 +1,57 @@
+<header class="top-bar">
+  <button
+    type="button"
+    class="icon-button menu-toggle"
+    (click)="layout.toggleSidebar()"
+    [attr.aria-expanded]="layout.sidebarOpen()"
+    aria-label="Abrir o cerrar el menú"
+  >
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16" /></svg>
+  </button>
+
+  <h1 class="title">{{ title() }}</h1>
+
+  <div class="actions">
+    <button type="button" class="tutorial" (click)="tutorial.open()" aria-haspopup="dialog">
+      <span class="tutorial-mark" aria-hidden="true">?</span>
+      <span class="tutorial-text">Tutorial</span>
+    </button>
+
+    <a class="icon-button bell" routerLink="/avisos" [attr.aria-label]="'Avisos' + (notices.unread() ? ', ' + notices.unread() + ' sin leer' : '')">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 8a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9M10 21h4" /></svg>
+      @if (notices.unread() > 0) {
+        <span class="bell-dot" aria-hidden="true">{{ notices.unread() }}</span>
+      }
+    </a>
+
+    @if (auth.user(); as user) {
+      <div class="account">
+        <button
+          type="button"
+          class="avatar-button"
+          (click)="menuOpen.set(!menuOpen())"
+          [attr.aria-expanded]="menuOpen()"
+          aria-haspopup="menu"
+          [attr.aria-label]="'Cuenta de ' + user.nombre"
+        >
+          <span class="avatar" aria-hidden="true">{{ initials() }}</span>
+          <span class="who">
+            <span class="name">{{ user.nombre }}</span>
+            <span class="role" [class]="'role ' + user.rol">{{ roleLabels[user.rol] }}</span>
+          </span>
+        </button>
+        @if (menuOpen()) {
+          <div class="menu" role="menu">
+            <p class="menu-head">
+              <strong>{{ user.nombre }}</strong>
+              <span>{{ user.email }}</span>
+            </p>
+            <button type="button" role="menuitem" (click)="menuOpen.set(false); password.open()">Cambiar contraseña</button>
+            <button type="button" role="menuitem" class="logout" (click)="logout()">Salir</button>
+          </div>
+        }
+      </div>
+    }
+  </div>
+</header>
+<app-password-dialog #password />

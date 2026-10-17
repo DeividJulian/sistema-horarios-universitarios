@@ -7,7 +7,7 @@
         @default { Panel de programación académica }
       }
     </p>
-    <h1>Hola, {{ firstName() }}</h1>
+    <h2 class="greeting">Hola, {{ firstName() }}</h2>
     <p class="muted lead">
       @switch (auth.role()) {
         @case ('admin') {
@@ -29,31 +29,14 @@
       }
     </p>
   </div>
-  @if (seesEverything()) {
-    <div class="actions">
-      <button type="button" class="btn-secondary" (click)="analyze()" [disabled]="!store.loaded()">Analizar horario</button>
-      @if (auth.isAdmin()) {
-        <button type="button" class="btn-primary" (click)="generate()" [disabled]="store.generating() || !store.loaded()">
-          {{ store.generating() ? 'Generando…' : 'Generar horario automáticamente' }}
-        </button>
-      }
-    </div>
-  }
 </header>
 
-@if (store.loaded()) {
-  <section class="kpis" aria-label="Resumen">
-    @for (k of kpis(); track k.label) {
-      <div class="kpi" [style.--kpi-color]="k.color">
-        <span class="kpi-icon" aria-hidden="true">
-          <svg viewBox="0 0 24 24"><path [attr.d]="k.icon" /></svg>
-        </span>
-        <span class="kpi-value">{{ k.value }}</span>
-        <span class="kpi-label">{{ k.label }}</span>
-      </div>
-    }
-  </section>
-}
+<app-bento-overview
+  [entries]="visibleEntries()"
+  [cancelled]="cancelledThisWeek()"
+  [ready]="store.loaded()"
+  (analyze)="analyze()"
+/>
 
 @if (auth.role() === 'usuario') {
   <p class="readonly-note" role="note">
@@ -82,7 +65,22 @@
     (action)="reload()"
   />
 } @else if (!store.loaded()) {
-  <app-state-message kind="loading" title="Cargando horario…" message="Consultando profesores, aulas, grupos y materias." />
+  <!-- Skeleton of the calendar while the data arrives (no spinner) -->
+  <div class="calendar-skeleton" role="status" aria-label="Cargando horario">
+    <div class="skeleton-head">
+      @for (i of [1, 2, 3, 4, 5, 6]; track i) {
+        <span class="skeleton"></span>
+      }
+    </div>
+    @for (row of [1, 2, 3, 4, 5, 6]; track row) {
+      <div class="skeleton-row">
+        <span class="skeleton hour"></span>
+        @for (col of [1, 2, 3, 4, 5]; track col) {
+          <span class="skeleton" [class.empty]="(row + col) % 3 === 0"></span>
+        }
+      </div>
+    }
+  </div>
 } @else if (auth.isStudent() && !myGroup()) {
   <app-state-message
     kind="empty"
@@ -155,6 +153,7 @@
         [days]="days()"
         [cancelledKeys]="cancelledKeys()"
         [trimEmptyHours]="!auth.isAdmin()"
+        [busy]="store.generating()"
         (moved)="move($event)"
         (occupiedDrop)="occupiedDrop()"
         [selectedId]="selectedId()"
@@ -182,6 +181,21 @@
           (restoreRequested)="restoreClass($event)"
           (classroomChangeRequested)="changeClassroom($event)"
         />
+      } @else {
+        <aside class="inspector-empty" aria-label="Inspector">
+          <p class="inspector-eyebrow">Inspector</p>
+          <span class="inspector-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M8 3v3M16 3v3M4 9h16M5 5h14v15H5zM9 14h6" /></svg>
+          </span>
+          <p class="inspector-title">Selecciona una clase</p>
+          <p class="inspector-text">
+            @switch (auth.role()) {
+              @case ('admin') { Verás su aula, grupo y profesor, sus restricciones y podrás moverla, cancelarla o cambiarla de aula. }
+              @case ('profesor') { Podrás cancelarla en una fecha o cambiarla a un aula libre; tus estudiantes recibirán un aviso. }
+              @default { Verás su aula, grupo, jornada, profesor y si tiene cancelaciones. }
+            }
+          </p>
+        </aside>
       }
     </div>
   }

@@ -11,10 +11,10 @@
   display: flex;
   flex-direction: column;
   border: 1px solid var(--border);
-  border-radius: 12px;
+  border-radius: var(--radius);
   overflow: hidden;
   min-width: 640px;
-  background: rgba(18, 26, 46, 0.6);
+  background: var(--panel);
 }
 
 .row {
@@ -26,7 +26,7 @@
 }
 
 .row-alt {
-  background-color: rgba(255, 255, 255, 0.02);
+  background-color: rgba(255, 255, 255, 0.015);
 }
 
 .hour-cell {
@@ -84,41 +84,36 @@
 .cell {
   flex: 1 1 0;
   min-width: 0;
-  height: 50px;
+  height: 52px;
   border-right: 1px solid var(--border);
   border-bottom: 1px solid var(--border);
   padding: 4px;
 }
 
+/* Class cards: soft pastel fill and a 1 px border in the subject colour (--c) */
 .block {
+  --c: #60a5fa;
   position: relative;
-  background-color: var(--panel-alt);
-  border-left: 3px solid var(--accent);
-  border-radius: 6px;
-  padding: 4px 7px;
   height: 100%;
-  cursor: pointer;
+  padding: 5px 8px;
+  border-radius: 8px;
+  border: 1px solid color-mix(in srgb, var(--c) 38%, transparent);
+  background: color-mix(in srgb, var(--c) 13%, var(--panel));
   display: flex;
   align-items: flex-start;
   gap: 6px;
+  cursor: pointer;
   touch-action: none;
-  transition: background-color 0.15s;
+  transition: all 0.2s ease;
 }
 
 .block:hover {
-  background-color: #1f2a47;
+  background: color-mix(in srgb, var(--c) 20%, var(--panel));
+  border-color: color-mix(in srgb, var(--c) 60%, transparent);
 }
 
 .block:not(.cdk-drag-disabled) {
   cursor: grab;
-}
-
-.block-dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  margin-top: 5px;
-  flex-shrink: 0;
 }
 
 .block-text {
@@ -126,33 +121,59 @@
   flex-direction: column;
   overflow: hidden;
   min-width: 0;
+  flex: 1;
 }
 
 .block-text strong {
   font-size: 12px;
+  font-weight: 600;
+  color: color-mix(in srgb, var(--c) 35%, #ffffff);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
 .block-text span {
-  font-family: var(--font-mono);
-  font-size: 10.5px;
+  font-size: 11px;
   color: var(--text-muted);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-.block.has-conflict {
-  outline: 1px solid var(--danger);
-  background-color: rgba(251, 113, 133, 0.1);
+/* Small floating tags inside the card */
+.tag {
+  position: absolute;
+  right: 4px;
+  bottom: 4px;
+  padding: 0 6px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 16px;
+  border: 1px solid transparent;
 }
 
-/* Cancelled on the date shown: striped and faded, with the word "Cancelada" instead of the room */
+.tag-conflict {
+  color: var(--warning);
+  background: var(--pastel-amber);
+  border-color: rgba(251, 191, 36, 0.4);
+}
+
+.tag-cancelled {
+  color: var(--danger);
+  background: var(--pastel-rose);
+  border-color: rgba(248, 113, 113, 0.4);
+}
+
+/* Amber for possible clashes, as warnings (the colour itself is set in the template) */
+.block.has-conflict {
+  border-color: rgba(251, 191, 36, 0.6);
+}
+
+/* Cancelled on the date shown: grey, faded and crossed out */
 .block.cancelled {
-  background-image: repeating-linear-gradient(135deg, rgba(251, 113, 133, 0.12) 0 6px, transparent 6px 12px);
-  border-left-color: var(--danger) !important;
+  background-image: repeating-linear-gradient(135deg, rgba(248, 113, 113, 0.08) 0 6px, transparent 6px 12px);
 }
 
 .block.cancelled strong {
@@ -160,32 +181,43 @@
   color: var(--text-muted);
 }
 
-.block.cancelled .block-text span {
-  color: var(--danger);
-  font-weight: 700;
-}
-
-.conflict-icon {
-  position: absolute;
-  top: 4px;
-  right: 4px;
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
-  display: grid;
-  place-items: center;
-  font-size: 10px;
-  font-weight: 800;
-  color: #1a0a0d;
-  background: var(--danger);
-}
-
 .block.selected {
-  box-shadow: 0 0 0 2px var(--accent);
+  box-shadow: 0 0 0 2px var(--accent-strong);
+}
+
+/* Drag preview keeps the card look */
+.block.cdk-drag-preview {
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.55);
+}
+
+/* While the schedule is generated the cards shimmer softly */
+.board.busy .block {
+  pointer-events: none;
+  background: linear-gradient(90deg, #18181b 0%, #26262c 40%, #18181b 80%);
+  background-size: 200% 100%;
+  border-color: var(--border);
+  animation: shimmer 1.4s ease-in-out infinite;
+}
+
+.board.busy .block > * {
+  opacity: 0.25;
+}
+
+@keyframes shimmer {
+  from {
+    background-position: 100% 0;
+  }
+  to {
+    background-position: -100% 0;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .block {
     transition: none;
+  }
+
+  .board.busy .block {
+    animation: none;
   }
 }

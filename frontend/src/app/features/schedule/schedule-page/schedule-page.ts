@@ -6,7 +6,6 @@ import { ClassChangeService } from '../../../core/api/class-change.service';
 import { AuthService } from '../../../core/auth/auth.service';
 import {
   Classroom,
-  Conflict,
   Readiness,
   ScheduleEntry,
   formatLongDate,
@@ -19,37 +18,21 @@ import { ConfirmService } from '../../../core/services/confirm.service';
 import { NotificationService } from '../../../core/services/notification.service';
 import { CatalogStore } from '../../../core/state/catalog.store';
 import { NoticeStore } from '../../../core/state/notice.store';
+import { OptimizationStore } from '../../../core/state/optimization.store';
 import { AnalysisResult } from '../../../workers/schedule-analysis';
 import { StateMessage } from '../../../shared/state-message/state-message';
 import { CONFLICT_LABELS } from '../../analysis/conflict-labels';
 import { AnalysisPanel } from '../analysis-panel/analysis-panel';
+import { BentoOverview } from '../bento-overview/bento-overview';
 import { EMPTY_FILTER, ScheduleFilter, matchesFilter } from '../schedule-filter';
 import { ScheduleFilters } from '../schedule-filters/schedule-filters';
 import { CancelRequest, ClassroomChangeRequest, EntryDetails } from '../entry-details/entry-details';
 import { GettingStarted } from '../getting-started/getting-started';
 import { EntryMove, ScheduleGrid } from '../schedule-grid/schedule-grid';
 
-interface Kpi {
-  label: string;
-  value: number;
-  color: string;
-  icon: string;
-}
-
-// 24x24 stroke icons for the summary cards
-const ICONS = {
-  teacher: 'M16 19v-1a4 4 0 0 0-8 0v1M12 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6z',
-  classroom: 'M3 21h18M5 21V7l7-4 7 4v14M9 21v-6h6v6',
-  group: 'M17 20v-1a4 4 0 0 0-3-3.87M7 20v-1a4 4 0 0 1 3-3.87M12 12a3 3 0 1 0 0-6 3 3 0 0 0 0 6z',
-  subject: 'M4 19V5a2 2 0 0 1 2-2h12v16H6a2 2 0 0 0-2 2zM8 7h6',
-  calendar: 'M8 3v3M16 3v3M4 9h16M5 5h14v15H5z',
-  cancelled: 'M5 5h14v15H5zM9 11l6 6M15 11l-6 6',
-  bell: 'M6 8a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9M10 21h4',
-};
-
 @Component({
   selector: 'app-schedule-page',
-  imports: [ScheduleFilters, ScheduleGrid, AnalysisPanel, StateMessage, RouterLink, EntryDetails, GettingStarted],
+  imports: [ScheduleFilters, ScheduleGrid, AnalysisPanel, BentoOverview, StateMessage, RouterLink, EntryDetails, GettingStarted],
   templateUrl: './schedule-page.html',
   styleUrl: './schedule-page.css',
 })
@@ -57,6 +40,7 @@ export class SchedulePage {
   protected readonly store = inject(CatalogStore);
   protected readonly auth = inject(AuthService);
   protected readonly notices = inject(NoticeStore);
+  protected readonly optimization = inject(OptimizationStore);
   private readonly notify = inject(NotificationService);
   private readonly confirm = inject(ConfirmService);
   private readonly analysisApi = inject(AnalysisService);
@@ -64,7 +48,8 @@ export class SchedulePage {
 
   protected readonly filter = signal<ScheduleFilter>(EMPTY_FILTER);
   protected readonly analysis = signal<AnalysisResult | null>(null);
-  protected readonly conflicts = signal<Conflict[]>([]);
+  /** Conflicts come from the shared store (the sidebar and the cards use them too). */
+  protected readonly conflicts = this.optimization.conflicts;
   protected readonly readiness = signal<Readiness | null>(null);
   protected readonly selectedId = signal<number | null>(null);
 
@@ -115,38 +100,9 @@ export class SchedulePage {
     () => new Set(this.notices.cancellations().map((c) => `${c.horario_id}|${c.fecha}`)),
   );
 
-  private readonly cancelledThisWeek = computed(
+  protected readonly cancelledThisWeek = computed(
     () => this.visibleEntries().filter((e) => this.cancelledKeys().has(`${e.id}|${this.dateOf().get(e.dia_semana)}`)).length,
   );
-
-  /** Summary cards: the faculty for administrators, "my week" for teachers and students. */
-  protected readonly kpis = computed<Kpi[]>(() => {
-    if (this.seesEverything()) {
-      const c = this.counts();
-      return [
-        { label: 'Profesores', value: c.teachers, color: '#a78bfa', icon: ICONS.teacher },
-        { label: 'Aulas', value: c.classrooms, color: '#38bdf8', icon: ICONS.classroom },
-        { label: 'Grupos', value: c.groups, color: '#34d399', icon: ICONS.group },
-        { label: 'Materias', value: c.subjects, color: '#f472b6', icon: ICONS.subject },
-        { label: 'Clases programadas', value: c.entries, color: '#fbbf24', icon: ICONS.calendar },
-      ];
-    }
-    const entries = this.visibleEntries();
-    const subjects = new Set(entries.map((e) => e.materia_id));
-    const kpis: Kpi[] = [
-      { label: 'Clases a la semana', value: entries.length, color: '#fbbf24', icon: ICONS.calendar },
-      { label: 'Materias', value: subjects.size, color: '#f472b6', icon: ICONS.subject },
-    ];
-    if (this.auth.isTeacher()) {
-      const groups = new Set(entries.map((e) => this.store.subjectsById().get(e.materia_id)?.grupo_id));
-      kpis.push({ label: 'Grupos', value: groups.size, color: '#34d399', icon: ICONS.group });
-    }
-    kpis.push(
-      { label: 'Canceladas próximos días', value: this.cancelledThisWeek(), color: '#fb7185', icon: ICONS.cancelled },
-      { label: 'Avisos nuevos', value: this.notices.unread(), color: '#38bdf8', icon: ICONS.bell },
-    );
-    return kpis;
-  });
 
   // ---------- Selected block ----------
 
@@ -212,24 +168,9 @@ export class SchedulePage {
     });
   }
 
-  protected async generate(): Promise<void> {
-    if (this.store.entries().length > 0) {
-      const accepted = await this.confirm.ask({
-        title: '¿Generar un horario nuevo?',
-        message: 'El horario actual se reemplazará por completo, incluidos los bloques que hayas movido a mano y las clases canceladas.',
-        confirmText: 'Generar horario',
-      });
-      if (!accepted) return;
-    }
-
-    this.store.generateSchedule().subscribe({
-      next: (result) => {
-        this.notify.success(`Horario generado: ${result.total_bloques} bloques sin cruces.`);
-        this.reload();
-        this.notices.refresh();
-      },
-      error: (err) => this.notify.apiError(err, 'No se pudo generar el horario.'),
-    });
+  /** Generating lives in the shared store, so the sidebar button and the cards do the same. */
+  protected generate(): void {
+    this.optimization.generate();
   }
 
   /** The heavy analysis runs in a Web Worker so the page never freezes. */
@@ -340,11 +281,8 @@ export class SchedulePage {
 
   /** Conflicts and readiness are for the people who see the whole faculty; a failure here is not critical. */
   private refreshConflicts(): void {
+    this.optimization.refresh(); // teachers also get the conflicts of their classes
     if (!this.seesEverything()) return;
-    this.analysisApi.conflicts().subscribe({
-      next: (report) => this.conflicts.set(report.conflictos),
-      error: () => this.conflicts.set([]),
-    });
     this.analysisApi.readiness().subscribe({
       next: (readiness) => this.readiness.set(readiness),
       error: () => this.readiness.set(null),

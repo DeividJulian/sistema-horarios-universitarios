@@ -1,255 +1,237 @@
-.nav {
+/* Fixed left sidebar, a little darker than the canvas */
+:host {
+  position: fixed;
+  inset: 0 auto 0 0;
+  width: 240px;
+  z-index: 45;
+  background: var(--sidebar);
+  border-right: 1px solid var(--border);
+  transition: transform 0.2s ease;
+}
+
+.sidebar {
+  height: 100%;
   display: flex;
-  align-items: center;
-  gap: 28px;
-  padding: 12px 40px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
-  background: rgba(11, 16, 32, 0.72);
-  position: sticky;
-  top: 0;
-  z-index: 40;
-  backdrop-filter: blur(14px) saturate(140%);
-  flex-wrap: wrap;
+  flex-direction: column;
+  gap: 4px;
+  padding: 16px 12px;
+  overflow-y: auto;
 }
 
 .brand {
   display: flex;
   align-items: center;
   gap: 10px;
+  padding: 4px 8px 16px;
   color: var(--text);
   text-decoration: none;
-  font-weight: 800;
+  font-weight: 700;
+  font-size: 15px;
 }
 
 .brand-mark {
-  width: 30px;
-  height: 30px;
-  border-radius: 9px;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
   display: grid;
   place-items: center;
-  background: var(--gradient-accent);
-  color: #1a1305;
-  font-size: 14px;
-  box-shadow: 0 6px 18px rgba(245, 158, 11, 0.3);
+  font-size: 13px;
+  font-weight: 800;
+  color: #fff;
+  border: 1px solid transparent;
+  background:
+    linear-gradient(#18181b, #18181b) padding-box,
+    var(--gradient-accent) border-box;
+}
+
+.section-title {
+  margin: 14px 8px 6px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #71717a;
 }
 
 ul {
-  display: flex;
-  gap: 4px;
   list-style: none;
   margin: 0;
-  padding: 4px;
-  border-radius: 12px;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
 }
 
 ul a {
-  display: block;
-  padding: 6px 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
   border-radius: 8px;
   color: var(--text-muted);
   text-decoration: none;
   font-size: 14px;
-  font-weight: 700;
-  transition: color 0.15s, background 0.15s;
+  font-weight: 500;
+  transition: background-color 0.15s ease, color 0.15s ease;
 }
 
 ul a:hover {
   color: var(--text);
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--panel);
 }
 
 ul a.active {
-  color: #1a1305;
-  background: var(--gradient-accent);
-  box-shadow: 0 4px 14px rgba(245, 158, 11, 0.3);
-}
-
-/* Always visible, pushed to the right end of the bar */
-.right {
-  margin-left: auto;
-  display: flex;
-  align-items: center;
-  gap: 14px;
-}
-
-.tutorial {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 6px 14px 6px 6px;
-  border-radius: 999px;
-  border: 1px solid rgba(245, 158, 11, 0.6);
-  background: rgba(245, 158, 11, 0.1);
   color: var(--text);
-  font-size: 14px;
-  font-weight: 700;
-  cursor: pointer;
+  background: var(--panel);
+  box-shadow: inset 0 0 0 1px var(--border);
 }
 
-.tutorial:hover {
-  background: rgba(245, 158, 11, 0.2);
-}
-
-.tutorial-mark {
-  width: 22px;
-  height: 22px;
-  border-radius: 50%;
-  display: grid;
-  place-items: center;
-  background: var(--accent);
-  color: #1a1305;
-  font-size: 13px;
-  font-weight: 800;
-}
-
-.account {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding-left: 14px;
-  border-left: 1px solid rgba(255, 255, 255, 0.08);
-}
-
-.avatar {
-  width: 34px;
-  height: 34px;
-  border-radius: 50%;
-  display: grid;
-  place-items: center;
-  font-size: 13px;
-  font-weight: 800;
-  color: #fff;
-  background: linear-gradient(135deg, #7c3aed, #06b6d4);
-}
-
-.who {
-  display: flex;
-  flex-direction: column;
-  line-height: 1.2;
-}
-
-.name {
-  font-size: 13px;
-  font-weight: 700;
-  max-width: 160px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.role {
-  font-size: 11px;
-  font-weight: 700;
-  color: #67e8f9;
-}
-
-.role.admin {
-  color: #fcd34d;
-}
-
-.role.profesor {
-  color: #c4b5fd;
-}
-
-.role.estudiante {
-  color: #6ee7b7;
-}
-
-.icon-button {
-  width: 32px;
-  height: 32px;
-  display: grid;
-  place-items: center;
-  background: transparent;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  color: var(--text-muted);
-  cursor: pointer;
-}
-
-.icon-button:hover {
-  color: var(--text);
-  border-color: var(--text-muted);
-}
-
-.icon-button svg {
-  width: 16px;
-  height: 16px;
+.icon {
+  width: 18px;
+  height: 18px;
+  flex: none;
   fill: none;
   stroke: currentColor;
-  stroke-width: 2;
+  stroke-width: 1.8;
   stroke-linecap: round;
   stroke-linejoin: round;
 }
 
+ul a.active .icon {
+  stroke: var(--accent);
+}
+
+.label {
+  flex: 1;
+}
+
 .badge-count {
-  display: inline-grid;
-  place-items: center;
   min-width: 18px;
   height: 18px;
   padding: 0 5px;
-  margin-left: 4px;
   border-radius: 999px;
+  display: inline-grid;
+  place-items: center;
   font-size: 11px;
-  font-weight: 800;
+  font-weight: 700;
   color: #fff;
   background: var(--danger);
-  vertical-align: 1px;
 }
 
-.logout {
-  background: transparent;
+/* ---------- Schedule health, at the bottom ---------- */
+.status {
+  margin-top: auto;
+  padding: 12px;
+  border-radius: var(--radius);
+  background: var(--panel);
   border: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.status-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.status-title {
+  font-size: 12px;
+  font-weight: 600;
   color: var(--text-muted);
-  border-radius: 8px;
-  padding: 6px 12px;
-  font-size: 13px;
+}
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+}
+
+.status-badge .dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.status-badge.optimizado {
+  color: var(--success);
+  border-color: rgba(74, 222, 128, 0.35);
+  background: var(--pastel-mint);
+}
+
+.status-badge.con-conflictos,
+.status-badge.incompleto {
+  color: var(--warning);
+  border-color: rgba(251, 191, 36, 0.35);
+  background: var(--pastel-amber);
+}
+
+.efficiency {
+  margin: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.efficiency strong {
+  font-size: 18px;
   font-weight: 700;
-  cursor: pointer;
-}
-
-.logout:hover {
   color: var(--text);
-  border-color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
 }
 
+.optimize {
+  width: 100%;
+  padding: 9px 12px;
+  font-size: 13px;
+}
+
+/* Subtle pulse on the gradient border while the schedule is being computed */
+.optimize.working {
+  opacity: 1;
+  animation: pulse 1.4s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(139, 92, 246, 0.45);
+  }
+  50% {
+    box-shadow: 0 0 0 6px rgba(139, 92, 246, 0);
+  }
+}
+
+/* Small screens: the sidebar slides in from the left */
 @media (max-width: 900px) {
-  .who {
-    display: none;
+  :host {
+    transform: translateX(-100%);
+    box-shadow: none;
+  }
+
+  :host(.open) {
+    transform: none;
+    box-shadow: 0 0 0 100vmax rgba(0, 0, 0, 0.5);
   }
 }
 
-/* On phones the right group shares the first row with the brand and the links wrap below */
-@media (max-width: 700px) {
-  .nav {
-    padding: 10px 16px;
-    gap: 10px;
-  }
-
-  .right {
-    order: 1;
-    gap: 8px;
-  }
-
-  .account {
-    padding-left: 8px;
-  }
-
-  .tutorial {
-    padding-right: 10px;
-  }
-
-  ul {
-    order: 2;
-    width: 100%;
-  }
-}
-
-/* Very narrow phones: only the logo, so the brand and the buttons fit in one row */
-@media (max-width: 480px) {
-  .brand-name {
-    display: none;
+@media (prefers-reduced-motion: reduce) {
+  :host,
+  .optimize.working {
+    transition: none;
+    animation: none;
   }
 }
