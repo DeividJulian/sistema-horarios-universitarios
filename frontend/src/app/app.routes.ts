@@ -15,6 +15,12 @@ export const routes: Routes = [
     loadComponent: () => import('./features/login/login-page/login-page').then((m) => m.LoginPage),
   },
   {
+    path: 'registro',
+    title: 'Registrarse',
+    canActivate: [guestGuard],
+    loadComponent: () => import('./features/login/register-page/register-page').then((m) => m.RegisterPage),
+  },
+  {
     path: 'horario',
     title: 'Horario',
     canActivate: [authGuard],

@@ -4,7 +4,7 @@ import { Router } from '@angular/router';
 import { Observable, tap } from 'rxjs';
 
 import { API_URL } from '../api/api-url';
-import { DemoAccount, LoginResponse, Role, User } from '../models';
+import { DemoAccount, LoginResponse, RegisterGroup, RegisterInput, Role, User } from '../models';
 
 const SESSION_KEY = 'horarios.sesion';
 
@@ -60,6 +60,18 @@ export class AuthService {
     return this.http.post<LoginResponse>(`${API_URL}/auth/login`, { email, password }).pipe(
       tap((response) => this.store({ token: response.access_token, user: response.usuario })),
     );
+  }
+
+  /** Creates (student) or activates (teacher) the account and signs in with it. */
+  register(data: RegisterInput): Observable<LoginResponse> {
+    return this.http.post<LoginResponse>(`${API_URL}/auth/register`, data).pipe(
+      tap((response) => this.store({ token: response.access_token, user: response.usuario })),
+    );
+  }
+
+  /** Groups a student can choose when signing up (public endpoint). */
+  registerOptions(): Observable<RegisterGroup[]> {
+    return this.http.get<RegisterGroup[]>(`${API_URL}/auth/register-options`);
   }
 
   /** Clears the session and goes back to the login screen (keeping where the user was, to return after signing in). */

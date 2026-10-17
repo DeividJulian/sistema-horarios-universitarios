@@ -1,11 +1,13 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, DestroyRef, inject, input, signal } from '@angular/core';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { finalize } from 'rxjs';
 
 import { AuthService } from '../../../core/auth/auth.service';
 import { apiErrorMessage } from '../../../core/http/api-error';
+import { ROLE_LABELS } from '../../../core/models';
+import { NotificationService } from '../../../core/services/notification.service';
 
 type ServerState = 'waking' | 'ready' | 'down';
 type LoginField = 'email' | 'password';
@@ -34,13 +36,15 @@ export function loginErrorMessage(error: unknown): string {
 
 @Component({
   selector: 'app-login-page',
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, RouterLink],
   templateUrl: './login-page.html',
-  styleUrl: './login-page.css',
+  // Shared with the sign-up page (same "Cotizador IA" theme)
+  styleUrl: '../auth.css',
 })
 export class LoginPage {
   private readonly auth = inject(AuthService);
   private readonly router = inject(Router);
+  private readonly notify = inject(NotificationService);
 
   /** Page to return to after signing in (?volver=/analisis). */
   readonly volver = input<string>();
@@ -97,8 +101,10 @@ export class LoginPage {
         }),
       )
       .subscribe({
-        next: () => {
+        next: ({ usuario }) => {
           this.server.set('ready');
+          // Says who signed in and with which role
+          this.notify.success(`Bienvenido, ${usuario.nombre}. Entraste como ${ROLE_LABELS[usuario.rol]}.`);
           const target = this.volver();
           this.router.navigateByUrl(target && target.startsWith('/') && !target.startsWith('/login') ? target : '/horario');
         },

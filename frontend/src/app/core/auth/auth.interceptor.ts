@@ -18,7 +18,8 @@ export const authInterceptor: HttpInterceptorFn = (request, next) => {
 
   const token = auth.token();
   const isApi = request.url.startsWith(API_URL);
-  const isLogin = request.url.endsWith('/auth/login');
+  // Login and sign-up answer 401/409 for wrong data: that is not an expired session
+  const isLogin = request.url.endsWith('/auth/login') || request.url.endsWith('/auth/register');
 
   const authorized = token && isApi && !isLogin ? request.clone({ setHeaders: { Authorization: `Bearer ${token}` } }) : request;
 

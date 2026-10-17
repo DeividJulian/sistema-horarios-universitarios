@@ -26,6 +26,22 @@ export interface LoginResponse {
   usuario: User;
 }
 
+/** Self sign-up: students choose their group; teachers activate the account of their registered email. */
+export interface RegisterInput {
+  rol: 'estudiante' | 'profesor';
+  email: string;
+  password: string;
+  nombre?: string;
+  grupo_id?: number;
+}
+
+/** Group offered in the sign-up form (GET /auth/register-options). */
+export interface RegisterGroup {
+  id: number;
+  nombre: string;
+  jornada: string;
+}
+
 /** Test account offered on the login page (GET /auth/demo-accounts). */
 export interface DemoAccount {
   rol: Role;

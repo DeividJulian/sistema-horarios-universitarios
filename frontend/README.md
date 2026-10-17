@@ -12,6 +12,7 @@ Proyecto final de Programación Orientada a la Web — Universidad Cooperativa d
 
 | Página | Ruta | Funciones |
 |---|---|---|
+| Registro | `/registro` | El estudiante crea su cuenta eligiendo su grupo; el profesor activa la cuenta de su correo registrado eligiendo su contraseña |
 | Inicio de sesión | `/login` | Correo y contraseña, mostrar u ocultar contraseña, indicador de conexión con el servidor y mensajes claros si el servidor está despertando |
 | Horario | `/horario` | Calendario semanal, generación automática, arrastrar y soltar bloques, filtros por profesor/grupo/aula, detalle de cada bloque, mover por teclado, eliminar bloques, conflictos resaltados en rojo |
 | Gestión | `/gestion/...` | CRUD de profesores (con su disponibilidad), aulas, grupos, materias y usuarios, con las mismas validaciones que el backend. Solo administradores. |
@@ -32,6 +33,16 @@ Toda la aplicación exige iniciar sesión. El backend devuelve un token JWT que 
 Cualquier usuario puede cambiar su contraseña con el botón de la llave, junto a «Salir».
 
 Las rutas están protegidas con *guards* (`core/auth/auth.guards.ts`), pero la seguridad real está en el backend, que responde `401` sin sesión y `403` si el rol no alcanza.
+
+### Registro
+
+En `/registro` (enlace «¿No tienes cuenta? Regístrate» del login):
+
+- **Estudiante:** nombre, correo, grupo y contraseña. Solo verá el horario de ese grupo.
+- **Profesor:** el correo con el que el administrador lo registró y una contraseña propia. Activa su cuenta una sola vez.
+- **Administrador:** no hay registro libre; lo crea otro administrador en Gestión → Usuarios.
+
+Al entrar (por login o registro) aparece «Bienvenido, nombre. Entraste como …» con el rol, además del rol que muestra la barra.
 
 ### Pantalla de inicio de sesión
 
@@ -118,4 +129,4 @@ Abre `http://localhost:8080`, espera el aviso "Modo offline listo" y, en las her
 npm test -- --watch=false
 ```
 
-51 pruebas unitarias que cubren las validaciones, los mensajes de error, la lógica del Web Worker, los filtros, las notificaciones, el diálogo de confirmación, el estado compartido (incluida la actualización optimista con reversión), los interceptores, el inicio de sesión con sus guards por rol el cálculo de las fechas de la semana y los mensajes de error del login.
+54 pruebas unitarias que cubren las validaciones, los mensajes de error, la lógica del Web Worker, los filtros, las notificaciones, el diálogo de confirmación, el estado compartido (incluida la actualización optimista con reversión), los interceptores, el inicio de sesión con sus guards por rol el cálculo de las fechas de la semana y los mensajes de error del login y del registro.

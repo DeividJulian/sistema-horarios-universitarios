@@ -4,7 +4,7 @@ import { TestBed } from '@angular/core/testing';
 import { ActivatedRouteSnapshot, Router, RouterStateSnapshot, UrlTree, provideRouter } from '@angular/router';
 
 import { API_URL } from '../api/api-url';
-import { LoginResponse } from '../models';
+import { LoginResponse, Role } from '../models';
 import { adminGuard, authGuard, guestGuard } from './auth.guards';
 import { authInterceptor } from './auth.interceptor';
 import { AuthService, tokenExpiry } from './auth.service';
@@ -17,7 +17,7 @@ function fakeToken(expSeconds: number): string {
 
 const inOneHour = () => Math.floor(Date.now() / 1000) + 3600;
 
-function loginResponse(rol: 'admin' | 'usuario'): LoginResponse {
+function loginResponse(rol: Role): LoginResponse {
   return {
     access_token: fakeToken(inOneHour()),
     token_type: 'bearer',
@@ -70,6 +70,16 @@ describe('authentication', () => {
     expect(auth.isAdmin()).toBe(true);
     expect(auth.user()?.nombre).toBe('Ana Pérez');
     expect(localStorage.getItem('horarios.sesion')).toContain('Ana Pérez');
+  });
+
+  it('signs in right after signing up', () => {
+    auth.register({ rol: 'estudiante', nombre: 'Ana Pérez', email: 'ana@ucc.edu.co', password: 'segura123', grupo_id: 3 }).subscribe();
+    const request = backend.expectOne(`${API_URL}/auth/register`);
+    expect(request.request.body.grupo_id).toBe(3);
+    expect(request.request.headers.has('Authorization')).toBe(false);
+    request.flush({ ...loginResponse('estudiante'), usuario: { id: 7, nombre: 'Ana Pérez', email: 'ana@ucc.edu.co', rol: 'estudiante', grupo_id: 3 } });
+    expect(auth.isStudent()).toBe(true);
+    expect(auth.user()?.grupo_id).toBe(3);
   });
 
   it('sends the token to the API but not on the login request itself', () => {
