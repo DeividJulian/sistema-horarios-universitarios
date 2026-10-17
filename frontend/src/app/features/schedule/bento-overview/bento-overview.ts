@@ -6,7 +6,6 @@ import { ScheduleEntry, relativeTime } from '../../../core/models';
 import { CatalogStore } from '../../../core/state/catalog.store';
 import { NoticeStore } from '../../../core/state/notice.store';
 import { OptimizationStore } from '../../../core/state/optimization.store';
-import { AiAssistant } from '../ai-assistant/ai-assistant';
 
 interface Stat {
   label: string;
@@ -41,7 +40,7 @@ const RING_LENGTH = 2 * Math.PI * RING_RADIUS;
  */
 @Component({
   selector: 'app-bento-overview',
-  imports: [RouterLink, AiAssistant],
+  imports: [RouterLink],
   templateUrl: './bento-overview.html',
   styleUrl: './bento-overview.css',
 })
