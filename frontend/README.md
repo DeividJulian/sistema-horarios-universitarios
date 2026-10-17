@@ -12,7 +12,7 @@ Proyecto final de Programación Orientada a la Web — Universidad Cooperativa d
 
 | Página | Ruta | Funciones |
 |---|---|---|
-| Inicio de sesión | `/login` | Correo y contraseña, indicador de conexión con el servidor y cuentas de prueba |
+| Inicio de sesión | `/login` | Correo y contraseña, mostrar u ocultar contraseña, indicador de conexión con el servidor y mensajes claros si el servidor está despertando |
 | Horario | `/horario` | Calendario semanal, generación automática, arrastrar y soltar bloques, filtros por profesor/grupo/aula, detalle de cada bloque, mover por teclado, eliminar bloques, conflictos resaltados en rojo |
 | Gestión | `/gestion/...` | CRUD de profesores (con su disponibilidad), aulas, grupos, materias y usuarios, con las mismas validaciones que el backend. Solo administradores. |
 | Avisos | `/avisos` | Cancelaciones y cambios de aula u horario de las clases (cada rol ve los suyos) |
@@ -20,7 +20,7 @@ Proyecto final de Programación Orientada a la Web — Universidad Cooperativa d
 
 ## Inicio de sesión y roles
 
-Toda la aplicación exige iniciar sesión. El backend devuelve un token JWT que se guarda en el navegador y un interceptor lo envía en cada petición; si expira, la aplicación vuelve al login. El login muestra un botón de prueba por cada rol.
+Toda la aplicación exige iniciar sesión. El backend devuelve un token JWT que se guarda en el navegador y un interceptor lo envía en cada petición; si expira, la aplicación vuelve al login. El rol no se elige en el login: lo decide el backend y cada persona llega a su vista.
 
 | Rol | Qué ve y qué puede hacer |
 |---|---|
@@ -32,6 +32,10 @@ Toda la aplicación exige iniciar sesión. El backend devuelve un token JWT que 
 Cualquier usuario puede cambiar su contraseña con el botón de la llave, junto a «Salir».
 
 Las rutas están protegidas con *guards* (`core/auth/auth.guards.ts`), pero la seguridad real está en el backend, que responde `401` sin sesión y `403` si el rol no alcanza.
+
+### Pantalla de inicio de sesión
+
+Usa el estilo visual del proyecto *Cotizador IA*: tema oscuro con acento verde-azulado y una sola tarjeta centrada. Sus colores se declaran en el `:host` del componente (`features/login/login-page/login-page.css`), así que no cambian el resto de la aplicación. Incluye validaciones en español solo después de tocar cada campo, botón «Ingresar / Ingresando…» que bloquea el formulario mientras espera, mensajes de error en una zona `aria-live`, y se adapta desde 360 px de ancho.
 
 > El backend está en el plan gratuito de Render, que se apaga tras un rato sin uso. Por eso el login "despierta" al servidor apenas se abre y muestra su estado; la primera entrada puede tardar hasta un minuto.
 
@@ -114,4 +118,4 @@ Abre `http://localhost:8080`, espera el aviso "Modo offline listo" y, en las her
 npm test -- --watch=false
 ```
 
-47 pruebas unitarias que cubren las validaciones, los mensajes de error, la lógica del Web Worker, los filtros, las notificaciones, el diálogo de confirmación, el estado compartido (incluida la actualización optimista con reversión), los interceptores, el inicio de sesión con sus guards por rol y el cálculo de las fechas de la semana.
+51 pruebas unitarias que cubren las validaciones, los mensajes de error, la lógica del Web Worker, los filtros, las notificaciones, el diálogo de confirmación, el estado compartido (incluida la actualización optimista con reversión), los interceptores, el inicio de sesión con sus guards por rol el cálculo de las fechas de la semana y los mensajes de error del login.
