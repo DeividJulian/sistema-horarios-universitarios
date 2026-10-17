@@ -14,7 +14,17 @@ export interface ScheduleEntryMove {
   hora_inicio: string;
 }
 
+/** Figures of the metaheuristic phase (simulated annealing) that improves the CSP schedule. */
+export interface OptimizationReport {
+  horas_muertas_antes: number;
+  horas_muertas_despues: number;
+  iteraciones: number;
+  mejoras: number;
+  segundos: number;
+}
+
 export interface GenerationResult {
   mensaje: string;
   total_bloques: number;
+  optimizacion?: OptimizationReport;
 }

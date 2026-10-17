@@ -1,0 +1,86 @@
+@if (status()?.disponible) {
+  <button type="button" class="btn-secondary ai-trigger" (click)="open()" aria-haspopup="dialog">
+    <span class="spark" aria-hidden="true">
+      <svg viewBox="0 0 24 24"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z" /></svg>
+    </span>
+    Explicar con IA
+  </button>
+} @else {
+  <button
+    type="button"
+    class="btn-secondary ai-trigger"
+    disabled
+    [title]="status() ? 'Falta configurar ANTHROPIC_API_KEY en el servidor (Render)' : 'Consultando…'"
+  >
+    {{ status() ? 'IA no configurada' : 'IA…' }}
+  </button>
+}
+
+<dialog #dialog class="dialog" aria-labelledby="ai-title">
+  <header class="head">
+    <div>
+      <p class="eyebrow">Asistente con IA</p>
+      <h2 id="ai-title">Explicación del horario</h2>
+    </div>
+    <button type="button" class="close" (click)="close()" aria-label="Cerrar">×</button>
+  </header>
+
+  <div class="body" aria-live="polite" [attr.aria-busy]="loading()">
+    @if (loading()) {
+      <div class="thinking" role="status" aria-label="La IA está analizando el horario">
+        <span class="skeleton line w60"></span>
+        <span class="skeleton line"></span>
+        <span class="skeleton line w80"></span>
+        <span class="skeleton line w40"></span>
+        <span class="skeleton line"></span>
+        <p class="hint">Claude está revisando el diagnóstico, los conflictos y las estadísticas…</p>
+      </div>
+    } @else if (error(); as msg) {
+      <p class="alert" role="alert">{{ msg }}</p>
+    } @else if (answer()) {
+      <article class="answer">
+        @for (block of blocks(); track $index) {
+          @switch (block.kind) {
+            @case ('heading') {
+              <h3>@for (s of block.segments; track $index) {<span [class.bold]="s.bold">{{ s.text }}</span>}</h3>
+            }
+            @case ('paragraph') {
+              <p>@for (s of block.segments; track $index) {<span [class.bold]="s.bold">{{ s.text }}</span>}</p>
+            }
+            @case ('bullets') {
+              <ul>
+                @for (item of block.items; track $index) {
+                  <li>@for (s of item; track $index) {<span [class.bold]="s.bold">{{ s.text }}</span>}</li>
+                }
+              </ul>
+            }
+            @case ('numbers') {
+              <ol>
+                @for (item of block.items; track $index) {
+                  <li>@for (s of item; track $index) {<span [class.bold]="s.bold">{{ s.text }}</span>}</li>
+                }
+              </ol>
+            }
+          }
+        }
+      </article>
+      @if (model(); as m) {
+        <p class="model">Respuesta generada por {{ m }} a partir de los datos actuales del sistema. Revisa las sugerencias antes de aplicarlas.</p>
+      }
+    }
+  </div>
+
+  <form class="ask" (submit)="$event.preventDefault(); ask(question())">
+    <label class="sr-only" for="ai-question">Pregunta para la IA</label>
+    <input
+      id="ai-question"
+      [value]="question()"
+      (input)="question.set($any($event.target).value)"
+      maxlength="500"
+      placeholder="Pregunta algo sobre el horario, por ejemplo: ¿cómo reduzco las horas muertas?"
+      [disabled]="loading()"
+    />
+    <button type="submit" class="btn-primary" [disabled]="loading() || !question().trim()">Preguntar</button>
+    <button type="button" class="btn-secondary" (click)="ask()" [disabled]="loading()">Explicar de nuevo</button>
+  </form>
+</dialog>

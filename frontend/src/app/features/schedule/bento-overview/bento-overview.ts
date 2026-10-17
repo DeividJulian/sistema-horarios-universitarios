@@ -6,6 +6,7 @@ import { ScheduleEntry, relativeTime } from '../../../core/models';
 import { CatalogStore } from '../../../core/state/catalog.store';
 import { NoticeStore } from '../../../core/state/notice.store';
 import { OptimizationStore } from '../../../core/state/optimization.store';
+import { AiAssistant } from '../ai-assistant/ai-assistant';
 
 interface Stat {
   label: string;
@@ -40,7 +41,7 @@ const RING_LENGTH = 2 * Math.PI * RING_RADIUS;
  */
 @Component({
   selector: 'app-bento-overview',
-  imports: [RouterLink],
+  imports: [RouterLink, AiAssistant],
   templateUrl: './bento-overview.html',
   styleUrl: './bento-overview.css',
 })
@@ -97,7 +98,15 @@ export class BentoOverview {
 
   protected readonly lastRunText = computed(() => {
     const last = this.optimization.lastRun();
-    return last ? relativeTime(last) : 'Sin registro en este navegador';
+    return last ? relativeTime(last.fecha) : 'Sin registro en este navegador';
+  });
+
+  /** Idle hours removed by the simulated annealing in the last run: "104 → 22 (−79 %)". */
+  protected readonly idleText = computed(() => {
+    const last = this.optimization.lastRun();
+    if (last?.antes === undefined || last.despues === undefined) return null;
+    const saved = last.antes > 0 ? Math.round(((last.antes - last.despues) / last.antes) * 100) : 0;
+    return `${last.antes} → ${last.despues}${saved > 0 ? ` (−${saved} %)` : ''}`;
   });
 
   protected readonly hours = computed(() => this.optimization.stats()?.cumplimiento);

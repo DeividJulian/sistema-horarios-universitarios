@@ -68,6 +68,10 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
       'En la pestaña Horario pulsa «Generar horario automáticamente». En pocos segundos aparecerán todas las clases en el calendario.',
       'Si falta algo para poder generarlo, la guía de pasos que está arriba del calendario te dice qué es y te da un botón «Arreglar» que te lleva directo al problema.',
     ],
+    tips: [
+      'Después de repartir las clases, el sistema aplica recocido simulado para reducir las horas muertas de grupos y profesores; la tarjeta Optimización muestra cuántas quitó.',
+      'El botón «Explicar con IA» de esa tarjeta le pide a Claude que te explique en lenguaje sencillo qué está mal en el horario y cómo arreglarlo. También puedes hacerle preguntas.',
+    ],
     link: { path: '/horario', text: 'Ir al Horario' },
   },
   {

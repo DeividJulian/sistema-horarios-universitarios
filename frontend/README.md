@@ -14,7 +14,7 @@ Proyecto final de Programación Orientada a la Web — Universidad Cooperativa d
 |---|---|---|
 | Registro | `/registro` | El estudiante crea su cuenta eligiendo su grupo; el profesor activa la cuenta de su correo registrado eligiendo su contraseña |
 | Inicio de sesión | `/login` | Correo y contraseña, mostrar u ocultar contraseña, indicador de conexión con el servidor y mensajes claros si el servidor está despertando |
-| Horario | `/horario` | Calendario semanal, generación automática, arrastrar y soltar bloques, filtros por profesor/grupo/aula, detalle de cada bloque, mover por teclado, eliminar bloques, conflictos resaltados en rojo |
+| Horario | `/horario` | Calendario semanal, generación automática (CSP + recocido simulado, con las horas muertas antes → después), arrastrar y soltar bloques, filtros por profesor/grupo/aula, detalle de cada bloque, mover por teclado, eliminar bloques, conflictos resaltados en rojo y botón «Explicar con IA» (Claude explica el horario y responde preguntas) |
 | Gestión | `/gestion/...` | CRUD de profesores (con su disponibilidad), aulas, grupos, materias y usuarios, con las mismas validaciones que el backend. Solo administradores. |
 | Avisos | `/avisos` | Cancelaciones y cambios de aula u horario de las clases (cada rol ve los suyos) |
 | Análisis | `/analisis` | Totales, cumplimiento de horas, ocupación de aulas, bloques por día, carga de profesores, lista de conflictos y carga de datos de demostración |
@@ -63,6 +63,14 @@ Usa el estilo visual del proyecto *Cotizador IA*: tema oscuro con acento verde-a
 
 > El backend está en el plan gratuito de Render, que se apaga tras un rato sin uso. Por eso el login "despierta" al servidor apenas se abre y muestra su estado; la primera entrada puede tardar hasta un minuto.
 
+## Asistente con IA (Claude)
+
+En la tarjeta **Optimización** del horario (administrador y usuario de consulta) está el botón **«Explicar con IA»**. Abre un diálogo donde Claude explica en español qué impide o empeora el horario (diagnóstico, conflictos y estadísticas que arma el backend) y propone pasos concretos; también se le pueden hacer preguntas. El texto se muestra con títulos, listas y negritas sin usar `innerHTML`.
+
+- El frontend solo llama a `GET /ai/status` y `POST /ai/explain` del backend; **la clave de Anthropic nunca está en el frontend ni en el repositorio**.
+- Para activarla basta con definir `ANTHROPIC_API_KEY` en las variables de entorno del backend (Render) y volver a desplegarlo. Sin la clave el botón aparece deshabilitado como «IA no configurada».
+- Código: `features/schedule/ai-assistant/`, `core/api/ai.service.ts` y `core/models/ai.ts`.
+
 ## Tecnologías
 
 - Angular 22 con componentes standalone, **signals** y detección de cambios sin Zone.js
@@ -85,7 +93,7 @@ src/app/
 │   └── http/           # Traducción de errores HTTP a mensajes claros
 ├── features/
 │   ├── login/          # Página de inicio de sesión
-│   ├── schedule/       # Página del horario (calendario, filtros, detalle, análisis del worker)
+│   ├── schedule/       # Página del horario (calendario, filtros, detalle, análisis del worker, asistente con IA)
 │   ├── management/     # Página de gestión (profesores, disponibilidad, aulas, grupos, materias, usuarios)
 │   └── analysis/       # Página de análisis
 ├── shared/             # Componentes reutilizables (toasts, diálogo, barra de navegación, ...)

@@ -3,7 +3,7 @@ import { forkJoin } from 'rxjs';
 
 import { AnalysisService } from '../api/analysis.service';
 import { AuthService } from '../auth/auth.service';
-import { Conflict, ConflictKind, Statistics } from '../models';
+import { Conflict, ConflictKind, GenerationResult, Statistics } from '../models';
 import { ConfirmService } from '../services/confirm.service';
 import { NotificationService } from '../services/notification.service';
 import { CatalogStore } from './catalog.store';
@@ -12,6 +12,13 @@ import { NoticeStore } from './notice.store';
 const LAST_RUN_KEY = 'horarios.ultima-optimizacion';
 
 export type ScheduleStatus = 'optimizado' | 'con-conflictos' | 'incompleto' | 'sin-horario';
+
+/** Last optimization run in this browser: when, and the idle hours before and after the simulated annealing. */
+export interface LastRun {
+  fecha: string;
+  antes?: number;
+  despues?: number;
+}
 
 export interface ConstraintCheck {
   label: string;
@@ -44,7 +51,7 @@ export class OptimizationStore {
   readonly stats = signal<Statistics | null>(null);
   readonly conflicts = signal<Conflict[]>([]);
   readonly loaded = signal(false);
-  readonly lastRun = signal<string | null>(this.readLastRun());
+  readonly lastRun = signal<LastRun | null>(this.readLastRun());
   readonly generating = this.catalog.generating;
 
   /** Students only see their group; the faculty-wide numbers are not for them. */
@@ -109,8 +116,10 @@ export class OptimizationStore {
     return new Promise((resolve) => {
       this.catalog.generateSchedule().subscribe({
         next: (result) => {
-          this.notify.success(`Horario optimizado: ${result.total_bloques} bloques sin cruces.`);
-          this.saveLastRun();
+          const opt = result.optimizacion;
+          const idle = opt ? ` Horas muertas: ${opt.horas_muertas_antes} → ${opt.horas_muertas_despues}.` : '';
+          this.notify.success(`Horario optimizado: ${result.total_bloques} bloques sin cruces.${idle}`);
+          this.saveLastRun(result);
           this.catalog.load().subscribe({ error: () => undefined });
           this.notices.refresh();
           this.refresh();
@@ -124,19 +133,26 @@ export class OptimizationStore {
     });
   }
 
-  private saveLastRun(): void {
-    const now = new Date().toISOString();
-    this.lastRun.set(now);
+  private saveLastRun(result: GenerationResult): void {
+    const run: LastRun = {
+      fecha: new Date().toISOString(),
+      antes: result.optimizacion?.horas_muertas_antes,
+      despues: result.optimizacion?.horas_muertas_despues,
+    };
+    this.lastRun.set(run);
     try {
-      localStorage.setItem(LAST_RUN_KEY, now);
+      localStorage.setItem(LAST_RUN_KEY, JSON.stringify(run));
     } catch {
-      // Without storage the time is only kept until the page reloads
+      // Without storage the result is only kept until the page reloads
     }
   }
 
-  private readLastRun(): string | null {
+  private readLastRun(): LastRun | null {
     try {
-      return localStorage.getItem(LAST_RUN_KEY);
+      const raw = localStorage.getItem(LAST_RUN_KEY);
+      if (!raw) return null;
+      // Older versions stored only the date
+      return raw.startsWith('{') ? (JSON.parse(raw) as LastRun) : { fecha: raw };
     } catch {
       return null;
     }
