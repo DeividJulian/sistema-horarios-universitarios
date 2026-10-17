@@ -26,7 +26,6 @@ Patrón **Bento Grid** con estilo **Linear/Vercel** en toda la aplicación, incl
 - **Barra lateral fija (240 px):** vistas, gestión (administradores) y, abajo, el estado del horario (Optimizado / Con conflictos), su eficiencia y el botón «Re-optimizar horario». En celular se abre con el botón de menú.
 - **Barra superior:** título de la página, Tutorial, campana de avisos con contador y menú de la cuenta.
 - **Tarjetas Bento:** rendimiento con un anillo de porcentaje, checklist de restricciones resueltas y acción rápida (Generar o Re-optimizar con pulso en el borde mientras calcula), más la franja de totales (profesores, aulas, grupos, materias y clases). Profesores y estudiantes ven su propia semana.
-- **Vistas del horario:** Semana (próximos 5 días de clase, con arrastrar y soltar), Día (agenda con todos los detalles), Aulas (una columna por aula, con horas ocupadas o «Libre todo el día») y Docentes (una columna por profesor con clase ese día). Profesor y estudiante ven Semana y Día.
 - **Calendario:** tarjetas de clase con relleno pastel, borde de 1 px, etiquetas (Conflicto en ámbar, Cancelada) y transiciones de 0,2 s.
 - **Inspector lateral (320 px):** datos, etiquetas de estado y acciones de la clase seleccionada.
 - **Esqueletos de carga** con efecto shimmer en lugar de ruedas de carga.

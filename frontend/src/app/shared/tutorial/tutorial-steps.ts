@@ -74,8 +74,8 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
     title: '6. Revisa y ajusta el calendario',
     roles: ['admin'],
     paragraphs: [
-      'Arriba del calendario elige la vista: Semana (los próximos 5 días de clase), Día (la agenda de un día), Aulas (qué aula está ocupada o libre) o Docentes (las clases de cada profesor). Los filtros de profesor, grupo o aula funcionan en todas.',
-      'Haz clic en un bloque para ver su detalle en el inspector de la derecha, moverlo, cancelarlo en una fecha, cambiarlo de aula o eliminarlo. También puedes arrastrarlo a una casilla vacía. Los estudiantes del grupo reciben un aviso de cada cambio.',
+      'Usa los filtros de profesor, grupo o aula para ver solo lo que te interesa.',
+      'Haz clic en un bloque para ver su detalle, moverlo, cancelarlo en una fecha, cambiarlo de aula o eliminarlo. También puedes arrastrarlo a una casilla vacía. Los estudiantes del grupo reciben un aviso de cada cambio.',
     ],
     tips: ['Un bloque en rojo tiene un conflicto (por ejemplo, el profesor ya no está disponible a esa hora). Si cambiaste datos después de generar, vuelve a generar el horario.'],
   },
@@ -130,7 +130,7 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
     title: 'Bienvenido',
     roles: ['estudiante'],
     paragraphs: [
-      'En «Mi horario» ves solo las clases de tu grupo (tu semestre), con la fecha de cada día. Con la vista Día ves la agenda de un día con todos los detalles.',
+      'En «Mi horario» ves solo las clases de tu grupo (tu semestre), con la fecha de cada día de esta semana.',
       'Haz clic en una clase para ver el aula, el profesor y si tiene alguna cancelación.',
     ],
     link: { path: '/horario', text: 'Ver mi horario' },
@@ -159,7 +159,7 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
     title: '1. Explora el calendario',
     roles: ['usuario'],
     paragraphs: [
-      'En la pestaña Horario verás todas las clases de la semana. Cambia la vista entre Semana, Día, Aulas y Docentes, y usa los filtros de profesor, grupo o aula para ver solo lo que te interesa.',
+      'En la pestaña Horario verás todas las clases de la semana. Usa los filtros de profesor, grupo o aula para ver solo lo que te interesa.',
       'Haz clic en un bloque para ver su detalle: materia, aula, grupo, jornada y profesor.',
     ],
     link: { path: '/horario', text: 'Ir al Horario' },

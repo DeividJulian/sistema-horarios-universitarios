@@ -51,6 +51,8 @@ export class ScheduleGrid {
   readonly days = input<(SchoolDay | { day: Weekday; date: null })[]>(WEEKDAYS.map((day) => ({ day, date: null })));
   /** Cancelled classes as "entryId|YYYY-MM-DD". */
   readonly cancelledKeys = input<Set<string>>(new Set());
+  /** Reason of each cancellation (same keys), shown when hovering the card. */
+  readonly cancelReasons = input<Map<string, string>>(new Map());
   /** Only the hours that have classes (for people who cannot drag blocks to empty hours). */
   readonly trimEmptyHours = input(false);
   /** The schedule is being generated: the cards shimmer instead of a spinner. */
@@ -104,10 +106,15 @@ export class ScheduleGrid {
     return this.conflicts().get(entry.id) ?? [];
   }
 
-  protected ariaLabel(entry: ScheduleEntry): string {
+  protected ariaLabel(entry: ScheduleEntry, cancelled = false): string {
     const hour = hourOf(entry.hora_inicio);
-    const problems = this.conflictsOf(entry).length ? ', con conflictos' : '';
-    return `${this.subjectName(entry)}, ${entry.dia_semana} ${formatHour(hour)}, ${this.classroomName(entry)}${problems}. Pulsa Enter para ver el detalle.`;
+    const state = cancelled ? ', clase cancelada' : this.conflictsOf(entry).length ? ', con conflictos' : '';
+    return `${this.subjectName(entry)}, ${entry.dia_semana} ${formatHour(hour)}, ${this.classroomName(entry)}${state}. Pulsa Enter para ver el detalle.`;
+  }
+
+  protected cancelTitle(entry: ScheduleEntry, date: string | null): string {
+    const reason = date ? this.cancelReasons().get(`${entry.id}|${date}`) : undefined;
+    return `Clase cancelada${reason ? `: ${reason}` : ''}`;
   }
 
   protected color(entry: ScheduleEntry): string {
