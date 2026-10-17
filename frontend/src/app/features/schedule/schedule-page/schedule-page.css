@@ -90,14 +90,14 @@
 .calendar-head {
   display: flex;
   justify-content: space-between;
-  align-items: baseline;
+  align-items: center;
   flex-wrap: wrap;
   gap: 4px 16px;
   margin: 14px 0 10px;
 }
 
 .week {
-  margin: 0;
+  margin: 0 0 10px;
   font-size: 14px;
   font-weight: 600;
 }

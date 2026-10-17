@@ -133,33 +133,90 @@
     />
   } @else {
     <div class="calendar-head">
-      <h2 class="week">{{ daysLabel() }}</h2>
+      <app-view-switcher [views]="availableViews()" [days]="days()" [(view)]="view" [(day)]="selectedDay" />
       <p class="hint muted">
         @switch (auth.role()) {
-          @case ('admin') { Arrastra un bloque a una casilla vacía para moverlo, o haz clic en él para ver el detalle. }
+          @case ('admin') {
+            {{ view() === 'semana' ? 'Arrastra un bloque a una casilla vacía para moverlo, o haz clic en él para ver el detalle.' : 'Haz clic en una clase para ver su detalle o cambiarla.' }}
+          }
           @case ('profesor') { Haz clic en una clase para cancelarla o cambiarla de aula. }
           @default { Haz clic en una clase para ver su detalle. }
         }
       </p>
     </div>
+    @if (view() === 'semana') {
+      <h2 class="week">{{ daysLabel() }}</h2>
+    }
 
     <div class="calendar-layout" [class.with-details]="!!selectedEntry()">
-      <app-schedule-grid
-        [entries]="store.entries()"
-        [subjectsById]="store.subjectsById()"
-        [classroomsById]="store.classroomsById()"
-        [filter]="effectiveFilter()"
-        [conflicts]="conflictsByEntry()"
-        [days]="days()"
-        [cancelledKeys]="cancelledKeys()"
-        [trimEmptyHours]="!auth.isAdmin()"
-        [busy]="store.generating()"
-        (moved)="move($event)"
-        (occupiedDrop)="occupiedDrop()"
-        [selectedId]="selectedId()"
-        [readonly]="!auth.isAdmin()"
-        (selected)="selectedId.set($event.id)"
-      />
+      @switch (view()) {
+        @case ('dia') {
+          <app-day-agenda
+            [entries]="dayEntries()"
+            [date]="selectedDate()"
+            [subjectsById]="store.subjectsById()"
+            [classroomsById]="store.classroomsById()"
+            [groupsById]="store.groupsById()"
+            [teachersById]="store.teachersById()"
+            [conflicts]="conflictsByEntry()"
+            [cancelledKeys]="cancelledKeys()"
+            [selectedId]="selectedId()"
+            (selected)="selectedId.set($event.id)"
+          />
+        }
+        @case ('aulas') {
+          <app-resource-grid
+            mode="aulas"
+            [entries]="dayEntries()"
+            [date]="selectedDate()"
+            [classrooms]="store.classrooms()"
+            [teachers]="store.teachers()"
+            [subjectsById]="store.subjectsById()"
+            [classroomsById]="store.classroomsById()"
+            [groupsById]="store.groupsById()"
+            [teachersById]="store.teachersById()"
+            [conflicts]="conflictsByEntry()"
+            [cancelledKeys]="cancelledKeys()"
+            [selectedId]="selectedId()"
+            (selected)="selectedId.set($event.id)"
+          />
+        }
+        @case ('docentes') {
+          <app-resource-grid
+            mode="docentes"
+            [entries]="dayEntries()"
+            [date]="selectedDate()"
+            [classrooms]="store.classrooms()"
+            [teachers]="store.teachers()"
+            [subjectsById]="store.subjectsById()"
+            [classroomsById]="store.classroomsById()"
+            [groupsById]="store.groupsById()"
+            [teachersById]="store.teachersById()"
+            [conflicts]="conflictsByEntry()"
+            [cancelledKeys]="cancelledKeys()"
+            [selectedId]="selectedId()"
+            (selected)="selectedId.set($event.id)"
+          />
+        }
+        @default {
+          <app-schedule-grid
+            [entries]="store.entries()"
+            [subjectsById]="store.subjectsById()"
+            [classroomsById]="store.classroomsById()"
+            [filter]="effectiveFilter()"
+            [conflicts]="conflictsByEntry()"
+            [days]="days()"
+            [cancelledKeys]="cancelledKeys()"
+            [trimEmptyHours]="!auth.isAdmin()"
+            [busy]="store.generating()"
+            (moved)="move($event)"
+            (occupiedDrop)="occupiedDrop()"
+            [selectedId]="selectedId()"
+            [readonly]="!auth.isAdmin()"
+            (selected)="selectedId.set($event.id)"
+          />
+        }
+      }
 
       @if (selectedEntry(); as entry) {
         @let subject = store.subjectsById().get(entry.materia_id);

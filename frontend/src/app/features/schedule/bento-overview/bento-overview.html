@@ -107,10 +107,10 @@
       <div class="action-buttons">
         @if (auth.isAdmin()) {
           <button type="button" class="btn-primary" (click)="optimization.generate()" [disabled]="optimization.generating() || !ready()">
-            {{ optimization.generating() ? 'Optimizando…' : 'Re-optimizar' }}
+            {{ generateLabel() }}
           </button>
         }
-        <button type="button" class="btn-secondary" (click)="analyze.emit()" [disabled]="!ready()">Analizar huecos</button>
+        <button type="button" class="btn-secondary" (click)="analyze.emit()" [disabled]="!ready()">Analizar horario</button>
       </div>
     } @else {
       <header class="card-head">
@@ -131,4 +131,21 @@
       }
     }
   </article>
+
+  <!-- 4. Totals strip -->
+  <div class="stats" aria-label="Totales">
+    @for (s of stats(); track s.label) {
+      <div class="stat" [style.--stat-color]="s.color">
+        <span class="stat-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path [attr.d]="s.icon" /></svg>
+        </span>
+        @if (ready()) {
+          <span class="stat-value">{{ s.value }}</span>
+        } @else {
+          <span class="skeleton stat-skeleton"></span>
+        }
+        <span class="stat-label">{{ s.label }}</span>
+      </div>
+    }
+  </div>
 </section>

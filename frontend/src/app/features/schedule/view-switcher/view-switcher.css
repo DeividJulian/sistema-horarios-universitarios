@@ -1,0 +1,81 @@
+.switcher {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+/* Linear-style segmented control */
+.segmented {
+  display: inline-flex;
+  padding: 3px;
+  gap: 2px;
+  border-radius: 9px;
+  border: 1px solid var(--border);
+  background: var(--panel);
+}
+
+.segment {
+  padding: 5px 14px;
+  border-radius: 6px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--text-muted);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.segment:hover {
+  color: var(--text);
+}
+
+.segment.active {
+  color: var(--text);
+  background: var(--panel-alt);
+  border-color: var(--border-strong);
+}
+
+.days {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.day {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  padding: 5px 10px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-muted);
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.day:hover {
+  color: var(--text);
+  border-color: var(--border-strong);
+}
+
+.day.active {
+  color: var(--text);
+  border: 1px solid transparent;
+  background:
+    linear-gradient(var(--panel-alt), var(--panel-alt)) padding-box,
+    var(--gradient-accent) border-box;
+}
+
+.day-name {
+  font-weight: 600;
+}
+
+.day-date {
+  font-size: 11px;
+}

@@ -1,33 +1,33 @@
 /*
- * "Cotizador IA" theme for the login and sign-up pages: dark with a teal accent. The variables are declared on :host so they only apply
- * to these pages; the rest of the app keeps its own palette even though some names are the same.
+ * Login and sign-up pages, with the same palette as the rest of the app (technical dark mode, Linear/Vercel style):
+ * charcoal background, #18181b cards with a #27272a border, Inter, and the violet/blue accent only on active borders
+ * and the main button. The short names used by these pages are mapped to the app's tokens here.
  */
 :host {
-  --bg: #0a1316;
-  --surface: #101c20;
-  --surface-2: #16272c;
-  --border: #23393f;
-  --text: #e6ebf5;
-  --muted: #94a3c0;
-  --accent: #2dd4bf;
-  --accent-ink: #04201c;
-  --good: #34d399;
+  --bg: #09090b;
+  --surface: #18181b;
+  --surface-2: #1f1f23;
+  --border: #27272a;
+  --text: #f4f4f5;
+  --muted: #a1a1aa;
+  --accent: #a78bfa;
+  --good: #4ade80;
   --warn: #fbbf24;
   --bad: #f87171;
   --info: #60a5fa;
   --radius: 12px;
-  --mono: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  --mono: var(--font-mono);
   color-scheme: dark;
 
   display: block;
   min-height: 100vh;
-  /* Very soft accent glow behind the card */
+  /* Very soft violet glow behind the card */
   background:
-    radial-gradient(640px 420px at 50% 0%, rgba(45, 212, 191, 0.09), transparent 70%),
+    radial-gradient(640px 420px at 50% 0%, rgba(139, 92, 246, 0.1), transparent 70%),
     var(--bg);
   color: var(--text);
-  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-  font-size: 15px;
+  font-family: var(--font-sans);
+  font-size: 14px;
   line-height: 1.5;
 }
 
@@ -59,15 +59,19 @@
   margin-bottom: 20px;
 }
 
+/* Same mark as the sidebar: dark square with a violet/blue gradient border */
 .brand-mark {
   width: 32px;
   height: 32px;
   border-radius: 9px;
   display: grid;
   place-items: center;
-  background: var(--accent);
-  color: var(--accent-ink);
+  color: #fff;
   font-weight: 800;
+  border: 1px solid transparent;
+  background:
+    linear-gradient(var(--surface), var(--surface)) padding-box,
+    var(--gradient-accent) border-box;
 }
 
 .brand-name {
@@ -186,7 +190,7 @@ h1 {
 }
 
 .field input::placeholder {
-  color: #5b6b80;
+  color: #52525b;
 }
 
 .field input:focus-visible {
@@ -259,27 +263,21 @@ h1 {
   font-size: 14px;
 }
 
-/* ---------- Primary button (overrides the app's gradient button) ---------- */
+/* ---------- Primary button: same as the app (dark fill, violet/blue gradient border) ---------- */
 .btn-primary {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 10px;
   padding: 11px 16px;
-  border: 1px solid var(--accent);
   border-radius: 10px;
-  background: var(--accent);
-  color: var(--accent-ink);
   font: inherit;
   font-weight: 600;
   cursor: pointer;
-  box-shadow: none;
 }
 
 .btn-primary:hover:not(:disabled) {
-  filter: brightness(1.08);
-  transform: none;
-  box-shadow: none;
+  filter: brightness(1.12);
 }
 
 .btn-primary:disabled {
@@ -296,8 +294,8 @@ h1 {
   width: 16px;
   height: 16px;
   border-radius: 50%;
-  border: 2px solid rgba(4, 32, 28, 0.3);
-  border-top-color: var(--accent-ink);
+  border: 2px solid rgba(244, 244, 245, 0.25);
+  border-top-color: var(--text);
   animation: spin 0.8s linear infinite;
 }
 

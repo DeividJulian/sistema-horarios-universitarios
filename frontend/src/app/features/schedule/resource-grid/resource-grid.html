@@ -1,0 +1,54 @@
+<section class="resources" [attr.aria-label]="(mode() === 'aulas' ? 'Ocupación de las aulas el ' : 'Clases de cada docente el ') + longDate()">
+  <header class="resources-head">
+    <h3>{{ mode() === 'aulas' ? 'Aulas' : 'Docentes' }} · {{ longDate() }}</h3>
+    <span class="count">{{ entries().length }} {{ entries().length === 1 ? 'clase' : 'clases' }}</span>
+  </header>
+
+  @if (hours().length === 0) {
+    <p class="empty">No hay clases este día.</p>
+  } @else {
+    <div class="scroll">
+      <div class="table" [style.grid-template-columns]="template()" role="grid">
+        <div class="corner"></div>
+        @for (c of columns(); track c.id) {
+          <div class="col-head" role="columnheader">
+            <strong>{{ c.label }}</strong>
+            <span>{{ c.sub }}</span>
+            <span class="busy" [class.free]="c.hours === 0">
+              {{ c.hours === 0 ? 'Libre todo el día' : c.hours + (c.hours === 1 ? ' hora ocupada' : ' horas ocupadas') }}
+            </span>
+          </div>
+        }
+
+        @for (h of hours(); track h) {
+          <div class="hour">{{ h | hour }}</div>
+          @for (c of columns(); track c.id) {
+            <div class="cell">
+              @if (entryAt(c.id, h); as entry) {
+                @let i = info(entry);
+                <button
+                  type="button"
+                  class="class-card"
+                  [class.selected]="selectedId() === entry.id"
+                  [class.cancelled]="i.cancelled"
+                  [class.conflict]="i.conflicts.length > 0"
+                  [style.--c]="i.color"
+                  (click)="selected.emit(entry)"
+                  [attr.aria-label]="i.title + ', ' + c.label + (i.cancelled ? ', cancelada' : '')"
+                >
+                  <span class="card-title">{{ i.title }}</span>
+                  <span class="card-meta">{{ i.meta }}</span>
+                  @if (i.cancelled) {
+                    <span class="card-tag cancelled tag">Cancelada</span>
+                  } @else if (i.conflicts.length) {
+                    <span class="card-tag conflict tag">Conflicto</span>
+                  }
+                </button>
+              }
+            </div>
+          }
+        }
+      </div>
+    </div>
+  }
+</section>

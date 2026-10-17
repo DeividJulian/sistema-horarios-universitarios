@@ -16,15 +16,13 @@ import {
 } from '../../../core/models';
 import { HourPipe } from '../../../shared/pipes/hour.pipe';
 import { ScheduleFilter, matchesFilter } from '../schedule-filter';
+import { subjectColor } from '../subject-color';
 
 export interface EntryMove {
   entry: ScheduleEntry;
   day: Weekday;
   hour: number;
 }
-
-// Soft pastel family: each subject keeps the same colour (fill and border are derived from it in the CSS)
-const SUBJECT_COLORS = ['#60a5fa', '#4ade80', '#a78bfa', '#2dd4bf', '#f472b6', '#38bdf8', '#c084fc', '#86efac'];
 
 export const cellId = (day: Weekday, hour: number) => `${day}-${hour}`;
 
@@ -113,7 +111,7 @@ export class ScheduleGrid {
   }
 
   protected color(entry: ScheduleEntry): string {
-    return SUBJECT_COLORS[entry.materia_id % SUBJECT_COLORS.length];
+    return subjectColor(entry.materia_id);
   }
 
   protected onDrop(event: CdkDragDrop<ScheduleEntry | null>, day: Weekday, hour: number): void {

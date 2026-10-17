@@ -57,7 +57,7 @@
           [disabled]="optimization.generating()"
           (click)="optimization.generate()"
         >
-          {{ optimization.generating() ? 'Optimizando…' : 'Re-optimizar horario' }}
+          {{ optimization.generating() ? 'Optimizando…' : optimization.status() === 'sin-horario' ? 'Generar horario' : 'Re-optimizar horario' }}
         </button>
       }
     </section>

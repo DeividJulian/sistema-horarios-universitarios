@@ -1,0 +1,47 @@
+<section class="agenda" [attr.aria-label]="'Clases del ' + longDate()">
+  <header class="agenda-head">
+    <h3>{{ longDate() }}</h3>
+    <span class="count">{{ rows().length }} {{ rows().length === 1 ? 'clase' : 'clases' }}</span>
+  </header>
+
+  @if (rows().length === 0) {
+    <p class="empty">No hay clases este día.</p>
+  } @else {
+    <ol class="timeline">
+      @for (r of rows(); track r.entry.id) {
+        <li>
+          <span class="time">{{ r.hour | hour }}</span>
+          <button
+            type="button"
+            class="class-card item"
+            [class.selected]="selectedId() === r.entry.id"
+            [class.cancelled]="r.cancelled"
+            [class.conflict]="r.conflicts.length > 0"
+            [style.--c]="r.cancelled ? '#71717a' : r.conflicts.length ? '#fbbf24' : r.color"
+            (click)="selected.emit(r.entry)"
+            [attr.aria-label]="r.subject + ', ' + r.classroom + (r.cancelled ? ', cancelada' : '')"
+          >
+            <span class="item-top">
+              <span class="card-title">{{ r.subject }}</span>
+              @if (r.cancelled) {
+                <span class="card-tag cancelled">Cancelada</span>
+              } @else if (r.conflicts.length) {
+                <span class="card-tag conflict">Conflicto</span>
+              }
+            </span>
+            <span class="details">
+              <span><b>Hora</b> {{ r.hour | hour }} – {{ r.hour + 1 | hour }}</span>
+              <span><b>Aula</b> {{ r.classroom }}</span>
+              @if (r.group) {
+                <span><b>Grupo</b> {{ r.group }}</span>
+              }
+              @if (r.teacher) {
+                <span><b>Profesor</b> {{ r.teacher }}</span>
+              }
+            </span>
+          </button>
+        </li>
+      }
+    </ol>
+  }
+</section>

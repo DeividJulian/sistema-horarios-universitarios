@@ -303,6 +303,69 @@
   text-overflow: ellipsis;
 }
 
+/* ---------- Totals strip ---------- */
+.stats {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 12px;
+}
+
+.stat {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  grid-template-rows: auto auto;
+  column-gap: 10px;
+  align-items: center;
+  padding: 10px 12px;
+  border-radius: var(--radius);
+  background: var(--panel);
+  border: 1px solid var(--border);
+  transition: border-color 0.2s ease;
+}
+
+.stat:hover {
+  border-color: color-mix(in srgb, var(--stat-color) 45%, var(--border));
+}
+
+.stat-icon {
+  grid-row: span 2;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: grid;
+  place-items: center;
+  color: var(--stat-color);
+  background: color-mix(in srgb, var(--stat-color) 13%, transparent);
+}
+
+.stat-icon svg {
+  width: 17px;
+  height: 17px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.stat-value {
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+}
+
+.stat-skeleton {
+  width: 32px;
+  height: 18px;
+}
+
+.stat-label {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
 /* ---------- Skeletons ---------- */
 .skeleton-ring {
   width: 84px;

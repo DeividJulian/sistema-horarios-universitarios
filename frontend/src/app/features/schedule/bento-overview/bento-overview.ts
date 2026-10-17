@@ -3,8 +3,27 @@ import { RouterLink } from '@angular/router';
 
 import { AuthService } from '../../../core/auth/auth.service';
 import { ScheduleEntry, relativeTime } from '../../../core/models';
+import { CatalogStore } from '../../../core/state/catalog.store';
 import { NoticeStore } from '../../../core/state/notice.store';
 import { OptimizationStore } from '../../../core/state/optimization.store';
+
+interface Stat {
+  label: string;
+  value: number;
+  /** 24x24 stroke icon. */
+  icon: string;
+  color: string;
+}
+
+const ICONS = {
+  teacher: 'M16 19v-1a4 4 0 0 0-8 0v1M12 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6z',
+  classroom: 'M3 21h18M5 21V7l7-4 7 4v14M9 21v-6h6v6',
+  group: 'M17 20v-1a4 4 0 0 0-3-3.87M7 20v-1a4 4 0 0 1 3-3.87M12 12a3 3 0 1 0 0-6 3 3 0 0 0 0 6z',
+  subject: 'M4 19V5a2 2 0 0 1 2-2h12v16H6a2 2 0 0 0-2 2zM8 7h6',
+  calendar: 'M8 3v3M16 3v3M4 9h16M5 5h14v15H5z',
+  cancelled: 'M5 5h14v15H5zM9 11l6 6M15 11l-6 6',
+  bell: 'M6 8a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9M10 21h4',
+};
 
 interface Check {
   label: string;
@@ -29,6 +48,7 @@ export class BentoOverview {
   protected readonly auth = inject(AuthService);
   protected readonly optimization = inject(OptimizationStore);
   protected readonly notices = inject(NoticeStore);
+  private readonly catalog = inject(CatalogStore);
 
   /** Classes the person sees (all of them, or their own). */
   readonly entries = input.required<ScheduleEntry[]>();
@@ -81,4 +101,37 @@ export class BentoOverview {
   });
 
   protected readonly hours = computed(() => this.optimization.stats()?.cumplimiento);
+
+  /** «Generar» the first time, «Re-optimizar» once there is a schedule. */
+  protected readonly generateLabel = computed(() =>
+    this.optimization.generating() ? 'Optimizando…' : this.catalog.entries().length ? 'Re-optimizar' : 'Generar horario',
+  );
+
+  /** Totals strip under the cards (the counters the dashboard always had). */
+  protected readonly stats = computed<Stat[]>(() => {
+    if (this.faculty()) {
+      return [
+        { label: 'Profesores', value: this.catalog.teachers().length, icon: ICONS.teacher, color: '#a78bfa' },
+        { label: 'Aulas', value: this.catalog.classrooms().length, icon: ICONS.classroom, color: '#60a5fa' },
+        { label: 'Grupos', value: this.catalog.groups().length, icon: ICONS.group, color: '#4ade80' },
+        { label: 'Materias', value: this.catalog.subjects().length, icon: ICONS.subject, color: '#f472b6' },
+        { label: 'Clases programadas', value: this.catalog.entries().length, icon: ICONS.calendar, color: '#fbbf24' },
+      ];
+    }
+    const entries = this.entries();
+    const subjects = this.catalog.subjectsById();
+    const stats: Stat[] = [
+      { label: 'Clases a la semana', value: entries.length, icon: ICONS.calendar, color: '#fbbf24' },
+      { label: 'Materias', value: new Set(entries.map((e) => e.materia_id)).size, icon: ICONS.subject, color: '#f472b6' },
+    ];
+    if (this.auth.isTeacher()) {
+      const groups = new Set(entries.map((e) => subjects.get(e.materia_id)?.grupo_id));
+      stats.push({ label: 'Grupos', value: groups.size, icon: ICONS.group, color: '#4ade80' });
+    }
+    stats.push(
+      { label: 'Canceladas próximos días', value: this.cancelled(), icon: ICONS.cancelled, color: '#f87171' },
+      { label: 'Avisos nuevos', value: this.notices.unread(), icon: ICONS.bell, color: '#60a5fa' },
+    );
+    return stats;
+  });
 }

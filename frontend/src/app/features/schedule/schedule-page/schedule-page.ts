@@ -11,6 +11,7 @@ import {
   formatLongDate,
   hourOf,
   shiftText,
+  Weekday,
   toIsoDate,
   upcomingSchoolDays,
 } from '../../../core/models';
@@ -24,6 +25,9 @@ import { StateMessage } from '../../../shared/state-message/state-message';
 import { CONFLICT_LABELS } from '../../analysis/conflict-labels';
 import { AnalysisPanel } from '../analysis-panel/analysis-panel';
 import { BentoOverview } from '../bento-overview/bento-overview';
+import { DayAgenda } from '../day-agenda/day-agenda';
+import { ResourceGrid } from '../resource-grid/resource-grid';
+import { ScheduleView, ViewSwitcher } from '../view-switcher/view-switcher';
 import { EMPTY_FILTER, ScheduleFilter, matchesFilter } from '../schedule-filter';
 import { ScheduleFilters } from '../schedule-filters/schedule-filters';
 import { CancelRequest, ClassroomChangeRequest, EntryDetails } from '../entry-details/entry-details';
@@ -32,7 +36,19 @@ import { EntryMove, ScheduleGrid } from '../schedule-grid/schedule-grid';
 
 @Component({
   selector: 'app-schedule-page',
-  imports: [ScheduleFilters, ScheduleGrid, AnalysisPanel, BentoOverview, StateMessage, RouterLink, EntryDetails, GettingStarted],
+  imports: [
+    ScheduleFilters,
+    ScheduleGrid,
+    AnalysisPanel,
+    BentoOverview,
+    ViewSwitcher,
+    DayAgenda,
+    ResourceGrid,
+    StateMessage,
+    RouterLink,
+    EntryDetails,
+    GettingStarted,
+  ],
   templateUrl: './schedule-page.html',
   styleUrl: './schedule-page.css',
 })
@@ -91,6 +107,17 @@ export class SchedulePage {
   private readonly todayIso = signal(toIsoDate(new Date()));
   protected readonly days = computed(() => upcomingSchoolDays(5, new Date(`${this.todayIso()}T00:00:00`)));
   private readonly dateOf = computed(() => new Map(this.days().map((d) => [d.day, d.date])));
+  // ---------- Views: Semana, Día, Aulas, Docentes ----------
+  protected readonly view = signal<ScheduleView>('semana');
+  /** Day shown by the one-day views (Día, Aulas, Docentes); starts on the first upcoming school day. */
+  protected readonly selectedDay = signal<Weekday>(upcomingSchoolDays(1)[0].day);
+  /** Teachers and students only have their own classes, so the per-classroom and per-teacher views are not for them. */
+  protected readonly availableViews = computed<ScheduleView[]>(() =>
+    this.seesEverything() ? ['semana', 'dia', 'aulas', 'docentes'] : ['semana', 'dia'],
+  );
+  protected readonly selectedDate = computed(() => this.dateOf().get(this.selectedDay()) ?? this.days()[0].date);
+  protected readonly dayEntries = computed(() => this.visibleEntries().filter((e) => e.dia_semana === this.selectedDay()));
+
   protected readonly daysLabel = computed(() => {
     const days = this.days();
     return `Próximos días de clase: del ${formatLongDate(days[0].date)} al ${formatLongDate(days[days.length - 1].date)}`;
