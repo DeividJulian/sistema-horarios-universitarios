@@ -192,8 +192,8 @@ export class SchedulePage {
     });
   }
 
-  protected move({ entry, day, hour }: EntryMove): void {
-    this.store.moveEntry(entry, day, hour).subscribe({
+  protected move({ entry, day, hour, classroomId }: EntryMove): void {
+    this.store.moveEntry(entry, day, hour, classroomId).subscribe({
       next: () => {
         this.notify.success('Bloque movido. Los estudiantes del grupo recibieron un aviso.');
         this.refreshConflicts();
@@ -222,16 +222,18 @@ export class SchedulePage {
     });
   }
 
-  protected async cancelClass({ entry, fecha, motivo }: CancelRequest): Promise<void> {
+  protected async cancelClass({ entry, fecha, motivo, aviso }: CancelRequest): Promise<void> {
     const accepted = await this.confirm.ask({
       title: `¿Cancelar ${this.subjectName(entry)} del ${formatLongDate(fecha)}?`,
-      message: `Los estudiantes del grupo recibirán un aviso con el motivo: «${motivo}». El resto de semanas la clase sigue igual.`,
+      message: aviso
+        ? `Los estudiantes del grupo recibirán este aviso: «${aviso}». El resto de semanas la clase sigue igual.`
+        : `Los estudiantes del grupo recibirán un aviso con el motivo: «${motivo}». El resto de semanas la clase sigue igual.`,
       confirmText: 'Cancelar clase',
       cancelText: 'Volver',
       danger: true,
     });
     if (!accepted) return;
-    this.classChanges.cancel(entry.id, fecha, motivo).subscribe({
+    this.classChanges.cancel(entry.id, fecha, motivo, aviso).subscribe({
       next: () => {
         this.notify.success('Clase cancelada. Los estudiantes ya tienen el aviso.');
         this.notices.refresh();
@@ -250,7 +252,7 @@ export class SchedulePage {
     });
   }
 
-  protected async changeClassroom({ entry, classroomId }: ClassroomChangeRequest): Promise<void> {
+  protected async changeClassroom({ entry, classroomId, aviso }: ClassroomChangeRequest): Promise<void> {
     const classroom = this.store.classroomsById().get(classroomId)?.nombre ?? 'la nueva aula';
     const accepted = await this.confirm.ask({
       title: `¿Pasar ${this.subjectName(entry)} a ${classroom}?`,
@@ -258,7 +260,7 @@ export class SchedulePage {
       confirmText: 'Cambiar aula',
     });
     if (!accepted) return;
-    this.classChanges.changeClassroom(entry.id, classroomId).subscribe({
+    this.classChanges.changeClassroom(entry.id, classroomId, aviso).subscribe({
       next: (saved) => {
         this.store.applyEntry(saved);
         this.notify.success(`Clase pasada a ${classroom}. Se avisó a los estudiantes.`);

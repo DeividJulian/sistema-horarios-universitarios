@@ -1,0 +1,82 @@
+<section class="advisor" aria-labelledby="advisor-title">
+  <header>
+    <h3 id="advisor-title">Resolver con IA</h3>
+    @if (ai.providerName()) {
+      <span class="provider" title="Modelo: {{ ai.status()?.modelo }}">{{ ai.providerName() }}</span>
+    }
+  </header>
+
+  @if (!suggestion()) {
+    <p class="muted small-text">
+      El sistema busca las franjas y aulas donde esta clase cabe sin romper ninguna regla, y la IA te recomienda una.
+      Nada se mueve hasta que tú elijas.
+    </p>
+    @if (ai.status() && !ai.ready()) {
+      <button type="button" class="btn-secondary" disabled title="Falta configurar AI_API_KEY en el servidor (Render)">
+        IA no configurada
+      </button>
+    } @else {
+      <button type="button" class="btn-primary" (click)="ask()" [disabled]="loading() || !ai.status()" [attr.aria-busy]="loading()">
+        {{ loading() ? 'Analizando…' : 'Sugerir solución' }}
+      </button>
+    }
+  }
+
+  <div aria-live="polite">
+    @if (loading()) {
+      <div class="thinking" role="status" aria-label="La IA está analizando el conflicto">
+        <span class="skeleton line w80"></span>
+        <span class="skeleton line"></span>
+        <span class="skeleton line w60"></span>
+      </div>
+    }
+    @if (error(); as msg) {
+      <p class="error" role="alert">{{ msg }}</p>
+    }
+  </div>
+
+  @if (suggestion(); as s) {
+    <p class="explanation">{{ s.explicacion }}</p>
+    @if (s.motivos.length) {
+      <ul class="reasons">
+        @for (m of s.motivos; track $index) {
+          <li>{{ m }}</li>
+        }
+      </ul>
+    }
+
+    @if (s.opciones.length) {
+      <ol class="options" aria-label="Opciones sin conflictos">
+        @for (o of s.opciones; track o.indice) {
+          <li [class.recommended]="o.indice === s.recomendada">
+            <div class="where">
+              <strong>{{ o.dia_semana }}, {{ hourOf(o.hora_inicio) | hour }}</strong>
+              <span>{{ o.aula }} · aforo {{ o.aforo }}</span>
+              <span class="facts">
+                @if (o.indice === s.recomendada) {
+                  <span class="tag ok">Recomendada</span>
+                }
+                @if (o.horas_muertas_grupo + o.horas_muertas_profesor === 0) {
+                  <span class="tag">Sin horas muertas</span>
+                } @else {
+                  <span class="tag warn">{{ o.horas_muertas_grupo + o.horas_muertas_profesor }} h muertas</span>
+                }
+                @if (o.misma_aula) {
+                  <span class="tag">Misma aula</span>
+                }
+              </span>
+            </div>
+            <button type="button" class="btn-secondary small" (click)="apply.emit(o)"
+                    [attr.aria-label]="'Mover la clase al ' + o.dia_semana + ' en ' + o.aula">
+              Mover aquí
+            </button>
+          </li>
+        }
+      </ol>
+    } @else {
+      <p class="muted small-text">No hay ninguna franja libre que cumpla todas las reglas para esta clase.</p>
+    }
+    <p class="footnote">Sugerencia de {{ s.proveedor }} ({{ s.modelo }}). Revísala antes de aplicarla.</p>
+    <button type="button" class="btn-ghost small" (click)="ask()" [disabled]="loading()">Volver a preguntar</button>
+  }
+</section>

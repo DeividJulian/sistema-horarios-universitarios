@@ -1,3 +1,4 @@
+export * from './ai';
 export * from './analysis';
 export * from './availability';
 export * from './classroom';

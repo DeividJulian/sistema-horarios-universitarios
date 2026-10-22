@@ -12,6 +12,8 @@ export interface ScheduleEntry {
 export interface ScheduleEntryMove {
   dia_semana: Weekday;
   hora_inicio: string;
+  /** Optional: also moves the block to this classroom (for example an option suggested by the AI). */
+  aula_id?: number;
 }
 
 /** Figures of the metaheuristic phase (simulated annealing) that improves the CSP schedule. */

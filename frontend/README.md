@@ -71,6 +71,17 @@ Al entrar aparece «Bienvenido, nombre. Entraste como …» con el rol, además 
 
 > El backend está en el plan gratuito de Render, que se apaga tras un rato sin uso. Por eso el login "despierta" al servidor apenas se abre y muestra su estado; la primera entrada puede tardar hasta un minuto.
 
+## Inteligencia artificial
+
+La IA del backend (Groq por defecto) **solo aconseja**: nada cambia hasta que la persona lo confirma.
+
+- **Resolver con IA** (administrador): aparece en el detalle de un bloque en rojo.
+  - Muestra las franjas y aulas donde la clase cabe sin romper ninguna regla, con la recomendada resaltada y la explicación.
+  - «Mover aquí» aplica la opción elegida, que puede incluir un cambio de aula.
+- **Redactar aviso con IA** (profesor de la clase o administrador): está en «Cancelar una clase» y en «Cambiar de aula». Llena el campo «Aviso para los estudiantes», que se puede editar antes de enviarlo; si se deja vacío, el sistema escribe el aviso como antes.
+- **Nombre del proveedor:** se muestra el que dice `GET /ai/status`, nunca uno escrito a mano. Sin clave en el servidor, los botones dicen «IA no configurada».
+- **Código:** `core/api/ai.service.ts`, `core/models/ai.ts` y `features/schedule/conflict-advisor/`.
+
 ## Tecnologías
 
 - Angular 22 con componentes standalone, **signals** y detección de cambios sin Zone.js

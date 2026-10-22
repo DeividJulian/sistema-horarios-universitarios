@@ -98,12 +98,14 @@ export class CatalogStore {
   }
 
   /** Moves a block right away (optimistic update) and rolls back if the backend rejects it. */
-  moveEntry(entry: ScheduleEntry, day: Weekday, hour: number): Observable<ScheduleEntry> {
+  moveEntry(entry: ScheduleEntry, day: Weekday, hour: number, classroomId?: number): Observable<ScheduleEntry> {
     const previous = { ...entry };
     const start = toApiTime(hour);
-    this.replaceEntry({ ...entry, dia_semana: day, hora_inicio: start, hora_fin: toApiTime(hour + 1) });
+    const aula_id = classroomId ?? entry.aula_id;
+    this.replaceEntry({ ...entry, aula_id, dia_semana: day, hora_inicio: start, hora_fin: toApiTime(hour + 1) });
 
-    return this.scheduleApi.move(entry.id, { dia_semana: day, hora_inicio: start }).pipe(
+    const change = classroomId === undefined ? { dia_semana: day, hora_inicio: start } : { dia_semana: day, hora_inicio: start, aula_id };
+    return this.scheduleApi.move(entry.id, change).pipe(
       tap({
         next: (saved) => this.replaceEntry(saved),
         error: () => this.replaceEntry(previous),

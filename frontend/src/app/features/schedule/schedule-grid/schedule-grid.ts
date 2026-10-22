@@ -22,6 +22,8 @@ export interface EntryMove {
   entry: ScheduleEntry;
   day: Weekday;
   hour: number;
+  /** Optional new classroom (the AI suggestions can change it too). */
+  classroomId?: number;
 }
 
 export const cellId = (day: Weekday, hour: number) => `${day}-${hour}`;

@@ -1,8 +1,13 @@
-import { Component, computed, effect, input, output, signal } from '@angular/core';
+import { Component, computed, effect, inject, input, output, signal } from '@angular/core';
+
+import { AiService } from '../../../core/api/ai.service';
+import { apiErrorMessage } from '../../../core/http/api-error';
 
 import {
   Cancellation,
   Classroom,
+  ConflictOption,
+  NoticeKind,
   ScheduleEntry,
   START_HOURS,
   StudentGroup,
@@ -16,17 +21,21 @@ import {
   upcomingDates,
 } from '../../../core/models';
 import { HourPipe } from '../../../shared/pipes/hour.pipe';
+import { ConflictAdvisor } from '../conflict-advisor/conflict-advisor';
 import { EntryMove } from '../schedule-grid/schedule-grid';
 
 export interface CancelRequest {
   entry: ScheduleEntry;
   fecha: string;
   motivo: string;
+  /** Text the students receive, reviewed by the teacher (for example drafted by the AI). */
+  aviso?: string;
 }
 
 export interface ClassroomChangeRequest {
   entry: ScheduleEntry;
   classroomId: number;
+  aviso?: string;
 }
 
 /**
@@ -35,7 +44,7 @@ export interface ClassroomChangeRequest {
  */
 @Component({
   selector: 'app-entry-details',
-  imports: [HourPipe],
+  imports: [HourPipe, ConflictAdvisor],
   templateUrl: './entry-details.html',
   styleUrl: './entry-details.css',
 })
@@ -81,6 +90,13 @@ export class EntryDetails {
   protected readonly reason = signal('');
   protected readonly targetClassroom = signal<number | null>(null);
 
+  protected readonly ai = inject(AiService);
+  /** Notice for the students of each form; empty = the server writes it. */
+  protected readonly cancelNotice = signal('');
+  protected readonly roomNotice = signal('');
+  protected readonly drafting = signal<NoticeKind | null>(null);
+  protected readonly draftError = signal<{ kind: NoticeKind; message: string } | null>(null);
+
   constructor() {
     // The "move to" selectors start at the block's current slot
     effect(() => {
@@ -93,16 +109,52 @@ export class EntryDetails {
     effect(() => {
       this.entry();
       this.reason.set('');
+      this.cancelNotice.set('');
+      this.roomNotice.set('');
+      this.draftError.set(null);
+    });
+    effect(() => {
+      if (this.canAdjust() || !this.readonly()) this.ai.loadStatus();
     });
   }
 
+  /** Asks the AI for the notice; the teacher can edit it before sending. */
+  protected draftNotice(kind: NoticeKind): void {
+    if (this.drafting()) return;
+    this.drafting.set(kind);
+    this.draftError.set(null);
+    const reason = this.reason().trim();
+    const request =
+      kind === 'cancelacion'
+        ? { horario_id: this.entry().id, tipo: kind, fecha: this.cancelDate() || undefined, motivo: reason || undefined }
+        : { horario_id: this.entry().id, tipo: kind, aula_id: this.targetClassroom() ?? undefined };
+    const entryId = this.entry().id;
+    this.ai.draftNotice(request).subscribe({
+      next: (draft) => {
+        this.drafting.set(null);
+        if (entryId !== this.entry().id) return;
+        (kind === 'cancelacion' ? this.cancelNotice : this.roomNotice).set(draft.mensaje);
+      },
+      error: (err: unknown) => {
+        this.drafting.set(null);
+        this.draftError.set({ kind, message: apiErrorMessage(err, 'La IA no pudo redactar el aviso. Intenta de nuevo.') });
+      },
+    });
+  }
+
+  protected applyOption(option: ConflictOption): void {
+    this.moveRequested.emit({ entry: this.entry(), day: option.dia_semana as Weekday, hour: hourOf(option.hora_inicio), classroomId: option.aula_id });
+  }
+
   protected requestCancel(): void {
-    this.cancelRequested.emit({ entry: this.entry(), fecha: this.cancelDate(), motivo: this.reason().trim() });
+    const aviso = this.cancelNotice().trim();
+    this.cancelRequested.emit({ entry: this.entry(), fecha: this.cancelDate(), motivo: this.reason().trim(), ...(aviso ? { aviso } : {}) });
   }
 
   protected requestClassroomChange(): void {
     const classroomId = this.targetClassroom();
-    if (classroomId !== null) this.classroomChangeRequested.emit({ entry: this.entry(), classroomId });
+    const aviso = this.roomNotice().trim();
+    if (classroomId !== null) this.classroomChangeRequested.emit({ entry: this.entry(), classroomId, ...(aviso ? { aviso } : {}) });
   }
 
   protected isSameSlot(): boolean {

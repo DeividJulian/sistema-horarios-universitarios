@@ -78,7 +78,10 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
       'Usa los filtros de profesor, grupo o aula para ver solo lo que te interesa.',
       'Haz clic en un bloque para ver su detalle, moverlo, cancelarlo en una fecha, cambiarlo de aula o eliminarlo. También puedes arrastrarlo a una casilla vacía. Los estudiantes del grupo reciben un aviso de cada cambio.',
     ],
-    tips: ['Un bloque en rojo tiene un conflicto (por ejemplo, el profesor ya no está disponible a esa hora). Si cambiaste datos después de generar, vuelve a generar el horario.'],
+    tips: [
+      'Un bloque en rojo tiene un conflicto (por ejemplo, el profesor ya no está disponible a esa hora). Si cambiaste datos después de generar, vuelve a generar el horario.',
+      'En el detalle de un bloque en rojo, «Resolver con IA» te muestra las franjas y aulas donde cabe sin romper ninguna regla y te recomienda una. Nada se mueve hasta que pulses «Mover aquí».',
+    ],
   },
   {
     title: '7. Administra los usuarios',
@@ -105,7 +108,7 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
     title: '1. Cancela una clase',
     roles: ['profesor'],
     paragraphs: [
-      'Haz clic en la clase, elige la fecha (por ejemplo, el próximo lunes) y escribe el motivo. Pulsa «Cancelar clase y avisar».',
+      'Haz clic en la clase, elige la fecha (por ejemplo, el próximo lunes) y escribe el motivo. Si quieres, pulsa «Redactar aviso con IA» y revisa el texto que recibirán tus estudiantes. Pulsa «Cancelar clase y avisar».',
       'Solo se cancela esa fecha: las demás semanas la clase sigue igual. Los estudiantes del grupo reciben un aviso con el motivo, y en el calendario la clase aparece tachada.',
     ],
     tips: ['Si al final sí puedes dictarla, abre la clase y pulsa «Restablecer»: los estudiantes también reciben ese aviso.'],

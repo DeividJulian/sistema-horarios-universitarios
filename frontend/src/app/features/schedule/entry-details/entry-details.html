@@ -41,6 +41,9 @@
         <li><span class="icon" aria-hidden="true">!</span>{{ c }}</li>
       }
     </ul>
+    @if (!readonly()) {
+      <app-conflict-advisor [entryId]="entry().id" (apply)="applyOption($event)" />
+    }
   }
 
   @if (cancellations().length) {
@@ -83,6 +86,29 @@
             placeholder="Ej.: cita médica, reunión académica…"
           />
         </label>
+        <div class="notice-writer">
+          <label class="field">
+            <span class="field-label">Aviso para los estudiantes (opcional)</span>
+            <textarea
+              rows="4"
+              maxlength="600"
+              [value]="cancelNotice()"
+              (input)="cancelNotice.set($any($event.target).value)"
+              placeholder="Si lo dejas vacío, el sistema escribe el aviso con la fecha, la hora y el motivo."
+            ></textarea>
+          </label>
+          @if (ai.ready()) {
+            <button type="button" class="btn-secondary small" (click)="draftNotice('cancelacion')" [disabled]="drafting() !== null" [attr.aria-busy]="drafting() === 'cancelacion'">
+              {{ drafting() === 'cancelacion' ? 'Redactando…' : 'Redactar aviso con IA' }}
+              <span class="provider">· {{ ai.providerName() }}</span>
+            </button>
+          }
+          @if (draftError(); as e) {
+            @if (e.kind === 'cancelacion') {
+              <p class="draft-error" role="alert">{{ e.message }}</p>
+            }
+          }
+        </div>
         <button type="button" class="btn-danger" (click)="requestCancel()" [disabled]="reason().trim().length < 3">
           Cancelar clase y avisar
         </button>
@@ -102,6 +128,29 @@
             }
           </select>
         </label>
+        <div class="notice-writer">
+          <label class="field">
+            <span class="field-label">Aviso para los estudiantes (opcional)</span>
+            <textarea
+              rows="4"
+              maxlength="600"
+              [value]="roomNotice()"
+              (input)="roomNotice.set($any($event.target).value)"
+              placeholder="Si lo dejas vacío, el sistema escribe el aviso con el aula nueva."
+            ></textarea>
+          </label>
+          @if (ai.ready()) {
+            <button type="button" class="btn-secondary small" (click)="draftNotice('cambio_aula')" [disabled]="drafting() !== null" [attr.aria-busy]="drafting() === 'cambio_aula'">
+              {{ drafting() === 'cambio_aula' ? 'Redactando…' : 'Redactar aviso con IA' }}
+              <span class="provider">· {{ ai.providerName() }}</span>
+            </button>
+          }
+          @if (draftError(); as e) {
+            @if (e.kind === 'cambio_aula') {
+              <p class="draft-error" role="alert">{{ e.message }}</p>
+            }
+          }
+        </div>
         <button type="button" class="btn-primary" (click)="requestClassroomChange()" [disabled]="targetClassroom() === null">
           Cambiar aula y avisar
         </button>

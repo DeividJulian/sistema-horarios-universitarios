@@ -57,7 +57,8 @@ h1 {
 
 button,
 input,
-select {
+select,
+textarea {
   font-family: inherit;
 }
 
@@ -172,8 +173,10 @@ button:disabled {
   font-weight: 700;
 }
 
+
 .field input,
-.field select {
+.field select,
+.field textarea {
   background-color: var(--panel-alt);
   color: var(--text);
   border: 1px solid var(--border);

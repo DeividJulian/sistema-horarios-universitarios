@@ -243,3 +243,34 @@ dd .muted {
     max-height: none;
   }
 }
+
+/* Optional notice for the students, which the AI can draft */
+.notice-writer {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.notice-writer textarea {
+  width: 100%;
+  resize: vertical;
+  font: inherit;
+  font-size: 13px;
+}
+
+.notice-writer .small {
+  align-self: flex-start;
+  padding: 5px 10px;
+  font-size: 12px;
+}
+
+.notice-writer .provider {
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.draft-error {
+  margin: 0;
+  font-size: 12px;
+  color: var(--danger);
+}

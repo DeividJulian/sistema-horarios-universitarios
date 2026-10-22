@@ -1,6 +1,7 @@
 import { Component, effect, inject, untracked } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 
+import { AiService } from './core/api/ai.service';
 import { AuthService } from './core/auth/auth.service';
 import { LayoutService } from './core/services/layout.service';
 import { TabSyncService } from './core/services/tab-sync.service';
@@ -28,6 +29,7 @@ export class App {
   private readonly tutorial = inject(TutorialService);
   private readonly notices = inject(NoticeStore);
   private readonly optimization = inject(OptimizationStore);
+  private readonly ai = inject(AiService);
   protected readonly layout = inject(LayoutService);
 
   constructor() {
@@ -49,6 +51,7 @@ export class App {
           this.store.reset();
           this.notices.reset();
           this.optimization.reset();
+          this.ai.reset();
           this.layout.closeSidebar();
         });
       }
