@@ -8,7 +8,7 @@ import { ConfirmService } from '../../../core/services/confirm.service';
 import { NotificationService } from '../../../core/services/notification.service';
 import { CatalogStore } from '../../../core/state/catalog.store';
 import { errorMessage } from '../../../shared/forms/error-message';
-import { NAME_RULES, trimmedLength } from '../../../shared/forms/validators';
+import { NAME_RULES } from '../../../shared/forms/validators';
 
 @Component({
   selector: 'app-users-section',
@@ -33,14 +33,11 @@ export class UsersSection {
   protected readonly form = inject(NonNullableFormBuilder).group({
     nombre: ['', NAME_RULES],
     email: ['', [Validators.required, Validators.email]],
-    password: ['', [Validators.required, trimmedLength(8, 128)]],
     rol: ['estudiante' as Role],
     grupo_id: [null as number | null],
   });
 
   protected readonly selectedRole = signal<Role>('estudiante');
-  /** Password each account went back to, shown in its row so the administrator can pass it on. */
-  protected readonly resetPasswords = signal<ReadonlyMap<number, string>>(new Map());
 
   /** Students first, then teachers, then the rest; each block sorted by name. */
   protected readonly sortedUsers = computed(() => {
@@ -84,7 +81,6 @@ export class UsersSection {
       .create({
         nombre: data.nombre.trim(),
         email: data.email.trim(),
-        password: data.password,
         rol: data.rol,
         grupo_id: data.rol === 'estudiante' ? data.grupo_id : null,
       })
@@ -109,25 +105,6 @@ export class UsersSection {
         this.notify.success(`${saved.nombre} ahora está en ${this.store.groupsById().get(groupId)?.nombre ?? 'el nuevo grupo'}.`);
       },
       error: (err) => this.notify.apiError(err, 'No se pudo cambiar el grupo.'),
-    });
-  }
-
-  protected async resetPassword(user: User): Promise<void> {
-    const accepted = await this.confirm.ask({
-      title: `¿Restablecer la contraseña de ${user.nombre}?`,
-      message:
-        user.rol === 'profesor'
-          ? 'Volverá a la contraseña inicial de los profesores. Con ella puede entrar o activar de nuevo su cuenta en «Registrarse» eligiendo una propia.'
-          : 'Volverá a la contraseña inicial de su rol. Después puede cambiarla desde «Cambiar contraseña».',
-      confirmText: 'Restablecer',
-    });
-    if (!accepted) return;
-    this.api.resetPassword(user.id).subscribe({
-      next: (result) => {
-        this.resetPasswords.update((map) => new Map(map).set(user.id, result.password));
-        this.notify.success(result.mensaje);
-      },
-      error: (err) => this.notify.apiError(err, 'No se pudo restablecer la contraseña.'),
     });
   }
 

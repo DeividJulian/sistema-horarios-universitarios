@@ -1,0 +1,56 @@
+<form class="form" (submit)="verify($event)" novalidate>
+  <div class="sent" role="status">
+    <strong>Revisa tu correo</strong>
+    <span>
+      Enviamos un código de 6 dígitos a <strong>{{ email() }}</strong>. Vence en 10 minutos; si no lo ves, busca en spam.
+    </span>
+    @if (inbox(); as box) {
+      <a [href]="box.url" target="_blank" rel="noopener">{{ box.label }}</a>
+    }
+  </div>
+
+  <div class="field">
+    <label class="field-label" for="code">Código de verificación</label>
+    <input
+      #codeInput
+      id="code"
+      class="code-input"
+      [formControl]="code"
+      inputmode="numeric"
+      autocomplete="one-time-code"
+      maxlength="20"
+      placeholder="000000"
+      (input)="onInput()"
+      [attr.aria-invalid]="code.touched && code.invalid"
+      [attr.aria-describedby]="code.touched && code.invalid ? 'code-error' : null"
+    />
+    @if (code.touched && code.invalid) {
+      <span class="field-error" id="code-error">Escribe los 6 números del código.</span>
+    }
+  </div>
+
+  <button type="submit" class="btn-primary submit" [disabled]="verifying()" [attr.aria-busy]="verifying()">
+    @if (verifying()) {
+      <span class="spinner" aria-hidden="true"></span> Verificando…
+    } @else {
+      {{ submitLabel() }}
+    }
+  </button>
+
+  <div class="messages" aria-live="polite">
+    @if (error(); as msg) {
+      <p class="alert">{{ msg }}</p>
+    }
+  </div>
+
+  <div class="code-actions">
+    <button type="button" class="link-button" (click)="back.emit()">← Cambiar correo</button>
+    @if (cooldown() > 0) {
+      <span class="wait" aria-live="polite">Reenviar en {{ cooldown() }} s</span>
+    } @else {
+      <button type="button" class="link-button" [disabled]="resending()" (click)="resend()">
+        {{ resending() ? 'Enviando…' : 'Reenviar código' }}
+      </button>
+    }
+  </div>
+</form>

@@ -37,7 +37,7 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
     title: '2. Registra los profesores y su disponibilidad',
     roles: ['admin'],
     paragraphs: [
-      'En Gestión → Profesores crea a cada profesor con su nombre y correo. Con ese correo el profesor entra a la aplicación (contraseña inicial Profesor2026*).',
+      'En Gestión → Profesores crea a cada profesor con su nombre y correo. Con ese correo el profesor entra a la aplicación: le llega un código de 6 dígitos, sin contraseñas.',
       'Luego pulsa «Disponibilidad» y marca en la cuadrícula las horas en que puede dar clase. Puedes hacer clic en una casilla o arrastrar para marcar varias a la vez.',
     ],
     tips: ['El generador solo pone clases en las horas marcadas. Si un profesor tiene pocas horas libres, algunas materias no se podrán programar.'],
@@ -122,7 +122,7 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
     title: '3. Revisa los avisos',
     roles: ['profesor'],
     paragraphs: ['En «Avisos» ves todo lo que tus estudiantes recibieron sobre tus clases.'],
-    tips: ['Tu contraseña inicial es la misma para todos los profesores: cámbiala en el menú de tu cuenta (tu nombre, arriba a la derecha) → «Cambiar contraseña».', REOPEN_TIP],
+    tips: ['Para entrar no necesitas contraseña: escribe tu correo y usa el código de 6 dígitos que te llega.', REOPEN_TIP],
     link: { path: '/avisos', text: 'Ir a Avisos' },
   },
 

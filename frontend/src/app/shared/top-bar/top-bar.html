@@ -46,12 +46,10 @@
               <strong>{{ user.nombre }}</strong>
               <span>{{ user.email }}</span>
             </p>
-            <button type="button" role="menuitem" (click)="menuOpen.set(false); password.open()">Cambiar contraseña</button>
-            <button type="button" role="menuitem" class="logout" (click)="logout()">Salir</button>
+            <button type="button" role="menuitem" class="logout" (click)="logout()">Cerrar sesión</button>
           </div>
         }
       </div>
     }
   </div>
 </header>
-<app-password-dialog #password />

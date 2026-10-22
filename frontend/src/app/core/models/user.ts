@@ -10,12 +10,14 @@ export interface User {
   rol: Role;
   profesor_id?: number | null;
   grupo_id?: number | null;
+  /** False until the person enters their first emailed code. */
+  verificado?: boolean;
 }
 
+/** New account created by an administrator: the person enters with a code sent to this email. */
 export interface UserInput {
   nombre: string;
   email: string;
-  password: string;
   rol: Role;
   grupo_id?: number | null;
 }
@@ -26,13 +28,17 @@ export interface LoginResponse {
   usuario: User;
 }
 
-/** Self sign-up: students choose their group; teachers activate the account of their registered email. */
+/** Self sign-up, only for students (teachers already have an account: they just sign in). */
 export interface RegisterInput {
-  rol: 'estudiante' | 'profesor';
+  nombre: string;
   email: string;
-  password: string;
-  nombre?: string;
-  grupo_id?: number;
+  grupo_id: number;
+}
+
+/** Answer of POST /auth/register and /auth/login: a six-digit code went to this email. */
+export interface CodeSent {
+  mensaje: string;
+  email: string;
 }
 
 /** Group offered in the sign-up form (GET /auth/register-options). */
@@ -40,15 +46,6 @@ export interface RegisterGroup {
   id: number;
   nombre: string;
   jornada: string;
-}
-
-/** Test account offered on the login page (GET /auth/demo-accounts). */
-export interface DemoAccount {
-  rol: Role;
-  etiqueta: string;
-  descripcion: string;
-  email: string;
-  password: string;
 }
 
 export const ROLE_LABELS: Record<Role, string> = {

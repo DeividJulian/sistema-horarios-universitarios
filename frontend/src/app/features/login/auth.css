@@ -263,6 +263,30 @@ h1 {
   font-size: 14px;
 }
 
+/* Link inside an error (for example "Crear cuenta con este correo") */
+.alert a {
+  display: block;
+  margin-top: 6px;
+  color: var(--accent);
+  font-weight: 600;
+}
+
+/* Help text under a field */
+.hint {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+/* Informative note (blue) */
+.note {
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(96, 165, 250, 0.45);
+  color: var(--info);
+  font-size: 13px;
+}
+
 /* ---------- Primary button: same as the app (dark fill, violet/blue gradient border) ---------- */
 .btn-primary {
   display: flex;

@@ -5,34 +5,18 @@
       <span class="brand-name">Horarios y Aulas</span>
     </div>
 
-    <p class="eyebrow">Crear cuenta</p>
+    <p class="eyebrow">Crear cuenta de estudiante</p>
     <h1 id="register-title">Registrarse</h1>
-    <p class="lead">Crea tu cuenta para ver tu horario. Al entrar, el sistema sabrá si eres profesor o estudiante.</p>
 
-    <form [formGroup]="form" (ngSubmit)="submit()" novalidate class="form">
-      <fieldset class="account-type" [disabled]="submitting()">
-        <legend class="field-label">Tipo de cuenta</legend>
-        <div class="types" role="radiogroup">
-          <label class="type" [class.selected]="type() === 'estudiante'">
-            <input type="radio" name="tipo" value="estudiante" [checked]="type() === 'estudiante'" (change)="chooseType('estudiante')" />
-            <strong>Soy estudiante</strong>
-            <span>Veré el horario de mi grupo</span>
-          </label>
-          <label class="type" [class.selected]="type() === 'profesor'">
-            <input type="radio" name="tipo" value="profesor" [checked]="type() === 'profesor'" (change)="chooseType('profesor')" />
-            <strong>Soy profesor</strong>
-            <span>Activo mi cuenta y veo mis clases</span>
-          </label>
-        </div>
-      </fieldset>
+    @if (step() === 'form') {
+      <p class="lead">Crea tu cuenta para ver el horario de tu grupo. Te enviaremos un código a tu correo para activarla.</p>
 
-      @if (type() === 'profesor') {
-        <p class="note">
-          Usa el correo con el que el administrador te registró como profesor. Solo eliges tu contraseña; tu nombre ya está en el sistema.
-        </p>
-      }
+      <p class="note">
+        <strong>¿Eres profesor?</strong> No necesitas registrarte: <a routerLink="/login">inicia sesión</a> con el correo con el que el
+        administrador te registró y te enviaremos un código.
+      </p>
 
-      @if (type() === 'estudiante') {
+      <form [formGroup]="form" (ngSubmit)="submit()" novalidate class="form">
         <div class="field">
           <label class="field-label" for="register-name">Nombre completo</label>
           <input
@@ -46,26 +30,24 @@
             <span class="field-error" id="register-name-error">{{ msg }}</span>
           }
         </div>
-      }
 
-      <div class="field">
-        <label class="field-label" for="register-email">{{ type() === 'profesor' ? 'Correo registrado como profesor' : 'Correo' }}</label>
-        <input
-          id="register-email"
-          formControlName="email"
-          type="email"
-          inputmode="email"
-          autocomplete="username"
-          placeholder="nombre@ucc.edu.co"
-          [attr.aria-invalid]="!!fieldError('email')"
-          [attr.aria-describedby]="fieldError('email') ? 'register-email-error' : null"
-        />
-        @if (fieldError('email'); as msg) {
-          <span class="field-error" id="register-email-error">{{ msg }}</span>
-        }
-      </div>
+        <div class="field">
+          <label class="field-label" for="register-email">Correo</label>
+          <input
+            id="register-email"
+            formControlName="email"
+            type="email"
+            inputmode="email"
+            autocomplete="email"
+            placeholder="nombre@ucc.edu.co"
+            [attr.aria-invalid]="!!fieldError('email')"
+            [attr.aria-describedby]="fieldError('email') ? 'register-email-error' : null"
+          />
+          @if (fieldError('email'); as msg) {
+            <span class="field-error" id="register-email-error">{{ msg }}</span>
+          }
+        </div>
 
-      @if (type() === 'estudiante') {
         <div class="field">
           <label class="field-label" for="register-group">Grupo (semestre)</label>
           <select
@@ -88,79 +70,31 @@
             <span class="field-error">Todavía no hay grupos registrados. Pídele al administrador que los cree.</span>
           }
         </div>
-      }
 
-      <div class="field">
-        <label class="field-label" for="register-password">Contraseña (mínimo 8 caracteres)</label>
-        <span class="password">
-          <input
-            id="register-password"
-            formControlName="password"
-            [type]="showPassword() ? 'text' : 'password'"
-            autocomplete="new-password"
-            [attr.aria-invalid]="!!fieldError('password')"
-            [attr.aria-describedby]="fieldError('password') ? 'register-password-error' : null"
-          />
-          <button
-            type="button"
-            class="toggle"
-            [disabled]="submitting()"
-            (click)="showPassword.set(!showPassword())"
-            [attr.aria-label]="showPassword() ? 'Ocultar contraseña' : 'Mostrar contraseña'"
-            [attr.aria-pressed]="showPassword()"
-            aria-controls="register-password register-confirmation"
-            [title]="showPassword() ? 'Ocultar contraseña' : 'Mostrar contraseña'"
-          >
-            <svg viewBox="0 0 24 24" aria-hidden="true">
-              <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z" />
-              <circle cx="12" cy="12" r="3" />
-              @if (showPassword()) {
-                <path d="M4 4l16 16" />
-              }
-            </svg>
-          </button>
-        </span>
-        @if (fieldError('password'); as msg) {
-          <span class="field-error" id="register-password-error">{{ msg }}</span>
-        }
-      </div>
+        <button type="submit" class="btn-primary submit" [disabled]="submitting()" [attr.aria-busy]="submitting()">
+          @if (submitting()) {
+            <span class="spinner" aria-hidden="true"></span> Enviando código…
+          } @else {
+            Crear cuenta y enviarme el código
+          }
+        </button>
 
-      <div class="field">
-        <label class="field-label" for="register-confirmation">Repite la contraseña</label>
-        <input
-          id="register-confirmation"
-          formControlName="confirmacion"
-          [type]="showPassword() ? 'text' : 'password'"
-          autocomplete="new-password"
-          [attr.aria-invalid]="!!fieldError('confirmacion')"
-          [attr.aria-describedby]="fieldError('confirmacion') ? 'register-confirmation-error' : null"
-        />
-        @if (fieldError('confirmacion'); as msg) {
-          <span class="field-error" id="register-confirmation-error">{{ msg }}</span>
-        }
-      </div>
+        <!-- Always in the page, so screen readers announce what appears inside -->
+        <div class="messages" aria-live="polite">
+          @if (error(); as msg) {
+            <p class="alert">{{ msg }}</p>
+          }
+          @if (slow()) {
+            <p class="slow">El servidor está despertando, puede tardar hasta un minuto. No cierres la página.</p>
+          }
+        </div>
+      </form>
 
-      <button type="submit" class="btn-primary submit" [disabled]="submitting()" [attr.aria-busy]="submitting()">
-        @if (submitting()) {
-          <span class="spinner" aria-hidden="true"></span> Creando cuenta…
-        } @else {
-          Crear cuenta
-        }
-      </button>
-
-      <!-- Always in the page, so screen readers announce what appears inside -->
-      <div class="messages" aria-live="polite">
-        @if (error(); as msg) {
-          <p class="alert">{{ msg }}</p>
-        }
-        @if (slow()) {
-          <p class="slow">El servidor está despertando, puede tardar hasta un minuto. No cierres la página.</p>
-        }
-      </div>
-    </form>
-
-    <p class="switch">¿Ya tienes cuenta? <a routerLink="/login">Inicia sesión</a></p>
-    <p class="admin-note">Las cuentas de administrador las crea otro administrador desde Gestión → Usuarios.</p>
+      <p class="switch">¿Ya tienes cuenta? <a routerLink="/login">Inicia sesión</a></p>
+      <p class="admin-note">Las cuentas de administrador y de consulta las crea un administrador desde Gestión → Usuarios.</p>
+    } @else {
+      <app-code-step [email]="sentTo()" submitLabel="Activar mi cuenta" (verified)="enter($event)" (back)="step.set('form')" />
+    }
   </div>
   <p class="footer">Universidad Cooperativa de Colombia · Programación Orientada a la Web</p>
 </section>

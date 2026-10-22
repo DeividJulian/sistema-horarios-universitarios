@@ -8,12 +8,11 @@ import { ROLE_LABELS } from '../../core/models';
 import { LayoutService } from '../../core/services/layout.service';
 import { TutorialService } from '../../core/services/tutorial.service';
 import { NoticeStore } from '../../core/state/notice.store';
-import { PasswordDialog } from '../password-dialog/password-dialog';
 
 /** Top bar of the workspace: page title, tutorial, notices and the account menu. */
 @Component({
   selector: 'app-top-bar',
-  imports: [RouterLink, PasswordDialog],
+  imports: [RouterLink],
   templateUrl: './top-bar.html',
   styleUrl: './top-bar.css',
   host: { '(document:click)': 'closeMenuOutside($event)', '(document:keydown.escape)': 'menuOpen.set(false)' },

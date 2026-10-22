@@ -7,7 +7,7 @@
 
     <p class="eyebrow">Acceso al sistema</p>
     <h1 id="login-title">Iniciar sesión</h1>
-    <p class="lead">Entra con tu correo institucional para consultar o administrar los horarios.</p>
+    <p class="lead">Sin contraseñas: escribe tu correo y te enviamos un código de 6 dígitos para entrar.</p>
     <p class="profiles">Perfiles: Administrador, Profesor y Estudiante. El sistema reconoce tu perfil al ingresar.</p>
 
     <p class="server" [class]="'server ' + server()" role="status">
@@ -19,80 +19,55 @@
       }
     </p>
 
-    <form [formGroup]="form" (ngSubmit)="submit()" novalidate class="form">
-      <div class="field">
-        <label class="field-label" for="login-email">Correo</label>
-        <input
-          id="login-email"
-          formControlName="email"
-          type="email"
-          autocomplete="username"
-          inputmode="email"
-          placeholder="nombre@ucc.edu.co"
-          [attr.aria-invalid]="!!fieldError('email')"
-          [attr.aria-describedby]="fieldError('email') ? 'login-email-error' : null"
-        />
-        @if (fieldError('email'); as msg) {
-          <span class="field-error" id="login-email-error">{{ msg }}</span>
-        }
-      </div>
-
-      <div class="field">
-        <label class="field-label" for="login-password">Contraseña</label>
-        <span class="password">
+    @if (step() === 'email') {
+      <form [formGroup]="form" (ngSubmit)="submit()" novalidate class="form">
+        <div class="field">
+          <label class="field-label" for="login-email">Correo</label>
           <input
-            id="login-password"
-            formControlName="password"
-            [type]="showPassword() ? 'text' : 'password'"
-            autocomplete="current-password"
-            placeholder="••••••••"
-            [attr.aria-invalid]="!!fieldError('password')"
-            [attr.aria-describedby]="fieldError('password') ? 'login-password-error' : null"
+            id="login-email"
+            formControlName="email"
+            type="email"
+            autocomplete="email"
+            inputmode="email"
+            placeholder="nombre@ucc.edu.co"
+            [attr.aria-invalid]="!!emailError()"
+            [attr.aria-describedby]="emailError() ? 'login-email-error' : 'login-email-hint'"
           />
-          <button
-            type="button"
-            class="toggle"
-            [disabled]="submitting()"
-            (click)="showPassword.set(!showPassword())"
-            [attr.aria-label]="showPassword() ? 'Ocultar contraseña' : 'Mostrar contraseña'"
-            [attr.aria-pressed]="showPassword()"
-            aria-controls="login-password"
-            [title]="showPassword() ? 'Ocultar contraseña' : 'Mostrar contraseña'"
-          >
-            <svg viewBox="0 0 24 24" aria-hidden="true">
-              <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z" />
-              <circle cx="12" cy="12" r="3" />
-              @if (showPassword()) {
-                <path d="M4 4l16 16" />
+          @if (emailError(); as msg) {
+            <span class="field-error" id="login-email-error">{{ msg }}</span>
+          } @else {
+            <span class="hint" id="login-email-hint">Profesores: usen el correo con el que el administrador los registró.</span>
+          }
+        </div>
+
+        <button type="submit" class="btn-primary submit" [disabled]="submitting()" [attr.aria-busy]="submitting()">
+          @if (submitting()) {
+            <span class="spinner" aria-hidden="true"></span> Enviando código…
+          } @else {
+            Enviarme el código
+          }
+        </button>
+
+        <!-- Always in the page, so screen readers announce what appears inside -->
+        <div class="messages" aria-live="polite">
+          @if (error(); as msg) {
+            <p class="alert">
+              {{ msg }}
+              @if (noAccount()) {
+                <a routerLink="/registro" [queryParams]="{ email: typedEmail() }">Crear cuenta de estudiante con este correo</a>
               }
-            </svg>
-          </button>
-        </span>
-        @if (fieldError('password'); as msg) {
-          <span class="field-error" id="login-password-error">{{ msg }}</span>
-        }
-      </div>
+            </p>
+          }
+          @if (slow()) {
+            <p class="slow">El servidor está despertando, puede tardar hasta un minuto. No cierres la página.</p>
+          }
+        </div>
+      </form>
 
-      <button type="submit" class="btn-primary submit" [disabled]="submitting()" [attr.aria-busy]="submitting()">
-        @if (submitting()) {
-          <span class="spinner" aria-hidden="true"></span> Ingresando…
-        } @else {
-          Ingresar
-        }
-      </button>
-
-      <!-- Always in the page, so screen readers announce what appears inside -->
-      <div class="messages" aria-live="polite">
-        @if (error(); as msg) {
-          <p class="alert">{{ msg }}</p>
-        }
-        @if (slow()) {
-          <p class="slow">El servidor está despertando, puede tardar hasta un minuto. No cierres la página.</p>
-        }
-      </div>
-    </form>
-
-    <p class="switch">¿No tienes cuenta? <a routerLink="/registro">Regístrate</a></p>
+      <p class="switch">¿Eres estudiante y no tienes cuenta? <a routerLink="/registro">Regístrate</a></p>
+    } @else {
+      <app-code-step [email]="email()" (verified)="enter($event)" (back)="step.set('email')" />
+    }
   </div>
   <p class="footer">Universidad Cooperativa de Colombia · Programación Orientada a la Web</p>
 </section>

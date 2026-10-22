@@ -1,74 +1,5 @@
 /* Only what the sign-up page adds to the shared theme in ../auth.css */
 
-.account-type {
-  margin: 0;
-  padding: 0;
-  border: none;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.account-type legend {
-  padding: 0;
-  margin-bottom: 6px;
-}
-
-.types {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px;
-}
-
-.type {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  padding: 10px 12px;
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  background: var(--bg);
-  cursor: pointer;
-}
-
-.type strong {
-  font-size: 14px;
-}
-
-.type span {
-  font-size: 12px;
-  color: var(--muted);
-}
-
-.type.selected {
-  border-color: var(--accent);
-  background: var(--surface-2);
-}
-
-/* The radio stays reachable by keyboard; the whole card shows the focus */
-.type input {
-  position: absolute;
-  opacity: 0;
-  inset: 0;
-  margin: 0;
-  cursor: pointer;
-}
-
-.type:focus-within {
-  outline: 2px solid var(--accent);
-  outline-offset: 1px;
-}
-
-.note {
-  margin: 0;
-  padding: 10px 12px;
-  border-radius: 10px;
-  border: 1px solid rgba(96, 165, 250, 0.45);
-  color: var(--info);
-  font-size: 13px;
-}
-
 .field select {
   width: 100%;
   padding: 10px 12px;
@@ -88,20 +19,9 @@
   border-color: var(--bad);
 }
 
-.hint {
-  font-size: 12px;
-  color: var(--muted);
-}
-
 .admin-note {
   margin: 6px 0 0;
   font-size: 12px;
   color: var(--muted);
   text-align: center;
-}
-
-@media (max-width: 360px) {
-  .types {
-    grid-template-columns: 1fr;
-  }
 }

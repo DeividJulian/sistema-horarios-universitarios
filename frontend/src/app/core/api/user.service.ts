@@ -24,11 +24,6 @@ export class UserService {
     return this.http.patch<User>(`${this.url}/${id}/group`, { grupo_id: groupId });
   }
 
-  /** Puts the account back to the initial password of its role and returns it. */
-  resetPassword(id: number): Observable<ApiMessage & { password: string }> {
-    return this.http.post<ApiMessage & { password: string }>(`${this.url}/${id}/reset-password`, {});
-  }
-
   delete(id: number): Observable<ApiMessage> {
     return this.http.delete<ApiMessage>(`${this.url}/${id}`);
   }

@@ -6,39 +6,52 @@ import { finalize } from 'rxjs';
 
 import { AuthService } from '../../../core/auth/auth.service';
 import { apiErrorMessage } from '../../../core/http/api-error';
-import { ROLE_LABELS } from '../../../core/models';
+import { ROLE_LABELS, User } from '../../../core/models';
 import { NotificationService } from '../../../core/services/notification.service';
+import { CodeStep } from '../code-step/code-step';
 
 type ServerState = 'waking' | 'ready' | 'down';
-type LoginField = 'email' | 'password';
 
 /** After this long without an answer, explain that the free server is waking up. */
 const SLOW_MS = 4000;
 
-/** Clear Spanish message for each way the login can fail. */
+export const LAST_EMAIL_KEY = 'horarios.ultimo-correo';
+
+/** The email used last time on this browser, to save typing it again. */
+export function rememberedEmail(): string {
+  try {
+    return localStorage.getItem(LAST_EMAIL_KEY) ?? '';
+  } catch {
+    return '';
+  }
+}
+
+/** Clear Spanish message for each way asking for the code can fail. */
 export function loginErrorMessage(error: unknown): string {
   if (error instanceof HttpErrorResponse) {
     if (error.status === 0) {
       return 'No hay conexión con el servidor. Revisa tu internet o intenta de nuevo en un minuto.';
     }
-    if (error.status === 401) {
-      return apiErrorMessage(error, 'Correo o contraseña incorrectos.');
-    }
-    if (error.status === 403) {
-      return apiErrorMessage(error, 'Tu cuenta no tiene acceso. Habla con el administrador.');
-    }
+    // Our backend explains a 502 (the email did not go out); Render's own 502/503/504 means it is waking up
     if (error.status === 502 || error.status === 503 || error.status === 504) {
-      return 'El servidor está despertando. Espera unos segundos e intenta de nuevo.';
+      const detail = error.error?.detail;
+      return typeof detail === 'string' ? detail : 'El servidor está despertando. Espera unos segundos e intenta de nuevo.';
     }
   }
-  return apiErrorMessage(error, 'No se pudo iniciar sesión. Intenta de nuevo.');
+  return apiErrorMessage(error, 'No se pudo enviar el código. Intenta de nuevo.');
 }
 
+/** Where to go after signing in: the page the user wanted, or the schedule. */
+export function afterLoginUrl(volver: string | undefined): string {
+  return volver && volver.startsWith('/') && !volver.startsWith('//') && !volver.startsWith('/login') ? volver : '/horario';
+}
+
+/** Passwordless login: email first, then the six-digit code that arrives there. */
 @Component({
   selector: 'app-login-page',
-  imports: [ReactiveFormsModule, RouterLink],
+  imports: [ReactiveFormsModule, RouterLink, CodeStep],
   templateUrl: './login-page.html',
-  // Shared with the sign-up page (same "Cotizador IA" theme)
+  // Shared with the sign-up page
   styleUrl: '../auth.css',
 })
 export class LoginPage {
@@ -50,14 +63,16 @@ export class LoginPage {
   readonly volver = input<string>();
 
   protected readonly form = inject(NonNullableFormBuilder).group({
-    email: ['', [Validators.required, Validators.email]],
-    password: ['', Validators.required],
+    email: [rememberedEmail(), [Validators.required, Validators.email]],
   });
 
+  protected readonly step = signal<'email' | 'code'>('email');
+  protected readonly email = signal('');
   protected readonly submitting = signal(false);
   protected readonly slow = signal(false);
   protected readonly error = signal<string | null>(null);
-  protected readonly showPassword = signal(false);
+  /** The email had no account (404): offer to create one with it. */
+  protected readonly noAccount = signal(false);
   protected readonly server = signal<ServerState>('waking');
 
   constructor() {
@@ -69,13 +84,12 @@ export class LoginPage {
     inject(DestroyRef).onDestroy(() => ping.unsubscribe());
   }
 
-  /** Message under a field, only once the person has left it (or tried to submit). */
-  protected fieldError(field: LoginField): string | null {
-    const control = this.form.controls[field];
+  /** Message under the field, only once the person has left it (or tried to submit). */
+  protected emailError(): string | null {
+    const control = this.form.controls.email;
     if (!control.touched || control.valid) return null;
-    if (control.hasError('required')) return field === 'email' ? 'Escribe tu correo.' : 'Escribe tu contraseña.';
-    if (control.hasError('email')) return 'Escribe un correo válido, por ejemplo nombre@ucc.edu.co.';
-    return null;
+    if (control.hasError('required')) return 'Escribe tu correo.';
+    return 'Escribe un correo válido, por ejemplo nombre@ucc.edu.co.';
   }
 
   protected submit(): void {
@@ -84,14 +98,15 @@ export class LoginPage {
       this.form.markAllAsTouched();
       return;
     }
-    const { email, password } = this.form.getRawValue();
+    const email = this.form.controls.email.value.trim().toLowerCase();
     this.submitting.set(true);
     this.error.set(null);
+    this.noAccount.set(false);
     this.form.disable({ emitEvent: false }); // nothing can be edited while the request is on its way
     const slowTimer = setTimeout(() => this.slow.set(true), SLOW_MS);
 
     this.auth
-      .login(email.trim(), password)
+      .requestCode(email)
       .pipe(
         finalize(() => {
           clearTimeout(slowTimer);
@@ -101,17 +116,31 @@ export class LoginPage {
         }),
       )
       .subscribe({
-        next: ({ usuario }) => {
+        next: () => {
           this.server.set('ready');
-          // Says who signed in and with which role
-          this.notify.success(`Bienvenido, ${usuario.nombre}. Entraste como ${ROLE_LABELS[usuario.rol]}.`);
-          const target = this.volver();
-          this.router.navigateByUrl(target && target.startsWith('/') && !target.startsWith('/login') ? target : '/horario');
+          this.email.set(email);
+          try {
+            localStorage.setItem(LAST_EMAIL_KEY, email);
+          } catch {
+            // Without storage it just isn't remembered
+          }
+          this.step.set('code');
         },
         error: (err: unknown) => {
           if (err instanceof HttpErrorResponse && err.status === 0) this.server.set('down');
+          this.noAccount.set(err instanceof HttpErrorResponse && err.status === 404);
           this.error.set(loginErrorMessage(err));
         },
       });
+  }
+
+  protected typedEmail(): string {
+    return this.form.controls.email.value.trim().toLowerCase();
+  }
+
+  protected enter(user: User): void {
+    // Says who signed in and with which role
+    this.notify.success(`Bienvenido, ${user.nombre}. Entraste como ${ROLE_LABELS[user.rol]}.`);
+    this.router.navigateByUrl(afterLoginUrl(this.volver()));
   }
 }

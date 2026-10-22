@@ -1,12 +1,14 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
-import { Observable, tap } from 'rxjs';
+import { Observable, map, tap } from 'rxjs';
 
 import { API_URL } from '../api/api-url';
-import { DemoAccount, LoginResponse, RegisterGroup, RegisterInput, Role, User } from '../models';
+import { CodeSent, LoginResponse, RegisterGroup, RegisterInput, Role, User } from '../models';
 
 const SESSION_KEY = 'horarios.sesion';
+/** Prefix of the Service Worker cache that keeps API answers for offline use (public/sw.js). */
+const API_CACHE_PREFIX = 'schedule-api-';
 
 interface StoredSession {
   token: string;
@@ -35,7 +37,21 @@ function readSession(): StoredSession | null {
   }
 }
 
-/** Who is signed in and with which role. The token is kept in localStorage so a reload keeps the session. */
+/** Data the Service Worker saved for offline use belongs to the user who signed out: it must not survive. */
+export async function clearApiCache(): Promise<void> {
+  try {
+    if (typeof caches === 'undefined') return;
+    const names = await caches.keys();
+    await Promise.all(names.filter((name) => name.startsWith(API_CACHE_PREFIX)).map((name) => caches.delete(name)));
+  } catch {
+    // No Cache Storage (private mode, old browser): nothing to clear
+  }
+}
+
+/**
+ * Passwordless session: the person asks for a six-digit code by email and trades it for a token.
+ * The token is kept in localStorage so a reload keeps the session.
+ */
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private readonly http = inject(HttpClient);
@@ -51,22 +67,52 @@ export class AuthService {
   readonly isTeacher = computed(() => this.role() === 'profesor');
   readonly isStudent = computed(() => this.role() === 'estudiante');
 
+  constructor() {
+    // Signing out (or in) in one tab is reflected in the others
+    if (typeof window !== 'undefined') {
+      window.addEventListener('storage', (event) => {
+        if (event.key === SESSION_KEY) this.session.set(readSession());
+      });
+    }
+  }
+
   hasRole(...roles: Role[]): boolean {
     const role = this.role();
     return role !== null && roles.includes(role);
   }
 
-  login(email: string, password: string): Observable<LoginResponse> {
-    return this.http.post<LoginResponse>(`${API_URL}/auth/login`, { email, password }).pipe(
-      tap((response) => this.store({ token: response.access_token, user: response.usuario })),
+  /** Student sign-up: creates the account and emails a code to activate it. */
+  register(data: RegisterInput): Observable<CodeSent> {
+    return this.http.post<CodeSent>(`${API_URL}/auth/register`, data);
+  }
+
+  /** Emails a code to enter (also used to resend the sign-up code). */
+  requestCode(email: string): Observable<CodeSent> {
+    return this.http.post<CodeSent>(`${API_URL}/auth/login`, { email });
+  }
+
+  /** Trades the emailed code for a session. */
+  verify(email: string, codigo: string): Observable<User> {
+    return this.http.post<LoginResponse>(`${API_URL}/auth/verify`, { email, codigo }).pipe(
+      tap((response) => {
+        void clearApiCache();
+        this.store({ token: response.access_token, user: response.usuario });
+      }),
+      map((response) => response.usuario),
     );
   }
 
-  /** Creates (student) or activates (teacher) the account and signs in with it. */
-  register(data: RegisterInput): Observable<LoginResponse> {
-    return this.http.post<LoginResponse>(`${API_URL}/auth/register`, data).pipe(
-      tap((response) => this.store({ token: response.access_token, user: response.usuario })),
-    );
+  /** On opening the app: confirms with the server that the saved session is still valid and refreshes the user. */
+  refreshProfile(): void {
+    const session = this.session();
+    if (!session) return;
+    // A 401 is handled by the interceptor, which closes the session
+    this.http.get<User>(`${API_URL}/auth/me`).subscribe({
+      next: (user) => {
+        if (this.session()?.token === session.token) this.store({ token: session.token, user });
+      },
+      error: () => undefined,
+    });
   }
 
   /** Groups a student can choose when signing up (public endpoint). */
@@ -77,16 +123,8 @@ export class AuthService {
   /** Clears the session and goes back to the login screen (keeping where the user was, to return after signing in). */
   logout(returnUrl?: string): void {
     this.store(null);
+    void clearApiCache();
     this.router.navigate(['/login'], returnUrl ? { queryParams: { volver: returnUrl } } : {});
-  }
-
-  /** Test accounts for every role, shown as buttons on the login page (public endpoint). */
-  demoAccounts(): Observable<DemoAccount[]> {
-    return this.http.get<DemoAccount[]>(`${API_URL}/auth/demo-accounts`);
-  }
-
-  changePassword(actual: string, nueva: string): Observable<unknown> {
-    return this.http.post(`${API_URL}/auth/change-password`, { actual, nueva });
   }
 
   /** Wakes the backend up (Render's free tier sleeps) while the user types; /health is public. */

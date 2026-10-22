@@ -2,8 +2,8 @@
   <strong>Usuarios.</strong> Las personas que pueden entrar a la aplicación. Un <strong>administrador</strong> cambia todo;
   un <strong>profesor</strong> ve sus clases y puede cancelarlas o cambiarlas de aula; un <strong>estudiante</strong> ve solo el
   horario de su grupo; una cuenta de <strong>consulta</strong> ve todo sin modificar nada. Las cuentas de profesor se crean
-  solas con el correo de cada profesor (contraseña inicial <code>Profesor2026*</code>). Si alguien olvida su contraseña,
-  pulsa «Restablecer» en su fila y vuelve a la inicial de su rol.
+  solas con el correo de cada profesor. Nadie usa contraseña: cada persona entra con un código de 6 dígitos que le llega a
+  su correo, así que el correo debe ser real.
 </p>
 
 <div class="crud-layout">
@@ -32,7 +32,12 @@
                     <span class="muted">(tú)</span>
                   }
                 </td>
-                <td class="muted">{{ u.email }}</td>
+                <td class="muted">
+                  {{ u.email }}
+                  @if (!u.verificado) {
+                    <span class="pending" title="Todavía no ha entrado con el código que le llega al correo">· sin verificar</span>
+                  }
+                </td>
                 <td><span class="role-pill" [class]="'role-pill ' + u.rol">{{ roleLabels[u.rol] }}</span></td>
                 <td>
                   @switch (u.rol) {
@@ -60,14 +65,6 @@
                 </td>
                 <td>
                   <div class="row-actions">
-                    @if (resetPasswords().get(u.id); as password) {
-                      <span class="muted" role="status">Contraseña: <code>{{ password }}</code></span>
-                    }
-                    @if (u.id !== auth.user()?.id) {
-                      <button type="button" class="btn-secondary" (click)="resetPassword(u)" [attr.aria-label]="'Restablecer la contraseña de ' + u.nombre">
-                        Restablecer
-                      </button>
-                    }
                     @if (u.id !== auth.user()?.id && u.rol !== 'profesor') {
                       <button type="button" class="btn-danger" (click)="remove(u)" [attr.aria-label]="'Eliminar ' + u.nombre">Eliminar</button>
                     }
@@ -119,13 +116,8 @@
         <input formControlName="email" type="email" autocomplete="off" [attr.aria-invalid]="!!errorMessage(form.controls.email, 'El correo')" />
         @if (errorMessage(form.controls.email, 'El correo'); as msg) {
           <p class="field-error">{{ msg }}</p>
-        }
-      </label>
-      <label class="field">
-        <span class="field-label">Contraseña (mínimo 8 caracteres)</span>
-        <input formControlName="password" type="password" autocomplete="new-password" [attr.aria-invalid]="!!errorMessage(form.controls.password, 'La contraseña')" />
-        @if (errorMessage(form.controls.password, 'La contraseña'); as msg) {
-          <p class="field-error">{{ msg }}</p>
+        } @else {
+          <span class="field-hint">Debe ser un correo real: ahí le llega el código para entrar.</span>
         }
       </label>
       <div class="form-actions">

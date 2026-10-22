@@ -12,8 +12,8 @@ Proyecto final de Programación Orientada a la Web — Universidad Cooperativa d
 
 | Página | Ruta | Funciones |
 |---|---|---|
-| Registro | `/registro` | El estudiante crea su cuenta eligiendo su grupo; el profesor activa la cuenta de su correo registrado eligiendo su contraseña |
-| Inicio de sesión | `/login` | Correo y contraseña, mostrar u ocultar contraseña, indicador de conexión con el servidor y mensajes claros si el servidor está despertando |
+| Registro | `/registro` | El estudiante crea su cuenta con nombre, correo y grupo, y la activa con el código que le llega al correo |
+| Inicio de sesión | `/login` | Sin contraseña: correo → código de 6 dígitos por correo, con «Reenviar código» y cuenta regresiva; indicador de conexión con el servidor y mensajes claros si el servidor está despertando |
 | Horario | `/horario` | Calendario semanal, generación automática (CSP + recocido simulado, con las horas muertas antes → después), arrastrar y soltar bloques, filtros por profesor/grupo/aula, detalle de cada bloque, mover por teclado, eliminar bloques y conflictos resaltados en rojo |
 | Gestión | `/gestion/...` | CRUD de profesores (con su disponibilidad), aulas, grupos, materias y usuarios, con las mismas validaciones que el backend. Solo administradores. |
 | Avisos | `/avisos` | Cancelaciones y cambios de aula u horario de las clases (cada rol ve los suyos) |
@@ -34,32 +34,40 @@ La eficiencia es el porcentaje de clases programadas sin conflictos sobre las ho
 
 ## Inicio de sesión y roles
 
-Toda la aplicación exige iniciar sesión. El backend devuelve un token JWT que se guarda en el navegador y un interceptor lo envía en cada petición; si expira, la aplicación vuelve al login. El rol no se elige en el login: lo decide el backend y cada persona llega a su vista.
+Toda la aplicación exige iniciar sesión, **sin contraseñas**:
+1. La persona escribe su correo.
+2. El backend le envía un código de 6 dígitos (Brevo en producción).
+3. Al escribirlo o pegarlo, la aplicación entra sola.
+
+El token JWT se guarda en `localStorage`, con `try/catch` por si el navegador lo bloquea, y se descarta si ya venció. Al abrir la app se confirma con `GET /auth/me`. El rol no se elige en el login: lo decide el backend y cada persona llega a su vista.
 
 | Rol | Qué ve y qué puede hacer |
 |---|---|
 | **Administrador** | Todo: Gestión (incluidos los usuarios), generar el horario, arrastrar, mover, cancelar, cambiar de aula y eliminar bloques. |
-| **Profesor** | «Mis clases»: solo sus clases de la semana. Puede cancelar una clase en una fecha (con motivo) o cambiarla a un aula libre; sus estudiantes reciben un aviso. Entra con el correo registrado y la contraseña inicial `Profesor2026*`. |
+| **Profesor** | «Mis clases»: solo sus clases de la semana. Puede cancelar una clase en una fecha (con motivo) o cambiarla a un aula libre; sus estudiantes reciben un aviso. Entra con el correo que el administrador le registró. |
 | **Estudiante** | «Mi horario»: solo el horario de su grupo (su semestre), con las clases canceladas tachadas, y la página de Avisos con un contador de no leídos. |
 | **Consulta** | Ve el horario de toda la facultad y el análisis, sin modificar nada. |
 
-Cualquier usuario puede cambiar su contraseña con el botón de la llave, junto a «Salir».
+Piezas (`core/auth/` y `features/login/`):
+- **`AuthService`:** con signals; tiene `register`, `requestCode`, `verify`, `refreshProfile` y `logout`.
+- **Interceptor:**
+  - pone el `Bearer` solo en las peticiones a nuestro backend;
+  - ante un `401` cierra la sesión, salvo en las rutas `/auth/`, donde solo significa código incorrecto (`/auth/me` sí la cierra).
+- **Guards:** `authGuard`, `guestGuard`, `adminGuard` y `roleGuard`.
+- **`CodeStep`:** el paso del código, compartido por el login y el registro.
+- **Al cerrar sesión:** también se borra la caché del API que guarda el Service Worker.
 
-Las rutas están protegidas con *guards* (`core/auth/auth.guards.ts`), pero la seguridad real está en el backend, que responde `401` sin sesión y `403` si el rol no alcanza.
+Las rutas están protegidas con *guards*, pero la seguridad real está en el backend, que responde `401` sin sesión y `403` si el rol no alcanza.
 
 ### Registro
 
-En `/registro` (enlace «¿No tienes cuenta? Regístrate» del login):
+En `/registro` (enlace «Regístrate» del login, o «Crear cuenta de estudiante con este correo» cuando el correo no tiene cuenta):
 
-- **Estudiante:** nombre, correo, grupo y contraseña. Solo verá el horario de ese grupo.
-- **Profesor:** el correo con el que el administrador lo registró y una contraseña propia. Activa su cuenta una sola vez.
-- **Administrador:** no hay registro libre; lo crea otro administrador en Gestión → Usuarios.
+- **Estudiante:** nombre, correo y grupo; luego el código que le llega. Solo verá el horario de ese grupo.
+- **Profesor:** no se registra. Entra con el correo con el que el administrador lo registró.
+- **Administrador y consulta:** los crea un administrador en Gestión → Usuarios, solo con nombre y correo.
 
-Al entrar (por login o registro) aparece «Bienvenido, nombre. Entraste como …» con el rol, además del rol que muestra la barra.
-
-### Pantalla de inicio de sesión
-
-Usa el estilo visual del proyecto *Cotizador IA*: tema oscuro con acento verde-azulado y una sola tarjeta centrada. Sus colores se declaran en el `:host` del componente (`features/login/login-page/login-page.css`), así que no cambian el resto de la aplicación. Incluye validaciones en español solo después de tocar cada campo, botón «Ingresar / Ingresando…» que bloquea el formulario mientras espera, mensajes de error en una zona `aria-live`, y se adapta desde 360 px de ancho.
+Al entrar aparece «Bienvenido, nombre. Entraste como …» con el rol, además del rol que muestra la barra.
 
 > El backend está en el plan gratuito de Render, que se apaga tras un rato sin uso. Por eso el login "despierta" al servidor apenas se abre y muestra su estado; la primera entrada puede tardar hasta un minuto.
 

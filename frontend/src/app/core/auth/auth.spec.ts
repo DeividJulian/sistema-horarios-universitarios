@@ -17,11 +17,11 @@ function fakeToken(expSeconds: number): string {
 
 const inOneHour = () => Math.floor(Date.now() / 1000) + 3600;
 
-function loginResponse(rol: Role): LoginResponse {
+function loginResponse(rol: Role, exp = inOneHour()): LoginResponse {
   return {
-    access_token: fakeToken(inOneHour()),
+    access_token: fakeToken(exp),
     token_type: 'bearer',
-    usuario: { id: 1, nombre: 'Ana Pérez', email: 'ana@ucc.edu.co', rol },
+    usuario: { id: 1, nombre: 'Ana Pérez', email: 'ana@ucc.edu.co', rol, verificado: true },
   };
 }
 
@@ -43,61 +43,108 @@ describe('authentication', () => {
   const runGuard = (guard: typeof authGuard, url = '/horario') =>
     TestBed.runInInjectionContext(() => guard({} as ActivatedRouteSnapshot, { url } as RouterStateSnapshot));
 
-  function signIn(rol: 'admin' | 'usuario'): void {
-    auth.login('ana@ucc.edu.co', 'secreta').subscribe();
-    backend.expectOne(`${API_URL}/auth/login`).flush(loginResponse(rol));
+  function signIn(rol: Role): void {
+    auth.verify('ana@ucc.edu.co', '123456').subscribe();
+    backend.expectOne(`${API_URL}/auth/verify`).flush(loginResponse(rol));
   }
 
-  beforeEach(() => {
-    localStorage.clear();
+  function setup(): void {
     TestBed.configureTestingModule({
-      providers: [
-        provideRouter([]),
-        provideHttpClient(withInterceptors([authInterceptor])),
-        provideHttpClientTesting(),
-      ],
+      providers: [provideRouter([]), provideHttpClient(withInterceptors([authInterceptor])), provideHttpClientTesting()],
     });
     http = TestBed.inject(HttpClient);
     backend = TestBed.inject(HttpTestingController);
     auth = TestBed.inject(AuthService);
+  }
+
+  beforeEach(() => {
+    localStorage.clear();
+    setup();
   });
 
   afterEach(() => backend.verify());
 
-  it('keeps the user and role after signing in, and remembers the session', () => {
-    signIn('admin');
+  it('asks for a code by email and trades it for a session', () => {
+    auth.requestCode('ana@ucc.edu.co').subscribe();
+    const request = backend.expectOne(`${API_URL}/auth/login`);
+    expect(request.request.body).toEqual({ email: 'ana@ucc.edu.co' });
+    request.flush({ mensaje: 'Te enviamos un código para entrar.', email: 'ana@ucc.edu.co' });
+    expect(auth.isLoggedIn()).toBe(false);
+
+    auth.verify('ana@ucc.edu.co', '123456').subscribe();
+    const verify = backend.expectOne(`${API_URL}/auth/verify`);
+    expect(verify.request.body).toEqual({ email: 'ana@ucc.edu.co', codigo: '123456' });
+    verify.flush(loginResponse('admin'));
     expect(auth.isLoggedIn()).toBe(true);
     expect(auth.isAdmin()).toBe(true);
     expect(auth.user()?.nombre).toBe('Ana Pérez');
     expect(localStorage.getItem('horarios.sesion')).toContain('Ana Pérez');
   });
 
-  it('signs in right after signing up', () => {
-    auth.register({ rol: 'estudiante', nombre: 'Ana Pérez', email: 'ana@ucc.edu.co', password: 'segura123', grupo_id: 3 }).subscribe();
+  it('signing up only sends the code: the session starts after verifying it', () => {
+    auth.register({ nombre: 'Ana Pérez', email: 'ana@ucc.edu.co', grupo_id: 3 }).subscribe();
     const request = backend.expectOne(`${API_URL}/auth/register`);
-    expect(request.request.body.grupo_id).toBe(3);
-    expect(request.request.headers.has('Authorization')).toBe(false);
-    request.flush({ ...loginResponse('estudiante'), usuario: { id: 7, nombre: 'Ana Pérez', email: 'ana@ucc.edu.co', rol: 'estudiante', grupo_id: 3 } });
-    expect(auth.isStudent()).toBe(true);
-    expect(auth.user()?.grupo_id).toBe(3);
+    expect(request.request.body).toEqual({ nombre: 'Ana Pérez', email: 'ana@ucc.edu.co', grupo_id: 3 });
+    request.flush({ mensaje: 'Te enviamos un código para activar tu cuenta.', email: 'ana@ucc.edu.co' });
+    expect(auth.isLoggedIn()).toBe(false);
   });
 
-  it('sends the token to the API but not on the login request itself', () => {
+  it('restores a saved session after a reload, but not an expired one', () => {
+    signIn('usuario');
+    TestBed.resetTestingModule();
+    setup();
+    expect(auth.isLoggedIn()).toBe(true);
+
+    localStorage.setItem('horarios.sesion', JSON.stringify({ token: fakeToken(1), user: loginResponse('admin').usuario }));
+    TestBed.resetTestingModule();
+    setup();
+    expect(auth.isLoggedIn()).toBe(false);
+  });
+
+  it('survives a blocked localStorage (the session lives in memory)', () => {
+    const setItem = vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
+      throw new Error('blocked');
+    });
+    signIn('admin');
+    expect(auth.isLoggedIn()).toBe(true);
+    setItem.mockRestore();
+  });
+
+  it('refreshProfile updates the user from /auth/me', () => {
+    signIn('usuario');
+    auth.refreshProfile();
+    backend.expectOne(`${API_URL}/auth/me`).flush({ ...loginResponse('usuario').usuario, nombre: 'Ana María Pérez' });
+    expect(auth.user()?.nombre).toBe('Ana María Pérez');
+  });
+
+  it('sends the token only to our API', () => {
     signIn('usuario');
     http.get(`${API_URL}/teachers`).subscribe();
     const request = backend.expectOne(`${API_URL}/teachers`);
     expect(request.request.headers.get('Authorization')).toBe(`Bearer ${auth.token()}`);
     request.flush([]);
+
+    http.get('https://otro-sitio.com/datos').subscribe();
+    const other = backend.expectOne('https://otro-sitio.com/datos');
+    expect(other.request.headers.has('Authorization')).toBe(false);
+    other.flush({});
   });
 
-  it('signs out when the backend answers 401', () => {
+  it('signs out when the backend answers 401, also on /auth/me', () => {
     signIn('admin');
     const navigate = vi.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
-    http.get(`${API_URL}/teachers`).subscribe({ error: () => undefined });
-    backend.expectOne(`${API_URL}/teachers`).flush({ detail: 'expirada' }, { status: 401, statusText: 'Unauthorized' });
+    http.get(`${API_URL}/auth/me`).subscribe({ error: () => undefined });
+    backend.expectOne(`${API_URL}/auth/me`).flush({ detail: 'expirada' }, { status: 401, statusText: 'Unauthorized' });
     expect(auth.isLoggedIn()).toBe(false);
     expect(localStorage.getItem('horarios.sesion')).toBeNull();
     expect(navigate).toHaveBeenCalledWith(['/login'], expect.anything());
+  });
+
+  it('a wrong code on the login screens does not close the session', () => {
+    signIn('admin');
+    auth.verify('ana@ucc.edu.co', '000000').subscribe({ error: () => undefined });
+    backend.expectOne(`${API_URL}/auth/verify`).flush({ detail: 'Código incorrecto' }, { status: 401, statusText: 'Unauthorized' });
+    expect(auth.isLoggedIn()).toBe(true);
   });
 
   it('guards: without a session every page sends to the login, remembering where the user was going', () => {

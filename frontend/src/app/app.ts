@@ -31,6 +31,9 @@ export class App {
   protected readonly layout = inject(LayoutService);
 
   constructor() {
+    // Confirms with the server that the saved session still works (an expired one is closed by the interceptor)
+    this.auth.refreshProfile();
+
     effect(() => {
       if (this.auth.isLoggedIn()) {
         // The tutorial opens by itself the first time someone signs in on this browser
