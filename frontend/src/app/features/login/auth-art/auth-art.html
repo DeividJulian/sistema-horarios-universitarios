@@ -1,0 +1,66 @@
+<aside class="art" [attr.aria-label]="variant() === 'login' ? 'Horarios y Aulas' : 'Cómo funciona el registro'">
+  <div class="brand">
+    <svg width="40" height="40" viewBox="0 0 34 34" aria-hidden="true">
+      <rect x="1" y="1" width="32" height="32" rx="9" fill="#F3F1EA" />
+      <g fill="#15171C">
+        <rect x="7" y="7" width="5.5" height="5.5" rx="1.2" /><rect x="14.25" y="7" width="5.5" height="5.5" rx="1.2" />
+        <rect x="21.5" y="7" width="5.5" height="5.5" rx="1.2" /><rect x="7" y="14.25" width="5.5" height="5.5" rx="1.2" />
+        <rect x="21.5" y="14.25" width="5.5" height="5.5" rx="1.2" /><rect x="7" y="21.5" width="5.5" height="5.5" rx="1.2" />
+        <rect x="14.25" y="21.5" width="5.5" height="5.5" rx="1.2" /><rect x="21.5" y="21.5" width="5.5" height="5.5" rx="1.2" />
+      </g>
+      <rect x="14.25" y="14.25" width="5.5" height="5.5" rx="1.2" fill="#B93C0B" />
+    </svg>
+    <div>
+      <p class="brand-name">Horarios y Aulas</p>
+      <p class="brand-sub">Universidad Cooperativa de Colombia</p>
+    </div>
+  </div>
+
+  @if (variant() === 'login') {
+    <!-- A week being composed: classes, one lifted, one empty slot and the "now" line -->
+    <div class="week" aria-hidden="true">
+      <span></span>
+      <span class="d">LUN</span><span class="d">MAR</span><span class="d today">MIÉ</span><span class="d">JUE</span><span class="d">VIE</span>
+      <span class="h" style="grid-row: 2">07:00</span>
+      <span class="h" style="grid-row: 4">09:00</span>
+      <span class="h" style="grid-row: 6">11:00</span>
+      <span class="h" style="grid-row: 8">13:00</span>
+      <span class="b s1" style="grid-column: 2; grid-row: 2 / span 2"></span>
+      <span class="b s2" style="grid-column: 2; grid-row: 4 / span 2"></span>
+      <span class="b s4" style="grid-column: 3; grid-row: 2 / span 2"></span>
+      <span class="b s6" style="grid-column: 3; grid-row: 6 / span 2"></span>
+      <span class="b s1" style="grid-column: 4; grid-row: 2 / span 2"></span>
+      <span class="b lifted" style="grid-column: 4; grid-row: 5 / span 2"></span>
+      <span class="b s2" style="grid-column: 4; grid-row: 7 / span 2"></span>
+      <span class="b empty" style="grid-column: 5; grid-row: 3 / span 2"></span>
+      <span class="b s3" style="grid-column: 5; grid-row: 5 / span 2"></span>
+      <span class="b s7" style="grid-column: 6; grid-row: 2 / span 2"></span>
+      <span class="b s4" style="grid-column: 6; grid-row: 4 / span 2"></span>
+      <span class="now" style="grid-column: 2 / span 5; grid-row: 6"></span>
+    </div>
+
+    <div class="copy">
+      <h2>El horario se arma solo.<br /><span>Tú decides lo demás.</span></h2>
+      <p>Profesores, aulas y grupos asignados sin cruces con un CSP de backtracking y recocido simulado que reduce las horas muertas.</p>
+    </div>
+  } @else {
+    <div class="copy">
+      <h2>Tu semana,<br />en un solo lugar.</h2>
+      <ol class="steps">
+        <li>
+          <span class="n">01</span>
+          <div><strong>Estudiante</strong><p>Crea tu cuenta y elige tu grupo. Verás solo el horario de ese grupo y sus avisos.</p></div>
+        </li>
+        <li>
+          <span class="n">02</span>
+          <div><strong>Profesor</strong><p>No te registras: inicia sesión con el correo que registró el administrador y tus clases ya te estarán esperando.</p></div>
+        </li>
+        <li>
+          <span class="n">03</span>
+          <div><strong>Sin contraseñas</strong><p>Cada vez que entras te llega un código de 6 dígitos al correo.</p></div>
+        </li>
+      </ol>
+    </div>
+  }
+  <p class="foot">Programación Orientada a la Web</p>
+</aside>

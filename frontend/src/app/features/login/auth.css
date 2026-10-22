@@ -1,145 +1,133 @@
 /*
- * Login and sign-up pages, with the same palette as the rest of the app (technical dark mode, Linear/Vercel style):
- * charcoal background, #18181b cards with a #27272a border, Inter, and the violet/blue accent only on active borders
- * and the main button. The short names used by these pages are mapped to the app's tokens here.
+ * Login and sign-up pages «Plano»: ink brand panel on the left (app-auth-art), the form on warm paper on the right.
+ * Shared by the code step component, which resets :host to a plain block.
  */
 :host {
-  --bg: #09090b;
-  --surface: #18181b;
-  --surface-2: #1f1f23;
-  --border: #27272a;
-  --text: #f4f4f5;
-  --muted: #a1a1aa;
-  --accent: #a78bfa;
-  --good: #4ade80;
-  --warn: #fbbf24;
-  --bad: #f87171;
-  --info: #60a5fa;
-  --radius: 12px;
-  --mono: var(--font-mono);
-  color-scheme: dark;
-
   display: block;
   min-height: 100vh;
-  /* Very soft violet glow behind the card */
-  background:
-    radial-gradient(640px 420px at 50% 0%, rgba(139, 92, 246, 0.1), transparent 70%),
-    var(--bg);
-  color: var(--text);
-  font-family: var(--font-sans);
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--f-body);
   font-size: 14px;
-  line-height: 1.5;
+  line-height: 1.45;
 }
 
-/* ---------- Layout: one centred card ---------- */
 .auth-page {
   min-height: 100vh;
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.auth-form {
+  flex: 1 1 460px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 16px;
-  padding: 32px 16px;
+  gap: 24px;
+  padding: 40px 24px;
 }
 
 .card {
   width: 100%;
   max-width: 420px;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
 }
 
-/* ---------- Brand and heading ---------- */
+/* The brand lives in the ink panel; on small screens (no panel) it shows above the form */
 .brand {
-  display: flex;
+  display: none;
   align-items: center;
   gap: 10px;
-  margin-bottom: 20px;
 }
 
-/* Same mark as the sidebar: dark square with a violet/blue gradient border */
 .brand-mark {
-  width: 32px;
-  height: 32px;
+  width: 34px;
+  height: 34px;
   border-radius: 9px;
   display: grid;
   place-items: center;
-  color: #fff;
+  background: var(--ink);
+  color: var(--ink-inv);
+  font-family: var(--f-display);
   font-weight: 800;
-  border: 1px solid transparent;
-  background:
-    linear-gradient(var(--surface), var(--surface)) padding-box,
-    var(--gradient-accent) border-box;
 }
 
 .brand-name {
+  font-family: var(--f-display);
   font-weight: 700;
+  font-size: 17px;
+  letter-spacing: -0.02em;
 }
 
 .eyebrow {
-  margin: 0 0 6px;
-  font-family: var(--mono);
-  font-size: 12px;
-  letter-spacing: 0.08em;
+  margin: 0 0 -10px;
+  font-family: var(--f-mono);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.09em;
   text-transform: uppercase;
-  color: var(--accent);
+  color: var(--ink-3);
 }
 
-/* The app styles h1 with a gradient; the login uses plain text */
 h1 {
-  margin: 0 0 6px;
-  font-size: 30px;
-  letter-spacing: -0.02em;
-  line-height: 1.2;
-  color: var(--text);
-  background: none;
-  -webkit-text-fill-color: currentColor;
+  margin: 0;
+  font-family: var(--f-display);
+  font-size: 36px;
+  font-weight: 800;
+  letter-spacing: -0.035em;
+  line-height: 1;
 }
 
 .lead {
-  margin: 0 0 6px;
-  color: var(--muted);
-  font-size: 14px;
+  margin: 0;
+  font-size: 15px;
+  color: var(--ink-2);
 }
 
 .profiles {
-  margin: 0 0 16px;
-  color: var(--muted);
-  font-size: 12px;
+  margin: -6px 0 0;
+  font-size: 12.5px;
+  color: var(--ink-3);
 }
 
 .footer {
   margin: 0;
-  font-size: 12px;
-  color: var(--muted);
+  font-family: var(--f-mono);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  color: var(--ink-3);
   text-align: center;
 }
 
-/* ---------- Server status ---------- */
+/* Connection with the server (Render wakes up slowly) */
 .server {
-  display: inline-flex;
+  margin: 0;
+  display: flex;
   align-items: center;
-  gap: 8px;
-  margin: 0 0 18px;
-  padding: 4px 10px;
-  border-radius: 999px;
-  border: 1px solid var(--border);
-  font-size: 12px;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  font-size: 13px;
   font-weight: 600;
-  color: var(--muted);
+  border: 1px solid var(--line);
+  background: var(--surface);
 }
 
 .server .dot {
   width: 8px;
   height: 8px;
   border-radius: 50%;
+  flex: none;
   background: currentColor;
 }
 
 .server.waking {
-  color: var(--warn);
+  background: var(--warn-tint);
+  border-color: #ebd08a;
+  color: #5e3d00;
 }
 
 .server.waking .dot {
@@ -147,16 +135,20 @@ h1 {
 }
 
 .server.ready {
-  color: var(--good);
+  background: var(--ok-tint);
+  border-color: #a9dabd;
+  color: #145536;
 }
 
 .server.down {
-  color: var(--bad);
+  background: var(--danger-tint);
+  border-color: #f0b3ac;
+  color: #8e1a11;
 }
 
 @keyframes blink {
   50% {
-    opacity: 0.25;
+    opacity: 0.3;
   }
 }
 
@@ -164,7 +156,7 @@ h1 {
 .form {
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 16px;
 }
 
 .field {
@@ -176,150 +168,124 @@ h1 {
 .field-label {
   font-size: 13px;
   font-weight: 600;
-  color: var(--muted);
+  color: var(--ink-2);
 }
 
-.field input {
+.field input,
+.field select {
   width: 100%;
-  padding: 10px 12px;
-  border-radius: 10px;
-  border: 1px solid var(--border);
-  background: var(--bg);
-  color: var(--text);
+  height: 46px;
+  padding: 0 14px;
+  border-radius: var(--r-2);
+  border: 1px solid var(--line-2);
+  background: var(--surface);
+  color: var(--ink);
   font: inherit;
+  font-size: 15px;
 }
 
 .field input::placeholder {
-  color: #52525b;
+  color: #767b85;
 }
 
-.field input:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 1px;
+.field input:focus,
+.field select:focus {
+  outline: 3px solid rgba(30, 79, 194, 0.28);
+  outline-offset: 0;
+  border-color: var(--focus);
 }
 
-.field input[aria-invalid="true"] {
-  border-color: var(--bad);
+.field input[aria-invalid='true'],
+.field select[aria-invalid='true'] {
+  border-color: var(--danger);
+  border-width: 1.5px;
+  background: #fffbfa;
 }
 
 .field-error {
-  font-size: 12px;
-  color: var(--bad);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--danger);
 }
 
-.password {
-  position: relative;
-  display: block;
+.hint {
+  font-size: 12.5px;
+  color: var(--ink-3);
 }
 
-.password input {
-  padding-right: 48px;
-}
-
-.toggle {
-  position: absolute;
-  top: 50%;
-  right: 6px;
-  transform: translateY(-50%);
-  width: 34px;
-  height: 34px;
-  display: grid;
-  place-items: center;
-  padding: 0;
-  border: none;
-  border-radius: 8px;
-  background: transparent;
-  color: var(--muted);
-  cursor: pointer;
-}
-
-.toggle svg {
-  width: 18px;
-  height: 18px;
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 2;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-
-.toggle:hover {
-  color: var(--text);
-  background: var(--surface-2);
-}
-
-.toggle:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 1px;
-}
-
-/* General error */
+/* Errors and notes */
 .alert {
   margin: 0;
-  padding: 10px 12px;
-  border: 1px solid rgba(248, 113, 113, 0.6);
-  border-radius: 10px;
-  color: var(--bad);
-  font-size: 14px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid #f0b3ac;
+  background: var(--danger-tint);
+  color: #8e1a11;
+  font-size: 13.5px;
 }
 
-/* Link inside an error (for example "Crear cuenta con este correo") */
 .alert a {
   display: block;
   margin-top: 6px;
-  color: var(--accent);
+  color: var(--ink);
   font-weight: 600;
+  text-decoration: underline;
+  text-decoration-color: var(--signal);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
 }
 
-/* Help text under a field */
-.hint {
-  font-size: 12px;
-  color: var(--muted);
-}
-
-/* Informative note (blue) */
 .note {
   margin: 0;
-  padding: 10px 12px;
-  border-radius: 10px;
-  border: 1px solid rgba(96, 165, 250, 0.45);
-  color: var(--info);
-  font-size: 13px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid #b9caf5;
+  background: var(--info-tint);
+  color: #183c93;
+  font-size: 13.5px;
 }
 
-/* ---------- Primary button: same as the app (dark fill, violet/blue gradient border) ---------- */
+.note a {
+  color: inherit;
+  font-weight: 700;
+}
+
+/* ---------- Main button: ink, lifts with an orange shadow ---------- */
 .btn-primary {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 10px;
-  padding: 11px 16px;
-  border-radius: 10px;
+  height: 48px;
+  padding: 0 22px;
+  border: 0;
+  border-radius: var(--r-2);
+  background: var(--ink);
+  color: var(--ink-inv);
   font: inherit;
+  font-size: 15px;
   font-weight: 600;
   cursor: pointer;
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
 }
 
 .btn-primary:hover:not(:disabled) {
-  filter: brightness(1.12);
+  transform: translate(-2px, -2px);
+  box-shadow: 2px 2px 0 var(--signal);
 }
 
 .btn-primary:disabled {
-  opacity: 0.5;
+  background: var(--surface-3);
+  color: #6b707a;
   cursor: not-allowed;
-}
-
-.btn-primary:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
 }
 
 .spinner {
   width: 16px;
   height: 16px;
   border-radius: 50%;
-  border: 2px solid rgba(244, 244, 245, 0.25);
-  border-top-color: var(--text);
+  border: 2px solid rgba(21, 23, 28, 0.2);
+  border-top-color: currentColor;
   animation: spin 0.8s linear infinite;
 }
 
@@ -331,25 +297,32 @@ h1 {
 
 .slow {
   margin: 0;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: var(--warn-tint);
+  color: #5e3d00;
   font-size: 13px;
-  color: var(--warn);
 }
 
-/* Link between the login and sign-up pages */
 .switch {
-  margin: 16px 0 0;
-  font-size: 14px;
+  margin: 0;
+  padding-top: 18px;
+  border-top: 1px solid var(--line);
   text-align: center;
+  color: var(--ink-2);
 }
 
 .switch a {
-  color: var(--accent);
-  text-decoration: none;
+  color: var(--ink);
   font-weight: 600;
+  text-decoration: underline;
+  text-decoration-color: var(--signal);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
 }
 
 .switch a:hover {
-  text-decoration: underline;
+  color: var(--signal-ink);
 }
 
 .messages {
@@ -362,19 +335,18 @@ h1 {
   display: none;
 }
 
-/* Small phones (360 px): a bit less padding so the fields keep their width */
-@media (max-width: 420px) {
-  .auth-page {
+@media (max-width: 900px) {
+  .auth-form {
     justify-content: flex-start;
-    padding: 20px 12px;
+    padding: 28px 16px 32px;
   }
 
-  .card {
-    padding: 20px 16px;
+  .brand {
+    display: flex;
   }
 
   h1 {
-    font-size: 26px;
+    font-size: 30px;
   }
 }
 
@@ -382,5 +354,9 @@ h1 {
   .server.waking .dot,
   .spinner {
     animation: none;
+  }
+
+  .btn-primary {
+    transition: none;
   }
 }

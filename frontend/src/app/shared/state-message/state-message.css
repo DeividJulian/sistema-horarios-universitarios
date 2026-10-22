@@ -6,7 +6,7 @@
 }
 
 .state.error {
-  border-color: rgba(251, 113, 133, 0.45);
+  border-color: #f0b3ac;
 }
 
 .text {

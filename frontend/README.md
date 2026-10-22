@@ -21,13 +21,26 @@ Proyecto final de Programación Orientada a la Web — Universidad Cooperativa d
 
 ## Diseño
 
-Patrón **Bento Grid** con estilo **Linear/Vercel** en toda la aplicación, incluidos el inicio de sesión y el registro, en modo oscuro técnico (fondo `#09090b`, tarjetas `#18181b` con borde `#27272a`, tipografía Inter y acento violeta/azul solo en bordes activos y botones de acción):
+Sistema de diseño **«Plano»**, hecho en Claude Design, aplicado en toda la aplicación.
+- **Paleta:** papel cálido (`#F3F1EA`), tinta (`#15171C`) y un solo acento «señal» naranja quemado (`#B93C0B`) para la acción principal, la IA y el «ahora».
+- **Tipografía:** Bricolage Grotesque en los títulos, Geist en el texto y Geist Mono en las cifras.
+- **Tokens:** están en `src/styles.css`.
 
-- **Barra lateral fija (240 px):** vistas, gestión (administradores) y, abajo, el estado del horario (Optimizado / Con conflictos), su eficiencia y el botón «Re-optimizar horario». En celular se abre con el botón de menú.
-- **Barra superior:** título de la página, Tutorial, campana de avisos con contador y menú de la cuenta.
-- **Tarjetas Bento:** rendimiento con un anillo de porcentaje, checklist de restricciones resueltas y acción rápida (Generar o Re-optimizar con pulso en el borde mientras calcula), más la franja de totales (profesores, aulas, grupos, materias y clases). Profesores y estudiantes ven su propia semana.
-- **Calendario:** tarjetas de clase con relleno pastel, borde de 1 px, etiquetas (Conflicto en ámbar, Cancelada) y transiciones de 0,2 s.
-- **Inspector lateral (320 px):** datos, etiquetas de estado y acciones de la clase seleccionada.
+- **Inicio de sesión y registro:** panel de marca en tinta, con cuadrícula de plano, una semana ilustrada y el titular; el formulario va sobre papel. En celular solo queda el formulario.
+- **Barra lateral en tinta (248 px):** la opción activa se ve invertida. Abajo está la tarjeta de estado: Optimizado / Con conflictos, eficiencia con medidor y el botón «Re-optimizar horario». En celular se abre con el botón de menú.
+- **Barra superior:** fecha y título grande, pestañas sincronizadas, Tutorial, campana con contador y cuenta con su rol.
+- **Tarjetas de resumen:**
+  - anillo de eficiencia;
+  - restricciones resueltas;
+  - optimización con las horas muertas antes → después del recocido simulado;
+  - franja de totales.
+- **Calendario:**
+  - días con número grande y la píldora «Hoy», y la línea roja del «ahora»;
+  - tarjetas con el color de la materia, la hora, el grupo y el aula;
+  - **varias clases por casilla**, cuando varios grupos coinciden en la misma hora;
+  - estados *Conflicto* (rojo) y *Cancelada* (rayada, con el nombre tachado).
+- **Celular:** franja de días con la agenda del día elegido, y el inspector como hoja inferior.
+- **Inspector**, tablas, pestañas, avisos y diálogos con los mismos componentes. Las notificaciones van en tinta.
 - **Esqueletos de carga** con efecto shimmer en lugar de ruedas de carga.
 
 La eficiencia es el porcentaje de clases programadas sin conflictos sobre las horas que requieren las materias (`core/state/optimization.store.ts`).

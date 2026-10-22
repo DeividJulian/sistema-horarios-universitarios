@@ -10,20 +10,24 @@
   flex-direction: column;
   gap: 4px;
   padding: 12px 14px;
-  border: 1px solid var(--border);
-  border-radius: 10px;
+  border: 1px solid #b9caf5;
+  border-radius: 12px;
+  background: var(--info-tint);
+  color: #183c93;
   font-size: 14px;
   line-height: 1.5;
 }
 
 .sent a {
-  color: var(--accent);
+  color: var(--ink);
   font-weight: 600;
 }
 
 .field .code-input {
+  height: 56px;
+  font-family: var(--f-mono);
   font-size: 26px;
-  font-weight: 800;
+  font-weight: 600;
   letter-spacing: 0.5em;
   text-align: center;
   font-variant-numeric: tabular-nums;
@@ -59,5 +63,5 @@
 }
 
 .wait {
-  color: var(--muted);
+  color: var(--ink-3);
 }

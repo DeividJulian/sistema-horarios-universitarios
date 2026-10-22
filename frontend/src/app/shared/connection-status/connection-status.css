@@ -1,30 +1,45 @@
+/* Chips in the top bar: tabs kept in sync, offline mode and connection problems */
 .status {
-  position: fixed;
-  right: 16px;
-  bottom: 16px;
   display: flex;
-  flex-direction: column;
-  align-items: flex-end;
+  align-items: center;
   gap: 6px;
-  z-index: 50;
-  pointer-events: none;
 }
 
 .chip {
-  padding: 6px 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 32px;
+  padding: 0 10px;
   border-radius: 999px;
-  font-size: 12px;
-  background: rgba(30, 41, 59, 0.92);
-  color: #e2e8f0;
-  border: 1px solid rgba(148, 163, 184, 0.35);
+  border: 1px solid var(--line);
+  background: var(--surface);
+  font-size: 12.5px;
+  color: var(--ink-2);
+  white-space: nowrap;
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--ok);
 }
 
 .chip.ok {
-  border-color: rgba(52, 211, 153, 0.6);
-  color: #6ee7b7;
+  color: var(--ok);
 }
 
 .chip.warning {
-  border-color: rgba(251, 191, 36, 0.7);
-  color: #fcd34d;
+  border-color: #ebd08a;
+  background: var(--warn-tint);
+  color: #5e3d00;
+}
+
+/* Small screens: only the problems */
+@media (max-width: 1100px) {
+  .chip.sync,
+  .chip.ok {
+    display: none;
+  }
 }

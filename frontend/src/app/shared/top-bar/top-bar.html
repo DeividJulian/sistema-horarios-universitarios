@@ -9,11 +9,15 @@
     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16" /></svg>
   </button>
 
-  <h1 class="title">{{ title() }}</h1>
+  <div class="heading">
+    <span class="eyebrow">{{ today }}</span>
+    <h1 class="title">{{ title() }}</h1>
+  </div>
 
   <div class="actions">
-    <button type="button" class="tutorial" (click)="tutorial.open()" aria-haspopup="dialog">
-      <span class="tutorial-mark" aria-hidden="true">?</span>
+    <app-connection-status />
+    <button type="button" class="btn-secondary tutorial" (click)="tutorial.open()" aria-haspopup="dialog">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" /><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .8-1 1.5V14M12 17v.5" /></svg>
       <span class="tutorial-text">Tutorial</span>
     </button>
 

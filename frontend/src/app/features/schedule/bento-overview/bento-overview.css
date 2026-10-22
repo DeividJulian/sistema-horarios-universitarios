@@ -1,182 +1,179 @@
+/* Summary at the top of the schedule: three cards and the totals strip («Plano» design) */
 .bento {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 12px;
-  margin-bottom: 16px;
+  grid-template-columns: repeat(auto-fit, minmax(min(290px, 100%), 1fr));
+  gap: 16px;
+  margin-bottom: 20px;
 }
 
 .card {
-  min-width: 0;
-  padding: 14px 16px;
-  border-radius: var(--radius);
-  background: var(--panel);
-  border: 1px solid var(--border);
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  transition: border-color 0.2s ease;
-}
-
-.card:hover {
-  border-color: var(--border-strong);
+  gap: 12px;
+  min-width: 0;
 }
 
 .card-head {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: 8px;
+  gap: 12px;
 }
 
-.card-head h2 {
+.card-head .eyebrow,
+.hero-lines .eyebrow {
   margin: 0;
-  font-size: 14px;
-  font-weight: 600;
 }
 
-.badge {
-  display: inline-flex;
+.h-card {
+  margin: 0;
+  font-family: var(--f-display);
+  font-size: 17px;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+}
+
+.metric-sub {
+  margin: 0;
+  font-size: 12.5px;
+  color: var(--ink-2);
+}
+
+svg {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* 1. Ring */
+.hero-card {
+  justify-content: center;
+}
+
+.hero-body {
+  display: flex;
   align-items: center;
+  gap: 18px;
+}
+
+.ring {
+  width: 104px;
+  height: 104px;
+  flex: none;
+}
+
+.ring-track,
+.ring-value {
+  fill: none;
+  stroke-width: 12;
+}
+
+.ring-track {
+  stroke: var(--surface-3);
+}
+
+.ring-value {
+  stroke: var(--ink);
+  stroke-linecap: round;
+  transform: rotate(-90deg);
+  transform-origin: 52px 52px;
+  transition: stroke-dashoffset 0.6s ease;
+}
+
+.ring-dot {
+  fill: var(--signal);
+  stroke: none;
+}
+
+.ring-num {
+  fill: var(--ink);
+  stroke: none;
+  font-family: var(--f-mono);
+  font-size: 19px;
+  font-weight: 500;
+}
+
+.ring-lab {
+  fill: var(--ink-3);
+  stroke: none;
+  font-family: var(--f-mono);
+  font-size: 7px;
+  letter-spacing: 0.8px;
+}
+
+.hero-lines {
+  display: flex;
+  flex-direction: column;
   gap: 6px;
-  padding: 2px 8px;
-  border-radius: 999px;
-  font-size: 11px;
-  font-weight: 600;
-  color: var(--text-muted);
-  border: 1px solid var(--border);
-  white-space: nowrap;
+  min-width: 0;
+}
+
+.hero-lines .badge {
+  align-self: flex-start;
 }
 
 .badge .dot {
-  width: 6px;
-  height: 6px;
+  width: 7px;
+  height: 7px;
   border-radius: 50%;
   background: currentColor;
 }
 
 .badge.optimizado {
-  color: var(--success);
-  background: var(--pastel-mint);
-  border-color: rgba(74, 222, 128, 0.35);
+  background: var(--ok-tint);
+  color: #17603d;
 }
 
-.badge.con-conflictos,
+.badge.con-conflictos {
+  background: var(--danger-tint);
+  color: #a01f15;
+}
+
 .badge.incompleto {
-  color: var(--warning);
-  background: var(--pastel-amber);
-  border-color: rgba(251, 191, 36, 0.35);
+  background: var(--warn-tint);
+  color: #744900;
 }
 
-/* ---------- Hero ---------- */
-.hero-body {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
-
-.ring {
-  width: 84px;
-  height: 84px;
-  flex: none;
-}
-
-.ring-track {
-  fill: none;
-  stroke: var(--border);
-  stroke-width: 7;
-}
-
-.ring-value {
-  fill: none;
-  stroke: url(#ring-gradient);
-  stroke-width: 7;
-  stroke-linecap: round;
-  transform: rotate(-90deg);
-  transform-origin: 40px 40px;
-  transition: stroke-dashoffset 0.6s ease;
-}
-
-.ring text {
-  fill: var(--text);
-  font-size: 15px;
-  font-weight: 700;
-  font-family: var(--font-sans);
-}
-
-.hero-lines {
-  min-width: 0;
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.metric-label,
-.metric,
-.metric-sub {
-  margin: 0;
-}
-
-.metric-label {
-  font-size: 13px;
-  color: var(--text-muted);
-}
-
-.metric {
-  font-size: 14px;
-}
-
-.metric strong {
-  font-size: 18px;
-  font-variant-numeric: tabular-nums;
-}
-
-.metric-sub {
-  font-size: 12px;
-  color: var(--text-muted);
-}
-
-/* ---------- Checklist ---------- */
+/* 2. Checklist */
 .checks {
   list-style: none;
   margin: 0;
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 9px;
 }
 
 .checks li {
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-size: 13px;
+  gap: 10px;
+  font-size: 13.5px;
 }
 
 .check-icon {
   width: 20px;
   height: 20px;
-  flex: none;
   border-radius: 6px;
   display: grid;
   place-items: center;
-  color: var(--success);
-  background: var(--pastel-mint);
-}
-
-.checks li.warn .check-icon {
-  color: var(--warning);
-  background: var(--pastel-amber);
+  flex: none;
+  background: var(--ok-tint);
+  color: var(--ok);
 }
 
 .check-icon svg {
   width: 13px;
   height: 13px;
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 2.4;
-  stroke-linecap: round;
-  stroke-linejoin: round;
+  stroke-width: 2.6;
+}
+
+.checks li.warn .check-icon {
+  background: var(--warn-tint);
+  color: var(--warn);
 }
 
 .check-label {
@@ -185,58 +182,72 @@
 }
 
 .check-value {
-  color: var(--text-muted);
+  font-family: var(--f-mono);
   font-size: 12px;
-  font-variant-numeric: tabular-nums;
-}
-
-.checks li.warn .check-value {
-  color: var(--warning);
-}
-
-/* ---------- Quick action ---------- */
-.last-run {
-  margin: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  font-size: 12px;
-  color: var(--text-muted);
-}
-
-.last-run strong {
-  font-size: 15px;
-  color: var(--text);
-}
-
-.annealing {
-  margin: 0;
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  gap: 8px;
-  font-size: 12px;
-  color: var(--text-muted);
-}
-
-.annealing strong {
-  font-size: 13px;
-  color: var(--success);
-  font-variant-numeric: tabular-nums;
+  color: var(--ink-3);
   white-space: nowrap;
 }
 
-.action-buttons {
-  margin-top: auto;
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
+.checks li.warn .check-value {
+  color: var(--warn);
+  font-weight: 600;
 }
 
-.action-buttons button {
-  flex: 1;
-  padding: 8px 12px;
-  font-size: 13px;
+/* 3. Optimization */
+.last-run {
+  font-weight: 500;
+  font-size: 11px;
+}
+
+.annealing {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.idle {
+  margin: 0;
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.idle svg {
+  width: 18px;
+  height: 18px;
+  color: var(--ink-3);
+  align-self: center;
+}
+
+.idle-before {
+  font-size: 22px;
+  color: var(--ink-3);
+  text-decoration: line-through;
+  text-decoration-thickness: 1.5px;
+}
+
+.idle-after {
+  font-size: 40px;
+  font-weight: 500;
+  letter-spacing: -0.04em;
+  line-height: 1;
+}
+
+.action-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: auto;
+}
+
+.action-buttons > button {
+  flex: 1 1 auto;
+}
+
+.action-buttons svg {
+  width: 16px;
+  height: 16px;
 }
 
 /* While the schedule is being computed the card border pulses */
@@ -247,29 +258,21 @@
 @keyframes pulse-border {
   0%,
   100% {
-    border-color: var(--border);
-    box-shadow: 0 0 0 0 rgba(139, 92, 246, 0);
+    box-shadow: var(--sh-1), 0 0 0 0 rgba(185, 60, 11, 0.35);
   }
   50% {
-    border-color: rgba(139, 92, 246, 0.7);
-    box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.12);
+    box-shadow: var(--sh-1), 0 0 0 5px rgba(185, 60, 11, 0);
   }
 }
 
+/* Teachers and students: recent notices */
 .see-all {
-  font-size: 12px;
-  color: var(--accent);
-  text-decoration: none;
-}
-
-.see-all:hover {
-  text-decoration: underline;
+  font-size: 13px;
 }
 
 .empty {
   margin: 0;
-  font-size: 13px;
-  color: var(--text-muted);
+  color: var(--ink-2);
 }
 
 .recent {
@@ -278,147 +281,121 @@
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 8px;
 }
 
 .recent li {
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-size: 13px;
-  color: var(--text-muted);
+  gap: 10px;
+  padding: 9px 0;
+  border-bottom: 1px solid var(--line);
+  font-size: 13.5px;
+}
+
+.recent li:last-child {
+  border-bottom: 0;
 }
 
 .recent li.unread {
-  color: var(--text);
-  font-weight: 500;
+  font-weight: 600;
 }
 
 .recent-dot {
-  width: 8px;
-  height: 8px;
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
   flex: none;
-  border-radius: 50%;
-  background: #60a5fa;
+  background: var(--warn);
 }
 
 .recent-dot.cancelacion {
-  background: var(--danger);
-}
-
-.recent-dot.restablecida {
-  background: var(--success);
+  background: var(--ink);
 }
 
 .recent-dot.cambio_aula {
-  background: var(--warning);
+  background: var(--info);
+}
+
+.recent-dot.restablecida {
+  background: var(--ok);
 }
 
 .recent-title {
-  white-space: nowrap;
+  min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-/* ---------- Totals strip ---------- */
+/* 4. Totals strip */
 .stats {
   grid-column: 1 / -1;
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(min(150px, 100%), 1fr));
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-3);
+  overflow: hidden;
 }
 
 .stat {
-  display: grid;
-  grid-template-columns: auto 1fr;
-  grid-template-rows: auto auto;
-  column-gap: 10px;
-  align-items: center;
-  padding: 10px 12px;
-  border-radius: var(--radius);
-  background: var(--panel);
-  border: 1px solid var(--border);
-  transition: border-color 0.2s ease;
+  padding: 14px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  border-right: 1px solid var(--line);
 }
 
-.stat:hover {
-  border-color: color-mix(in srgb, var(--stat-color) 45%, var(--border));
+.stat:last-child {
+  border-right: 0;
 }
 
-.stat-icon {
-  grid-row: span 2;
-  width: 32px;
-  height: 32px;
-  border-radius: 8px;
-  display: grid;
-  place-items: center;
-  color: var(--stat-color);
-  background: color-mix(in srgb, var(--stat-color) 13%, transparent);
-}
-
-.stat-icon svg {
-  width: 17px;
-  height: 17px;
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 1.8;
-  stroke-linecap: round;
-  stroke-linejoin: round;
+.stat-ink {
+  background: var(--ink);
+  color: var(--ink-inv);
 }
 
 .stat-value {
-  font-size: 18px;
-  font-weight: 700;
+  font-size: 26px;
+  font-weight: 500;
+  letter-spacing: -0.03em;
   line-height: 1.1;
-  font-variant-numeric: tabular-nums;
-}
-
-.stat-skeleton {
-  width: 32px;
-  height: 18px;
 }
 
 .stat-label {
-  font-size: 12px;
-  color: var(--text-muted);
+  font-size: 12.5px;
+  color: var(--ink-2);
 }
 
-/* ---------- Skeletons ---------- */
+.stat-ink .stat-label {
+  color: var(--ink-inv-2);
+}
+
+/* Skeletons */
 .skeleton-ring {
-  width: 84px;
-  height: 84px;
+  width: 104px;
+  height: 104px;
   border-radius: 50%;
   flex: none;
 }
 
 .skeleton-line {
-  height: 14px;
-  width: 100%;
+  height: 12px;
+  width: 180px;
+  max-width: 100%;
 }
 
 .skeleton-line.short {
-  width: 60%;
+  width: 110px;
 }
 
-@media (max-width: 1100px) {
-  .bento {
-    grid-template-columns: 1fr 1fr;
-  }
-
-  .action-card {
-    grid-column: 1 / -1;
-  }
-}
-
-@media (max-width: 640px) {
-  .bento {
-    grid-template-columns: 1fr;
-  }
+.stat-skeleton {
+  width: 48px;
+  height: 26px;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .ring-value,
-  .card {
+  .ring-value {
     transition: none;
   }
 

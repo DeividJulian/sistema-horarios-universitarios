@@ -85,7 +85,7 @@ h2 {
 
 .badge-danger {
   color: var(--danger);
-  border-color: rgba(251, 113, 133, 0.5);
+  border-color: #f0b3ac;
 }
 
 .status-icon {
@@ -106,7 +106,7 @@ h2 {
 
 .status-icon.danger {
   color: var(--danger);
-  background: rgba(251, 113, 133, 0.12);
+  background: var(--danger-tint);
 }
 
 .ok-line {
@@ -193,7 +193,7 @@ h2 {
 }
 
 .backup strong {
-  color: #6ee7b7;
+  color: var(--ok);
 }
 
 .backup-icon {
@@ -204,7 +204,7 @@ h2 {
   place-items: center;
   font-weight: 800;
   color: #0b1020;
-  background: #34d399;
+  background: var(--ok);
 }
 
 .backup-actions {

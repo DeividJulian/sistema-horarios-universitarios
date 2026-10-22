@@ -8,6 +8,7 @@ import { AuthService } from '../../../core/auth/auth.service';
 import { apiErrorMessage } from '../../../core/http/api-error';
 import { ROLE_LABELS, User } from '../../../core/models';
 import { NotificationService } from '../../../core/services/notification.service';
+import { AuthArt } from '../auth-art/auth-art';
 import { CodeStep } from '../code-step/code-step';
 
 type ServerState = 'waking' | 'ready' | 'down';
@@ -49,7 +50,7 @@ export function afterLoginUrl(volver: string | undefined): string {
 /** Passwordless login: email first, then the six-digit code that arrives there. */
 @Component({
   selector: 'app-login-page',
-  imports: [ReactiveFormsModule, RouterLink, CodeStep],
+  imports: [ReactiveFormsModule, RouterLink, CodeStep, AuthArt],
   templateUrl: './login-page.html',
   // Shared with the sign-up page
   styleUrl: '../auth.css',

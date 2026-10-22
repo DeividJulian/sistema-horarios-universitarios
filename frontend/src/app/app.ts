@@ -10,7 +10,6 @@ import { CatalogStore } from './core/state/catalog.store';
 import { NoticeStore } from './core/state/notice.store';
 import { OptimizationStore } from './core/state/optimization.store';
 import { ConfirmDialog } from './shared/confirm-dialog/confirm-dialog';
-import { ConnectionStatus } from './shared/connection-status/connection-status';
 import { NavBar } from './shared/nav-bar/nav-bar';
 import { ToastContainer } from './shared/toast-container/toast-container';
 import { TopBar } from './shared/top-bar/top-bar';
@@ -18,7 +17,7 @@ import { Tutorial } from './shared/tutorial/tutorial';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, NavBar, TopBar, ConnectionStatus, ToastContainer, ConfirmDialog, Tutorial],
+  imports: [RouterOutlet, NavBar, TopBar, ToastContainer, ConfirmDialog, Tutorial],
   templateUrl: './app.html',
   styleUrl: './app.css',
 })

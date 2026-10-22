@@ -8,11 +8,12 @@ import { ROLE_LABELS } from '../../core/models';
 import { LayoutService } from '../../core/services/layout.service';
 import { TutorialService } from '../../core/services/tutorial.service';
 import { NoticeStore } from '../../core/state/notice.store';
+import { ConnectionStatus } from '../connection-status/connection-status';
 
 /** Top bar of the workspace: page title, tutorial, notices and the account menu. */
 @Component({
   selector: 'app-top-bar',
-  imports: [RouterLink],
+  imports: [RouterLink, ConnectionStatus],
   templateUrl: './top-bar.html',
   styleUrl: './top-bar.css',
   host: { '(document:click)': 'closeMenuOutside($event)', '(document:keydown.escape)': 'menuOpen.set(false)' },
@@ -26,6 +27,10 @@ export class TopBar {
   private readonly host = inject(ElementRef<HTMLElement>);
   protected readonly roleLabels = ROLE_LABELS;
   protected readonly menuOpen = signal(false);
+  /** "Miércoles, 21 de octubre de 2026" above the title. */
+  protected readonly today = new Intl.DateTimeFormat('es-CO', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })
+    .format(new Date())
+    .replace(/^./, (c) => c.toUpperCase());
 
   private readonly url = toSignal(
     this.router.events.pipe(

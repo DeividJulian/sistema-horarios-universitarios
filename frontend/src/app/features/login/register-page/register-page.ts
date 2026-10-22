@@ -9,6 +9,7 @@ import { apiErrorMessage } from '../../../core/http/api-error';
 import { RegisterGroup, User, shiftText } from '../../../core/models';
 import { NotificationService } from '../../../core/services/notification.service';
 import { trimmedLength } from '../../../shared/forms/validators';
+import { AuthArt } from '../auth-art/auth-art';
 import { CodeStep } from '../code-step/code-step';
 
 type RegisterField = 'nombre' | 'email' | 'grupo_id';
@@ -32,7 +33,7 @@ export function registerErrorMessage(error: unknown): string {
 /** Student sign-up: name, email and group, then the six-digit code that activates the account. */
 @Component({
   selector: 'app-register-page',
-  imports: [ReactiveFormsModule, RouterLink, CodeStep],
+  imports: [ReactiveFormsModule, RouterLink, CodeStep, AuthArt],
   templateUrl: './register-page.html',
   styleUrls: ['../auth.css', './register-page.css'],
 })

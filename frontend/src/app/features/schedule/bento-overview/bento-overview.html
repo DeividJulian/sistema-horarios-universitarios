@@ -1,20 +1,6 @@
 <section class="bento" aria-label="Resumen del horario">
   <!-- 1. Hero: percentage ring -->
   <article class="card hero-card">
-    <header class="card-head">
-      <h2>{{ faculty() ? 'Rendimiento del horario' : 'Tu semana' }}</h2>
-      @if (faculty() && !loading()) {
-        <span class="badge" [class]="'badge ' + optimization.status()">
-          <span class="dot" aria-hidden="true"></span>
-          @switch (optimization.status()) {
-            @case ('optimizado') { IA activa · Optimizado }
-            @case ('con-conflictos') { Con conflictos }
-            @case ('incompleto') { Incompleto }
-            @default { Sin horario }
-          }
-        </span>
-      }
-    </header>
     @if (loading()) {
       <div class="hero-body">
         <span class="skeleton skeleton-ring"></span>
@@ -25,38 +11,33 @@
       </div>
     } @else {
       <div class="hero-body">
-        <svg class="ring" viewBox="0 0 80 80" role="img" [attr.aria-label]="percentText() + ' por ciento'">
-          <defs>
-            <linearGradient id="ring-gradient" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0%" stop-color="#8b5cf6" />
-              <stop offset="100%" stop-color="#3b82f6" />
-            </linearGradient>
-          </defs>
-          <circle class="ring-track" cx="40" cy="40" r="34" />
-          <circle
-            class="ring-value"
-            cx="40"
-            cy="40"
-            r="34"
-            [attr.stroke-dasharray]="ringLength"
-            [attr.stroke-dashoffset]="ringOffset()"
-          />
-          <text x="40" y="44" text-anchor="middle">{{ percentText() }}%</text>
+        <svg class="ring" viewBox="0 0 104 104" role="img" [attr.aria-label]="'Eficiencia: ' + percentText() + ' por ciento'">
+          <circle class="ring-track" cx="52" cy="52" r="42" />
+          <circle class="ring-value" cx="52" cy="52" r="42" [attr.stroke-dasharray]="ringLength" [attr.stroke-dashoffset]="ringOffset()" />
+          <circle class="ring-dot" cx="52" cy="10" r="3" />
+          <text class="ring-num" x="52" y="56" text-anchor="middle">{{ percentText() }}%</text>
+          <text class="ring-lab" x="52" y="72" text-anchor="middle">{{ faculty() ? 'EFICIENCIA' : 'SEMANA' }}</text>
         </svg>
         <div class="hero-lines">
+          <span class="eyebrow">{{ faculty() ? 'Rendimiento' : 'Tu semana' }}</span>
           @if (faculty()) {
-            <p class="metric-label">Eficiencia del horario</p>
-            <p class="metric">
-              <strong>{{ conflictCount() }}</strong> {{ conflictCount() === 1 ? 'conflicto' : 'conflictos' }}
-            </p>
+            <h2 class="h-card">
+              @if (conflictCount() === 0) { Horario sin cruces } @else { {{ conflictCount() }} {{ conflictCount() === 1 ? 'conflicto' : 'conflictos' }} por resolver }
+            </h2>
             @if (hours(); as h) {
               <p class="metric-sub">{{ h.horas_programadas }} de {{ h.horas_requeridas }} horas programadas</p>
             }
+            <span class="badge" [class]="'badge ' + optimization.status()">
+              <span class="dot" aria-hidden="true"></span>
+              @switch (optimization.status()) {
+                @case ('optimizado') { Optimizado }
+                @case ('con-conflictos') { Con conflictos }
+                @case ('incompleto') { Incompleto }
+                @default { Sin horario }
+              }
+            </span>
           } @else {
-            <p class="metric-label">Clases que se dictan</p>
-            <p class="metric">
-              <strong>{{ entries().length }}</strong> {{ entries().length === 1 ? 'clase' : 'clases' }} a la semana
-            </p>
+            <h2 class="h-card">{{ entries().length }} {{ entries().length === 1 ? 'clase' : 'clases' }} a la semana</h2>
             <p class="metric-sub">{{ cancelled() }} {{ cancelled() === 1 ? 'cancelada' : 'canceladas' }} en los próximos días</p>
           }
         </div>
@@ -67,7 +48,7 @@
   <!-- 2. Checklist -->
   <article class="card">
     <header class="card-head">
-      <h2>{{ faculty() ? 'Restricciones resueltas' : 'Estado de tus clases' }}</h2>
+      <h2 class="eyebrow">{{ faculty() ? 'Restricciones resueltas' : 'Estado de tus clases' }}</h2>
     </header>
     @if (loading()) {
       <div class="checks">
@@ -98,21 +79,29 @@
   <article class="card action-card" [class.working]="optimization.generating()">
     @if (faculty()) {
       <header class="card-head">
-        <h2>Optimización</h2>
+        <h2 class="eyebrow">Optimización</h2>
+        <span class="badge last-run mono" title="Última optimización">{{ lastRunText() }}</span>
       </header>
-      <p class="last-run">
-        <span>Última optimización</span>
-        <strong>{{ lastRunText() }}</strong>
-      </p>
-      @if (idleText(); as idle) {
-        <p class="annealing" title="Recocido simulado: mueve bloques sin crear cruces para reducir las horas libres entre clases">
-          <span>Horas muertas (recocido simulado)</span>
-          <strong>{{ idle }}</strong>
-        </p>
+      @if (idle(); as i) {
+        <div class="annealing" title="Recocido simulado: mueve bloques sin crear cruces para reducir las horas libres entre clases">
+          <span class="metric-sub">Horas muertas de grupos y profesores</span>
+          <p class="idle">
+            <span class="idle-before mono">{{ i.before }}</span>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12h15M14 6l6 6-6 6" /></svg>
+            <span class="idle-after mono">{{ i.after }}</span>
+            @if (i.saved > 0) {
+              <span class="badge badge-ok mono">−{{ i.saved }} %</span>
+            }
+            <span class="sr-only">{{ idleText() }}</span>
+          </p>
+        </div>
+      } @else {
+        <p class="metric-sub">Genera el horario: el sistema reparte las clases sin cruces y luego reduce las horas muertas.</p>
       }
       <div class="action-buttons">
         @if (auth.isAdmin()) {
-          <button type="button" class="btn-primary" (click)="optimization.generate()" [disabled]="optimization.generating() || !ready()">
+          <button type="button" class="btn-signal" (click)="optimization.generate()" [disabled]="optimization.generating() || !ready()">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.3-5.6M20 4v5h-5" /></svg>
             {{ generateLabel() }}
           </button>
         }
@@ -120,14 +109,14 @@
       </div>
     } @else {
       <header class="card-head">
-        <h2>Avisos recientes</h2>
-        <a routerLink="/avisos" class="see-all">Ver todos</a>
+        <h2 class="eyebrow">Avisos recientes</h2>
+        <a routerLink="/avisos" class="see-all link">Ver todos</a>
       </header>
       @if (notices.notices().length === 0) {
         <p class="empty">Sin avisos por ahora.</p>
       } @else {
         <ul class="recent">
-          @for (n of notices.notices().slice(0, 2); track n.id) {
+          @for (n of notices.notices().slice(0, 3); track n.id) {
             <li [class.unread]="notices.isUnread(n)">
               <span class="recent-dot" [class]="'recent-dot ' + n.tipo" aria-hidden="true"></span>
               <span class="recent-title">{{ n.titulo }}</span>
@@ -140,13 +129,10 @@
 
   <!-- 4. Totals strip -->
   <div class="stats" aria-label="Totales">
-    @for (s of stats(); track s.label) {
-      <div class="stat" [style.--stat-color]="s.color">
-        <span class="stat-icon" aria-hidden="true">
-          <svg viewBox="0 0 24 24"><path [attr.d]="s.icon" /></svg>
-        </span>
+    @for (s of stats(); track s.label; let last = $last) {
+      <div class="stat" [class.stat-ink]="last">
         @if (ready()) {
-          <span class="stat-value">{{ s.value }}</span>
+          <span class="stat-value mono">{{ s.value }}</span>
         } @else {
           <span class="skeleton stat-skeleton"></span>
         }

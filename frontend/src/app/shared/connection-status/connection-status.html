@@ -5,7 +5,8 @@
     <span class="chip warning">Mostrando datos guardados</span>
   }
   @if (tabSync.available()) {
-    <span class="chip">
+    <span class="chip sync" title="Los cambios se reflejan en todas tus pestañas abiertas">
+      <span class="dot" aria-hidden="true"></span>
       {{ tabSync.openTabs() }}
       {{ tabSync.openTabs() === 1 ? 'pestaña sincronizada' : 'pestañas sincronizadas' }}
     </span>

@@ -27,8 +27,8 @@ h2 {
   align-items: center;
   gap: 10px;
   flex-wrap: wrap;
-  background: rgba(245, 166, 35, 0.08);
-  border: 1px solid rgba(245, 166, 35, 0.35);
+  background: var(--warn-tint);
+  border: 1px solid #ebd08a;
   border-radius: 8px;
   padding: 10px 12px;
   font-size: 13px;
@@ -48,8 +48,8 @@ h2 {
   place-items: center;
   font-weight: 800;
   font-size: 12px;
-  color: #1a1305;
-  background: var(--accent);
+  color: #fff;
+  background: var(--ink);
   flex-shrink: 0;
 }
 
@@ -131,8 +131,8 @@ h2 {
   height: 26px;
   border-radius: 5px;
   border: 1px solid var(--border);
-  background: var(--panel-alt);
-  color: #1a1305;
+  background: var(--surface);
+  color: var(--ink-inv);
   font-weight: 800;
   cursor: pointer;
   padding: 0;
@@ -144,14 +144,15 @@ h2 {
 }
 
 .cell.on {
-  background: var(--accent);
-  border-color: var(--accent);
+  background: var(--ink);
+  border-color: var(--ink);
+  background-image: repeating-linear-gradient(135deg, rgba(255, 255, 255, 0) 0 6px, rgba(255, 255, 255, 0.1) 6px 8px);
 }
 
 /* Hours inside the shift of the teacher's groups */
 tr.in-shift .cell:not(.on) {
-  background: rgba(245, 166, 35, 0.12);
-  border-color: rgba(245, 166, 35, 0.35);
+  background: var(--signal-tint);
+  border-color: #efc2a9;
 }
 
 .foot {

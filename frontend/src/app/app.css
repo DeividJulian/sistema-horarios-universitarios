@@ -1,6 +1,6 @@
-/* Signed in: fixed 240 px sidebar on the left, top bar and content on the right */
+/* Signed in: fixed 248 px ink sidebar on the left, top bar and content on the right */
 .workspace {
-  margin-left: 240px;
+  margin-left: 248px;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
@@ -8,7 +8,7 @@
 
 .app {
   flex: 1;
-  padding: 20px 24px 40px;
+  padding: 24px 28px 40px;
   outline: none;
 }
 
@@ -21,9 +21,9 @@
   left: 12px;
   top: -48px;
   z-index: 60;
-  background: var(--panel);
-  color: var(--text);
-  border: 1px solid var(--accent-strong);
+  background: var(--ink);
+  color: var(--ink-inv);
+  border: 0;
   padding: 8px 14px;
   border-radius: 8px;
   font-weight: 600;
@@ -47,5 +47,6 @@
     position: fixed;
     inset: 0;
     z-index: 44;
+    background: rgba(21, 23, 28, 0.48);
   }
 }

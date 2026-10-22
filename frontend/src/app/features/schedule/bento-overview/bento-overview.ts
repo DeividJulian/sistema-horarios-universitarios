@@ -31,7 +31,7 @@ interface Check {
   value: string;
 }
 
-const RING_RADIUS = 34;
+const RING_RADIUS = 42;
 const RING_LENGTH = 2 * Math.PI * RING_RADIUS;
 
 /**
@@ -106,6 +106,14 @@ export class BentoOverview {
     if (last?.antes === undefined || last.despues === undefined) return null;
     const saved = last.antes > 0 ? Math.round(((last.antes - last.despues) / last.antes) * 100) : 0;
     return `${last.antes} → ${last.despues}${saved > 0 ? ` (−${saved} %)` : ''}`;
+  });
+
+  /** The same figures as idleText, separately, for the big numbers of the card. */
+  protected readonly idle = computed(() => {
+    const last = this.optimization.lastRun();
+    if (last?.antes === undefined || last.despues === undefined) return null;
+    const saved = last.antes > 0 ? Math.round(((last.antes - last.despues) / last.antes) * 100) : 0;
+    return { before: last.antes, after: last.despues, saved };
   });
 
   protected readonly hours = computed(() => this.optimization.stats()?.cumplimiento);

@@ -1,9 +1,10 @@
 import { CdkDrag, CdkDragDrop, CdkDropList, CdkDropListGroup } from '@angular/cdk/drag-drop';
-import { Component, computed, input, output } from '@angular/core';
+import { Component, computed, input, output, signal } from '@angular/core';
 
 import {
   Classroom,
   ScheduleEntry,
+  StudentGroup,
   SchoolDay,
   START_HOURS,
   Subject,
@@ -38,6 +39,8 @@ export class ScheduleGrid {
   readonly entries = input.required<ScheduleEntry[]>();
   readonly subjectsById = input.required<Map<number, Subject>>();
   readonly classroomsById = input.required<Map<number, Classroom>>();
+  /** To show the group of each class (several groups can share an hour). */
+  readonly groupsById = input<Map<number, StudentGroup>>(new Map());
   readonly filter = input.required<ScheduleFilter>();
   /** Conflict descriptions per block id (from GET /conflictos). */
   readonly conflicts = input<Map<number, string[]>>(new Map());
@@ -65,18 +68,48 @@ export class ScheduleGrid {
   protected readonly allCellIds = WEEKDAYS.flatMap((d) => START_HOURS.map((h) => cellId(d, h)));
   protected readonly cellId = cellId;
 
-  /** Index "day-hour" -> visible block, rebuilt only when the data or the filter change. */
+  /** Index "day-hour" -> visible blocks (several groups can have class at the same hour), rebuilt only when the data or the filter change. */
   protected readonly cells = computed(() => {
-    const index = new Map<string, ScheduleEntry>();
+    const index = new Map<string, ScheduleEntry[]>();
     const subjects = this.subjectsById();
     const filter = this.filter();
     for (const entry of this.entries()) {
       if (matchesFilter(entry, subjects.get(entry.materia_id), filter)) {
-        index.set(cellId(entry.dia_semana, hourOf(entry.hora_inicio)), entry);
+        const key = cellId(entry.dia_semana, hourOf(entry.hora_inicio));
+        index.set(key, [...(index.get(key) ?? []), entry]);
       }
     }
     return index;
   });
+
+  /** Visible classes per day, for the header ("6 clases"). */
+  protected readonly dayCounts = computed(() => {
+    const counts = new Map<Weekday, number>();
+    for (const [key, list] of this.cells()) {
+      const day = key.split('-')[0] as Weekday;
+      counts.set(day, (counts.get(day) ?? 0) + list.length);
+    }
+    return counts;
+  });
+
+  /** Phones: the agenda shows one day at a time (null = today, or the first day). */
+  protected readonly pickedDay = signal<Weekday | null>(null);
+  protected readonly agendaDay = computed<Weekday>(() => {
+    const columns = this.days();
+    return this.pickedDay() ?? columns.find((c) => c.date === this.todayIso)?.day ?? columns[0]?.day ?? 'Lunes';
+  });
+  protected readonly agendaColumn = computed(() => this.days().find((c) => c.day === this.agendaDay()) ?? { day: this.agendaDay(), date: null });
+  /** Classes of the agenda day, by hour. */
+  protected readonly agenda = computed(() => {
+    const day = this.agendaDay();
+    return START_HOURS.map((hour) => ({ hour, entries: this.cells().get(cellId(day, hour)) ?? [] })).filter((slot) => slot.entries.length);
+  });
+
+  /** Current hour and minute, for the red "now" line in today's column. */
+  protected readonly now = (() => {
+    const date = new Date();
+    return { hour: date.getHours(), minute: date.getMinutes(), label: `${date.getHours()}:${String(date.getMinutes()).padStart(2, '0')}` };
+  })();
 
   /** All the hours, or from the first to the last hour with a visible class. */
   protected readonly visibleHours = computed(() => {
@@ -92,8 +125,17 @@ export class ScheduleGrid {
     return !!date && this.cancelledKeys().has(`${entry.id}|${date}`);
   }
 
-  protected entryAt(day: Weekday, hour: number): ScheduleEntry | null {
-    return this.cells().get(cellId(day, hour)) ?? null;
+  protected entriesAt(day: Weekday, hour: number): ScheduleEntry[] {
+    return this.cells().get(cellId(day, hour)) ?? [];
+  }
+
+  protected groupName(entry: ScheduleEntry): string | null {
+    const subject = this.subjectsById().get(entry.materia_id);
+    return subject ? (this.groupsById().get(subject.grupo_id)?.nombre ?? null) : null;
+  }
+
+  protected dayNumber(date: string): number {
+    return Number(date.slice(8, 10));
   }
 
   protected subjectName(entry: ScheduleEntry): string {
@@ -119,16 +161,24 @@ export class ScheduleGrid {
     return `Clase cancelada${reason ? `: ${reason}` : ''}`;
   }
 
-  protected color(entry: ScheduleEntry): string {
+  protected color(entry: ScheduleEntry): { fill: string; ink: string } {
     return subjectColor(entry.materia_id);
   }
 
-  protected onDrop(event: CdkDragDrop<ScheduleEntry | null>, day: Weekday, hour: number): void {
+  protected onDrop(event: CdkDragDrop<ScheduleEntry[]>, day: Weekday, hour: number): void {
     if (event.previousContainer === event.container) return;
     const entry: ScheduleEntry | undefined = event.item.data;
     if (!entry) return;
 
-    if (this.entryAt(day, hour)) {
+    // Another class of the same group, teacher or classroom is already there: the backend would refuse it
+    const subjects = this.subjectsById();
+    const moving = subjects.get(entry.materia_id);
+    const clash = this.entriesAt(day, hour).some((other) => {
+      if (other.id === entry.id) return false;
+      const subject = subjects.get(other.materia_id);
+      return other.aula_id === entry.aula_id || subject?.grupo_id === moving?.grupo_id || subject?.profesor_id === moving?.profesor_id;
+    });
+    if (clash) {
       this.occupiedDrop.emit();
       return;
     }

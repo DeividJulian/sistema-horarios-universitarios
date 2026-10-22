@@ -1,241 +1,370 @@
+/* Weekly calendar «Plano»: paper grid, big day numbers, subject-coloured cards and a red "now" line */
 :host {
   display: block;
 }
 
 .grid-scroll {
   overflow-x: auto;
+  border: 1px solid var(--line);
+  border-radius: var(--r-3);
+  background: var(--surface);
+  box-shadow: var(--sh-1);
 }
 
-/* Fluid board: the day columns share the width, up to a comfortable maximum */
 .board {
   display: flex;
   flex-direction: column;
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  overflow: hidden;
-  min-width: 640px;
-  background: var(--panel);
+  min-width: 760px;
 }
 
 .row {
   display: flex;
 }
 
+/* ---------- Header: "MIÉ 21 Hoy" ---------- */
 .header-row {
-  background-color: var(--panel-alt);
-}
-
-.row-alt {
-  background-color: rgba(255, 255, 255, 0.015);
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  background: var(--surface);
+  border-bottom: 1px solid var(--line);
 }
 
 .hour-cell {
-  width: 84px;
-  min-width: 84px;
-  white-space: nowrap;
-  padding: 6px;
-  border-right: 1px solid var(--border);
-  border-bottom: 1px solid var(--border);
-  font-family: var(--font-mono);
-  font-size: 11px;
-  color: var(--text-muted);
+  width: 82px;
+  min-width: 82px;
+  padding: 6px 8px 0 0;
   display: flex;
-  align-items: center;
-  justify-content: center;
+  justify-content: flex-end;
+  align-items: flex-start;
+  font-family: var(--f-mono);
+  font-size: 10.5px;
+  color: var(--ink-3);
+  white-space: nowrap;
 }
 
-.header-row .hour-cell {
-  border-bottom: none;
+.hour-cell.corner {
+  align-items: flex-end;
+  justify-content: center;
+  padding: 0 0 10px;
+  font-size: 10px;
+  letter-spacing: 0.06em;
 }
 
 .day-cell {
   flex: 1 1 0;
   min-width: 0;
-  padding: 8px 6px;
-  text-align: center;
-  border-right: 1px solid var(--border);
-  font-size: 13px;
+  padding: 12px 12px 10px;
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 4px 8px;
+  border-left: 1px solid var(--line);
+}
+
+.day-name {
+  font-family: var(--f-mono);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+
+.day-num {
+  font-family: var(--f-display);
+  font-size: 28px;
   font-weight: 700;
+  letter-spacing: -0.04em;
+  line-height: 1;
+}
+
+.day-meta {
+  margin-left: auto;
+  font-family: var(--f-mono);
+  font-size: 11px;
+  color: var(--ink-3);
+}
+
+.day-cell.today .day-num {
+  color: var(--signal);
+}
+
+.day-cell.today .day-name {
+  color: var(--signal-ink);
+}
+
+.today-pill {
+  font-family: var(--f-mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  background: var(--signal);
+  color: #fff;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+/* ---------- Cells (drop zones) ---------- */
+.cell {
+  position: relative;
+  flex: 1 1 0;
+  min-width: 0;
+  min-height: 84px;
+  padding: 4px;
+  display: flex;
+  gap: 4px;
+  border-left: 1px solid var(--line);
+  border-top: 1px solid var(--grid);
+  background-image: linear-gradient(rgba(231, 227, 216, 0.55) 1px, transparent 1px);
+  background-size: 100% 50%;
+  background-position: 0 50%;
+  background-repeat: no-repeat;
+}
+
+.cell.today {
+  background-color: #fbf3ec;
+}
+
+.cell.cdk-drop-list-receiving {
+  outline: 2px dashed var(--signal);
+  outline-offset: -4px;
+  background-color: rgba(185, 60, 11, 0.07);
+}
+
+/* Red "now" line in today's column */
+.now {
+  position: absolute;
+  left: -1px;
+  right: 0;
+  height: 2px;
+  background: var(--signal);
+  z-index: 3;
+  pointer-events: none;
+}
+
+.now::before {
+  content: '';
+  position: absolute;
+  left: -5px;
+  top: -4px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--signal);
+}
+
+.now-lab {
+  position: absolute;
+  right: 6px;
+  top: -9px;
+  font-family: var(--f-mono);
+  font-size: 10.5px;
+  font-weight: 600;
+  background: var(--signal);
+  color: #fff;
+  padding: 1px 6px;
+  border-radius: 4px;
+}
+
+/* ---------- Class cards ---------- */
+.block {
+  flex: 1 1 0;
+  min-width: 0;
+  position: relative;
+  z-index: 1;
   display: flex;
   flex-direction: column;
   gap: 1px;
+  padding: 6px 8px 7px 9px;
+  border-radius: 10px;
+  border: 1px solid rgba(21, 23, 28, 0.1);
+  background: var(--fill, var(--s8));
+  color: var(--tone, var(--ink));
+  text-align: left;
+  cursor: grab;
+  overflow: hidden;
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
 }
 
-.day-cell small {
-  font-size: 11px;
-  font-weight: 600;
-  color: var(--text-muted);
-}
-
-.day-cell.today {
-  color: var(--accent);
-  box-shadow: inset 0 -2px 0 var(--accent);
-}
-
-.day-cell.today small {
-  color: var(--accent);
-}
-
-.day-cell:last-child,
-.cell:last-child {
-  border-right: none;
-}
-
-.cell {
-  flex: 1 1 0;
-  min-width: 0;
-  height: 52px;
-  border-right: 1px solid var(--border);
-  border-bottom: 1px solid var(--border);
-  padding: 4px;
-}
-
-/* Class cards: soft pastel fill and a 1 px border in the subject colour (--c) */
-.block {
-  --c: #60a5fa;
-  position: relative;
-  height: 100%;
-  padding: 5px 8px;
-  border-radius: 8px;
-  border: 1px solid color-mix(in srgb, var(--c) 38%, transparent);
-  background: color-mix(in srgb, var(--c) 13%, var(--panel));
-  display: flex;
-  align-items: flex-start;
-  gap: 6px;
+.block.readonly {
   cursor: pointer;
-  touch-action: none;
-  transition: all 0.2s ease;
 }
 
 .block:hover {
-  background: color-mix(in srgb, var(--c) 20%, var(--panel));
-  border-color: color-mix(in srgb, var(--c) 60%, transparent);
+  transform: translate(-1px, -1px);
+  box-shadow: var(--sh-lift-sm);
+  z-index: 2;
 }
 
-.block:not(.cdk-drag-disabled) {
-  cursor: grab;
-}
-
-.block-text {
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  min-width: 0;
-  flex: 1;
-}
-
-.block-text strong {
-  font-size: 12px;
-  font-weight: 600;
-  color: color-mix(in srgb, var(--c) 35%, #ffffff);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.block-text span {
-  font-size: 11px;
-  color: var(--text-muted);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-/* Small floating tags inside the card */
-.tag {
-  position: absolute;
-  right: 4px;
-  bottom: 4px;
-  padding: 0 6px;
-  border-radius: 999px;
-  font-size: 10px;
-  font-weight: 600;
-  line-height: 16px;
-  border: 1px solid transparent;
-}
-
-.tag-conflict {
-  color: var(--warning);
-  background: var(--pastel-amber);
-  border-color: rgba(251, 191, 36, 0.4);
-}
-
-/* Amber for possible clashes, as warnings (the colour itself is set in the template) */
-.block.has-conflict {
-  border-color: rgba(251, 191, 36, 0.6);
-}
-
-/* .block-text span would paint the label grey, so the selector carries both classes */
-/* Cancelled on the date shown: red card with a solid red bar, a clear label and the subject crossed out */
-.block.cancelled {
-  padding: 4px 8px 3px 9px;
-  border: 1px solid rgba(248, 113, 113, 0.65);
-  border-left: 3px solid var(--danger);
-  background-color: rgba(248, 113, 113, 0.12);
-  background-image: repeating-linear-gradient(135deg, rgba(248, 113, 113, 0.1) 0 5px, transparent 5px 10px);
-}
-
-.block.cancelled:hover {
-  background-color: rgba(248, 113, 113, 0.18);
-  border-color: var(--danger);
-}
-
-.block.cancelled .block-text {
-  gap: 2px;
-}
-
-.block.cancelled strong {
-  color: #fca5a5;
-  text-decoration: line-through;
-  text-decoration-color: var(--danger);
-  text-decoration-thickness: 2px;
-}
-
-.block-text .cancel-badge {
-  align-self: flex-start;
-  display: inline-flex;
-  align-items: center;
-  gap: 3px;
-  padding: 0 6px 0 4px;
-  border-radius: 999px;
-  font-size: 9.5px;
-  font-weight: 700;
-  line-height: 14px;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  color: #fff;
-  background: var(--danger);
-}
-
-.cancel-badge svg {
-  width: 10px;
-  height: 10px;
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 3;
-  stroke-linecap: round;
+.block:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 1px;
 }
 
 .block.selected {
-  box-shadow: 0 0 0 2px var(--accent-strong);
+  outline: 2px solid var(--ink);
+  outline-offset: 0;
+  box-shadow: var(--sh-lift);
+  transform: translate(-2px, -2px);
+  z-index: 4;
 }
 
-/* Drag preview keeps the card look */
+.ev-top {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.ev-time {
+  font-family: var(--f-mono);
+  font-size: 10.5px;
+  font-weight: 500;
+  opacity: 0.92;
+  white-space: nowrap;
+}
+
+.ev-code {
+  margin-left: auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: var(--f-mono);
+  font-size: 9.5px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  padding: 1px 5px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.62);
+}
+
+.ev-title {
+  font-size: 13px;
+  font-weight: 650;
+  line-height: 1.22;
+  color: var(--ink);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.ev-room {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+  font-size: 11.5px;
+  color: var(--ink-2);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ev-room svg {
+  width: 12px;
+  height: 12px;
+  flex: none;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* Three or more classes at the same hour: compact cards */
+.cell.crowded .block {
+  padding: 4px 6px;
+}
+
+.cell.crowded .ev-title {
+  font-size: 12px;
+  -webkit-line-clamp: 1;
+}
+
+.cell.crowded .ev-code,
+.cell.crowded .ev-room svg {
+  display: none;
+}
+
+/* ---------- States ---------- */
+.flag {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 2px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-family: var(--f-mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.flag-cancel {
+  background: var(--ink);
+  color: #fff;
+}
+
+.flag-conflict {
+  background: var(--danger);
+  color: #fff;
+}
+
+.block.has-conflict {
+  background: var(--danger-tint);
+  border: 2px solid var(--danger);
+}
+
+.block.has-conflict .ev-time,
+.block.has-conflict .ev-code {
+  color: #a01f15;
+}
+
+/* Cancelled on that date: hatched paper, dashed border and the subject crossed out */
+.block.cancelled {
+  background: repeating-linear-gradient(135deg, #eeebe2 0 7px, #e2ded3 7px 14px);
+  border: 1.5px dashed #6a707a;
+}
+
+.block.cancelled .ev-title {
+  text-decoration: line-through;
+  text-decoration-thickness: 2px;
+  color: var(--ink-2);
+}
+
+.block.cancelled .ev-time,
+.block.cancelled .ev-room,
+.block.cancelled .ev-code {
+  color: var(--ink-3);
+}
+
+/* Drag and drop */
 .block.cdk-drag-preview {
-  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.55);
+  box-shadow: var(--sh-lift);
+  cursor: grabbing;
+}
+
+.block.cdk-drag-placeholder {
+  opacity: 0.35;
+  border-style: dashed;
 }
 
 /* While the schedule is generated the cards shimmer softly */
 .board.busy .block {
-  pointer-events: none;
-  background: linear-gradient(90deg, #18181b 0%, #26262c 40%, #18181b 80%);
+  color: transparent;
+  border-color: transparent;
+  background: linear-gradient(90deg, #e7e3d8 0%, #f1eee6 50%, #e7e3d8 100%);
   background-size: 200% 100%;
-  border-color: var(--border);
   animation: shimmer 1.4s ease-in-out infinite;
 }
 
 .board.busy .block > * {
-  opacity: 0.25;
+  visibility: hidden;
 }
 
 @keyframes shimmer {
@@ -254,5 +383,124 @@
 
   .board.busy .block {
     animation: none;
+  }
+}
+
+/* ---------- Phones: day strip + agenda ---------- */
+.agenda {
+  display: none;
+}
+
+@media (max-width: 640px) {
+  .grid-scroll {
+    display: none;
+  }
+
+  .agenda {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .daystrip {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 6px;
+  }
+
+  .daypill {
+    min-height: 60px;
+    border-radius: 14px;
+    border: 1px solid var(--line-2);
+    background: var(--surface);
+    color: var(--ink);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1px;
+    cursor: pointer;
+  }
+
+  .daypill .mono {
+    font-size: 10.5px;
+    letter-spacing: 0.08em;
+    color: var(--ink-3);
+  }
+
+  .daypill .display {
+    font-size: 20px;
+    font-weight: 700;
+  }
+
+  .daypill.today .display {
+    color: var(--signal);
+  }
+
+  .daypill.active {
+    background: var(--ink);
+    border-color: var(--ink);
+    color: var(--ink-inv);
+  }
+
+  .daypill.active .mono {
+    color: var(--ink-inv-2);
+  }
+
+  .daypill.active.today .display {
+    color: #f08a5d;
+  }
+
+  .agenda-empty {
+    margin: 0;
+    padding: 24px;
+    text-align: center;
+    color: var(--ink-2);
+    border: 1px dashed var(--line-2);
+    border-radius: 14px;
+  }
+
+  .agenda-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .agenda-row {
+    display: grid;
+    grid-template-columns: 72px minmax(0, 1fr);
+    gap: 10px;
+  }
+
+  .agenda-time {
+    padding-top: 12px;
+    text-align: right;
+    font-family: var(--f-mono);
+    font-size: 11px;
+    color: var(--ink-3);
+    white-space: nowrap;
+  }
+
+  .agenda-blocks {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .m-ev {
+    flex: none;
+    width: 100%;
+    padding: 12px 14px;
+    border-radius: 14px;
+    gap: 4px;
+    font: inherit;
+    cursor: pointer;
+  }
+
+  .m-ev .ev-title {
+    font-size: 15px;
   }
 }

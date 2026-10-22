@@ -1,34 +1,46 @@
 <div class="grid-scroll">
   <section class="board" cdkDropListGroup aria-label="Calendario semanal" [class.busy]="busy()" [attr.aria-busy]="busy()">
     <div class="row header-row">
-      <div class="hour-cell"></div>
+      <div class="hour-cell corner">GMT−5</div>
       @for (column of days(); track column.day) {
         <div class="day-cell" [class.today]="column.date === todayIso">
-          <span>{{ column.day }}</span>
+          <span class="day-name">{{ column.day.slice(0, 3) }}</span>
           @if (column.date; as date) {
-            <small>{{ date === todayIso ? 'Hoy · ' : '' }}{{ shortDate(date) }}</small>
+            <span class="day-num" [attr.aria-label]="shortDate(date)">{{ dayNumber(date) }}</span>
           }
+          @if (column.date === todayIso) {
+            <span class="today-pill">Hoy</span>
+          }
+          <span class="day-meta">{{ dayCounts().get(column.day) ?? 0 }} cl.</span>
         </div>
       }
     </div>
 
-    @for (hour of visibleHours(); track hour; let odd = $odd) {
-      <div class="row" [class.row-alt]="odd">
+    @for (hour of visibleHours(); track hour) {
+      <div class="row">
         <div class="hour-cell">{{ hour | hour }}</div>
 
         @for (column of days(); track column.day) {
           @let day = column.day;
+          @let blocks = entriesAt(day, hour);
           <div
             class="cell"
+            [class.today]="column.date === todayIso"
+            [class.crowded]="blocks.length > 2"
             cdkDropList
+            cdkDropListOrientation="horizontal"
             [id]="cellId(day, hour)"
             [cdkDropListConnectedTo]="allCellIds"
-            [cdkDropListData]="entryAt(day, hour)"
+            [cdkDropListData]="blocks"
             (cdkDropListDropped)="onDrop($event, day, hour)"
           >
-            @if (entryAt(day, hour); as entry) {
+            @if (column.date === todayIso && hour === now.hour) {
+              <div class="now" [style.top.%]="(now.minute / 60) * 100" aria-hidden="true"><span class="now-lab">{{ now.label }}</span></div>
+            }
+            @for (entry of blocks; track entry.id) {
               @let problems = conflictsOf(entry);
               @let cancelled = isCancelled(entry, column.date);
+              @let tone = color(entry);
               <div
                 cdkDrag
                 [cdkDragData]="entry"
@@ -41,30 +53,30 @@
                 (click)="selected.emit(entry)"
                 (keydown.enter)="selected.emit(entry)"
                 (keydown.space)="$event.preventDefault(); selected.emit(entry)"
-                [class.has-conflict]="problems.length > 0"
+                [class.has-conflict]="problems.length > 0 && !cancelled"
                 [class.cancelled]="cancelled"
-                [style.--c]="cancelled ? '#f87171' : problems.length ? '#fbbf24' : color(entry)"
+                [class.readonly]="readonly()"
+                [style.--fill]="tone.fill"
+                [style.--tone]="tone.ink"
                 [attr.title]="cancelled ? cancelTitle(entry, column.date) : problems.length ? problems.join(' · ') : null"
               >
                 @if (cancelled) {
-                  <!-- Cancelled on this date: red card, a clear label on top and the subject crossed out -->
-                  <div class="block-text">
-                    <span class="cancel-badge">
-                      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" /></svg>
-                      Cancelada
-                    </span>
-                    <strong>{{ subjectName(entry) }}</strong>
-                  </div>
-                } @else {
-                  <div class="block-text">
-                    <strong>{{ subjectName(entry) }}</strong>
-                    <span>{{ classroomName(entry) }} · {{ hour | hour }}</span>
-                  </div>
-                }
-                @if (!cancelled && problems.length) {
-                  <span class="tag tag-conflict" aria-hidden="true">Conflicto</span>
+                  <span class="flag flag-cancel">✕ Cancelada</span>
+                } @else if (problems.length) {
+                  <span class="flag flag-conflict" aria-hidden="true">! Conflicto</span>
                   <span class="sr-only">Conflicto: {{ problems.join('. ') }}</span>
                 }
+                <span class="ev-top">
+                  <span class="ev-time">{{ hour | hour }}</span>
+                  @if (groupName(entry); as group) {
+                    <span class="ev-code">{{ group }}</span>
+                  }
+                </span>
+                <strong class="ev-title">{{ subjectName(entry) }}</strong>
+                <span class="ev-room">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 21h16M6 21V4h12v17M14 12v.5" /></svg>
+                  {{ classroomName(entry) }}
+                </span>
               </div>
             }
           </div>
@@ -73,3 +85,70 @@
     }
   </section>
 </div>
+
+<!-- Phones: a strip of days and the agenda of the chosen day -->
+<section class="agenda" aria-label="Agenda del día">
+  <div class="daystrip" role="tablist" aria-label="Día">
+    @for (column of days(); track column.day) {
+      <button
+        type="button"
+        role="tab"
+        class="daypill"
+        [class.active]="column.day === agendaDay()"
+        [class.today]="column.date === todayIso"
+        [attr.aria-selected]="column.day === agendaDay()"
+        (click)="pickedDay.set(column.day)"
+      >
+        <span class="mono">{{ column.day.slice(0, 3).toUpperCase() }}</span>
+        <span class="display">{{ column.date ? dayNumber(column.date) : '' }}</span>
+      </button>
+    }
+  </div>
+
+  @if (agenda().length === 0) {
+    <p class="agenda-empty">No hay clases este día.</p>
+  } @else {
+    <ol class="agenda-list">
+      @for (slot of agenda(); track slot.hour) {
+        <li class="agenda-row">
+          <span class="agenda-time">{{ slot.hour | hour }}</span>
+          <div class="agenda-blocks">
+            @for (entry of slot.entries; track entry.id) {
+              @let problems = conflictsOf(entry);
+              @let cancelled = isCancelled(entry, agendaColumn().date);
+              @let tone = color(entry);
+              <button
+                type="button"
+                class="block m-ev"
+                [class.selected]="selectedId() === entry.id"
+                [class.has-conflict]="problems.length > 0 && !cancelled"
+                [class.cancelled]="cancelled"
+                [style.--fill]="tone.fill"
+                [style.--tone]="tone.ink"
+                [attr.aria-label]="ariaLabel(entry, cancelled)"
+                (click)="selected.emit(entry)"
+              >
+                @if (cancelled) {
+                  <span class="flag flag-cancel">✕ Cancelada</span>
+                } @else if (problems.length) {
+                  <span class="flag flag-conflict">! Conflicto</span>
+                }
+                <span class="ev-top">
+                  <span class="ev-time">{{ slot.hour | hour }} – {{ slot.hour + 1 | hour }}</span>
+                  @if (groupName(entry); as group) {
+                    <span class="ev-code">{{ group }}</span>
+                  }
+                </span>
+                <strong class="ev-title">{{ subjectName(entry) }}</strong>
+                <span class="ev-room">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 21h16M6 21V4h12v17M14 12v.5" /></svg>
+                  {{ classroomName(entry) }}
+                </span>
+              </button>
+            }
+          </div>
+        </li>
+      }
+    </ol>
+  }
+</section>

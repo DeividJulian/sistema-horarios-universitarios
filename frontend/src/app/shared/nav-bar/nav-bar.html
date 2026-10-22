@@ -1,7 +1,19 @@
 <nav class="sidebar" aria-label="Navegación principal">
   <a class="brand" routerLink="/horario" (click)="layout.closeSidebar()">
-    <span class="brand-mark" aria-hidden="true">H</span>
-    <span class="brand-name">Horarios y Aulas</span>
+    <svg class="brand-mark" width="34" height="34" viewBox="0 0 34 34" aria-hidden="true">
+      <rect x="1" y="1" width="32" height="32" rx="9" fill="#F3F1EA" />
+      <g fill="#15171C">
+        <rect x="7" y="7" width="5.5" height="5.5" rx="1.2" /><rect x="14.25" y="7" width="5.5" height="5.5" rx="1.2" />
+        <rect x="21.5" y="7" width="5.5" height="5.5" rx="1.2" /><rect x="7" y="14.25" width="5.5" height="5.5" rx="1.2" />
+        <rect x="21.5" y="14.25" width="5.5" height="5.5" rx="1.2" /><rect x="7" y="21.5" width="5.5" height="5.5" rx="1.2" />
+        <rect x="14.25" y="21.5" width="5.5" height="5.5" rx="1.2" /><rect x="21.5" y="21.5" width="5.5" height="5.5" rx="1.2" />
+      </g>
+      <rect x="14.25" y="14.25" width="5.5" height="5.5" rx="1.2" fill="#B93C0B" />
+    </svg>
+    <span class="brand-text">
+      <span class="brand-name">Horarios y Aulas</span>
+      <span class="brand-sub">Universidad Cooperativa de Colombia</span>
+    </span>
   </a>
 
   <p class="section-title">Vistas</p>
@@ -46,13 +58,14 @@
         }
       </div>
       <p class="efficiency">
-        <span>Eficiencia</span>
-        <strong>{{ optimization.loaded() ? efficiencyText() : '—' }}</strong>
+        <strong class="mono">{{ optimization.loaded() ? efficiencyText() : '—' }}</strong>
+        <span>eficiencia</span>
       </p>
+      <div class="meter" aria-hidden="true"><span [style.width.%]="optimization.loaded() ? optimization.efficiency() : 0"></span></div>
       @if (auth.isAdmin()) {
         <button
           type="button"
-          class="btn-primary optimize"
+          class="btn-signal optimize"
           [class.working]="optimization.generating()"
           [disabled]="optimization.generating()"
           (click)="optimization.generate()"
@@ -62,4 +75,5 @@
       }
     </section>
   }
+  <p class="side-foot">CSP + recocido simulado</p>
 </nav>

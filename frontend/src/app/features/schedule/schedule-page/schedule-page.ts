@@ -272,7 +272,7 @@ export class SchedulePage {
   }
 
   protected occupiedDrop(): void {
-    this.notify.info('Esa casilla ya está ocupada. Elige una casilla vacía.');
+    this.notify.info('A esa hora ya hay otra clase del mismo grupo, profesor o aula. Elige otra casilla.');
   }
 
   protected reload(): void {
