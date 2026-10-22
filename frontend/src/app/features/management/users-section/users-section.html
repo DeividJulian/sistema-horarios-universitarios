@@ -2,7 +2,8 @@
   <strong>Usuarios.</strong> Las personas que pueden entrar a la aplicación. Un <strong>administrador</strong> cambia todo;
   un <strong>profesor</strong> ve sus clases y puede cancelarlas o cambiarlas de aula; un <strong>estudiante</strong> ve solo el
   horario de su grupo; una cuenta de <strong>consulta</strong> ve todo sin modificar nada. Las cuentas de profesor se crean
-  solas con el correo de cada profesor (contraseña inicial <code>Profesor2026*</code>).
+  solas con el correo de cada profesor (contraseña inicial <code>Profesor2026*</code>). Si alguien olvida su contraseña,
+  pulsa «Restablecer» en su fila y vuelve a la inicial de su rol.
 </p>
 
 <div class="crud-layout">
@@ -59,6 +60,14 @@
                 </td>
                 <td>
                   <div class="row-actions">
+                    @if (resetPasswords().get(u.id); as password) {
+                      <span class="muted" role="status">Contraseña: <code>{{ password }}</code></span>
+                    }
+                    @if (u.id !== auth.user()?.id) {
+                      <button type="button" class="btn-secondary" (click)="resetPassword(u)" [attr.aria-label]="'Restablecer la contraseña de ' + u.nombre">
+                        Restablecer
+                      </button>
+                    }
                     @if (u.id !== auth.user()?.id && u.rol !== 'profesor') {
                       <button type="button" class="btn-danger" (click)="remove(u)" [attr.aria-label]="'Eliminar ' + u.nombre">Eliminar</button>
                     }

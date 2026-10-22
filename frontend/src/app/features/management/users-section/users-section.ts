@@ -39,6 +39,8 @@ export class UsersSection {
   });
 
   protected readonly selectedRole = signal<Role>('estudiante');
+  /** Password each account went back to, shown in its row so the administrator can pass it on. */
+  protected readonly resetPasswords = signal<ReadonlyMap<number, string>>(new Map());
 
   /** Students first, then teachers, then the rest; each block sorted by name. */
   protected readonly sortedUsers = computed(() => {
@@ -107,6 +109,25 @@ export class UsersSection {
         this.notify.success(`${saved.nombre} ahora está en ${this.store.groupsById().get(groupId)?.nombre ?? 'el nuevo grupo'}.`);
       },
       error: (err) => this.notify.apiError(err, 'No se pudo cambiar el grupo.'),
+    });
+  }
+
+  protected async resetPassword(user: User): Promise<void> {
+    const accepted = await this.confirm.ask({
+      title: `¿Restablecer la contraseña de ${user.nombre}?`,
+      message:
+        user.rol === 'profesor'
+          ? 'Volverá a la contraseña inicial de los profesores. Con ella puede entrar o activar de nuevo su cuenta en «Registrarse» eligiendo una propia.'
+          : 'Volverá a la contraseña inicial de su rol. Después puede cambiarla desde «Cambiar contraseña».',
+      confirmText: 'Restablecer',
+    });
+    if (!accepted) return;
+    this.api.resetPassword(user.id).subscribe({
+      next: (result) => {
+        this.resetPasswords.update((map) => new Map(map).set(user.id, result.password));
+        this.notify.success(result.mensaje);
+      },
+      error: (err) => this.notify.apiError(err, 'No se pudo restablecer la contraseña.'),
     });
   }
 
