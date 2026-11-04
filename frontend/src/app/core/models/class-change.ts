@@ -1,22 +1,9 @@
-/** A class that will not take place on one date (the weekly block stays in the schedule). */
-export interface Cancellation {
-  id: number;
-  horario_id: number;
-  /** "YYYY-MM-DD" */
-  fecha: string;
-  motivo: string;
-}
+import type { CancellationOut, NotificationOut } from '../api/generated';
 
-export type NotificationKind = 'cancelacion' | 'restablecida' | 'cambio_aula' | 'cambio_horario';
+/** A class that will not take place on one date (the weekly block stays in the schedule). fecha: "YYYY-MM-DD". */
+export type Cancellation = CancellationOut;
+
+export type NotificationKind = NotificationOut['tipo'];
 
 /** Notice for the students of a group. */
-export interface ScheduleNotice {
-  id: number;
-  grupo_id: number;
-  materia_id: number | null;
-  horario_id: number | null;
-  tipo: NotificationKind;
-  titulo: string;
-  mensaje: string;
-  creada_en: string;
-}
+export type ScheduleNotice = NotificationOut;

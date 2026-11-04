@@ -1,10 +1,4 @@
-import { RoomType } from './room-type';
+import type { ClassroomCreate, ClassroomOut } from '../api/generated';
 
-export interface Classroom {
-  id: number;
-  nombre: string;
-  aforo: number;
-  tipo?: RoomType;
-}
-
-export type ClassroomInput = Omit<Classroom, 'id'>;
+export type Classroom = ClassroomOut;
+export type ClassroomInput = ClassroomCreate;

@@ -13,3 +13,4 @@ export * from './weekday';
 export * from './user';
 export * from './class-change';
 export * from './week';
+export * from './contract-checks';

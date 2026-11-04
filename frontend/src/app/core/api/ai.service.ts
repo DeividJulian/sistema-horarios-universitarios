@@ -4,6 +4,8 @@ import { Observable } from 'rxjs';
 
 import { AiStatus, ConflictSuggestion, NoticeDraft, NoticeDraftRequest } from '../models';
 import { API_URL } from './api-url';
+import { zAiStatus, zConflictSuggestion, zNoticeDraftOut } from './generated/zod.gen';
+import { parseResponse } from './parse';
 
 /** The AI layer of the backend (Groq by default). The provider's key lives only in the server. */
 @Injectable({ providedIn: 'root' })
@@ -21,7 +23,7 @@ export class AiService {
   loadStatus(): void {
     if (this.asked) return;
     this.asked = true;
-    this.http.get<AiStatus>(`${API_URL}/ai/status`).subscribe({
+    this.http.get(`${API_URL}/ai/status`).pipe(parseResponse(zAiStatus, 'GET /ai/status')).subscribe({
       next: (status) => this.status.set(status),
       error: () => {
         this.asked = false; // it may work after signing in again
@@ -37,10 +39,10 @@ export class AiService {
   }
 
   conflictSuggestion(entryId: number): Observable<ConflictSuggestion> {
-    return this.http.post<ConflictSuggestion>(`${API_URL}/ai/conflicts/${entryId}/suggestion`, {});
+    return this.http.post(`${API_URL}/ai/conflicts/${entryId}/suggestion`, {}).pipe(parseResponse(zConflictSuggestion, 'POST /ai/conflicts/{id}/suggestion'));
   }
 
   draftNotice(request: NoticeDraftRequest): Observable<NoticeDraft> {
-    return this.http.post<NoticeDraft>(`${API_URL}/ai/notices/draft`, request);
+    return this.http.post(`${API_URL}/ai/notices/draft`, request).pipe(parseResponse(zNoticeDraftOut, 'POST /ai/notices/draft'));
   }
 }

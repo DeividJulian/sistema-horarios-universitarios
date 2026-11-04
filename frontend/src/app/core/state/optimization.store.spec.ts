@@ -5,7 +5,7 @@ import { provideRouter } from '@angular/router';
 
 import { API_URL } from '../api/api-url';
 import { AuthService } from '../auth/auth.service';
-import { Statistics } from '../models';
+import { Conflict, Statistics } from '../models';
 import { OptimizationStore } from './optimization.store';
 
 function stats(required: number, scheduled: number): Statistics {
@@ -14,7 +14,8 @@ function stats(required: number, scheduled: number): Statistics {
     cumplimiento: { horas_requeridas: required, horas_programadas: scheduled, porcentaje: (scheduled / required) * 100 },
     ocupacion_aulas: [],
     carga_profesores: [],
-  } as unknown as Statistics;
+    distribucion_por_dia: [],
+  };
 }
 
 describe('OptimizationStore', () => {
@@ -28,7 +29,7 @@ describe('OptimizationStore', () => {
     http = TestBed.inject(HttpTestingController);
   });
 
-  function load(required: number, scheduled: number, conflicts: { tipo: string; horario_ids: number[] }[]) {
+  function load(required: number, scheduled: number, conflicts: Conflict[]) {
     store.refresh();
     http.expectOne(`${API_URL}/statistics`).flush(stats(required, scheduled));
     http.expectOne(`${API_URL}/conflicts`).flush({ total: conflicts.length, hay_conflictos: conflicts.length > 0, conflictos: conflicts });
@@ -43,8 +44,8 @@ describe('OptimizationStore', () => {
 
   it('discounts the blocks that have conflicts and flags the broken constraints', () => {
     load(20, 20, [
-      { tipo: 'cruce_aula', horario_ids: [1, 2] },
-      { tipo: 'fuera_de_disponibilidad', horario_ids: [2] },
+      { tipo: 'cruce_aula', descripcion: 'El aula Aula 101 tiene 2 clases el Lunes a las 8:00 a. m.', horario_ids: [1, 2] },
+      { tipo: 'fuera_de_disponibilidad', descripcion: 'Ana no está disponible el Lunes a las 8:00 a. m.', horario_ids: [2] },
     ]);
     expect(store.efficiency()).toBe(90); // 18 clean blocks of 20
     expect(store.status()).toBe('con-conflictos');

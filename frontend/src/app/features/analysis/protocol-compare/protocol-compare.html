@@ -1,0 +1,49 @@
+<section class="panel compare" aria-labelledby="compare-title">
+  <header>
+    <div>
+      <p class="eyebrow">Paradigmas de comunicación</p>
+      <h2 id="compare-title">REST (JSON) vs gRPC (Protobuf)</h2>
+      <p class="muted">
+        El mismo horario por <code>GET /schedules</code> y por <code>ListSchedule</code> del servicio gRPC, con tu sesión y contra el
+        servidor real. Se hacen {{ rounds }} peticiones de cada uno (más una de calentamiento) y se toma la mediana.
+      </p>
+    </div>
+    <button type="button" class="btn-primary" (click)="run()" [disabled]="running()" [attr.aria-busy]="running()">
+      {{ running() ? 'Midiendo…' : 'Comparar' }}
+    </button>
+  </header>
+
+  <div aria-live="polite">
+    @if (error(); as msg) {
+      <p class="error" role="alert">{{ msg }}</p>
+    }
+    @if (rest() && grpc()) {
+      <div class="table-scroll">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th scope="col">Medida</th>
+              <th scope="col" class="num">REST · JSON</th>
+              <th scope="col" class="num">gRPC · Protobuf</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>Bloques del horario</td><td class="num">{{ rest()!.entries }}</td><td class="num">{{ grpc()!.entries }}</td></tr>
+            <tr><td>Tamaño del mensaje</td><td class="num">{{ rest()!.bytes | number }} B</td><td class="num win">{{ grpc()!.bytes | number }} B</td></tr>
+            @if (rest()!.gzipBytes && grpc()!.gzipBytes) {
+              <tr><td>Comprimido con gzip</td><td class="num">{{ rest()!.gzipBytes | number }} B</td><td class="num">{{ grpc()!.gzipBytes | number }} B</td></tr>
+            }
+            <tr><td>Tiempo (mediana)</td><td class="num">{{ rest()!.medianMs | number: '1.0-1' }} ms</td><td class="num">{{ grpc()!.medianMs | number: '1.0-1' }} ms</td></tr>
+          </tbody>
+        </table>
+      </div>
+      @if (ratio(); as r) {
+        <p class="verdict">Protobuf ocupa <strong>{{ r | number: '1.1-1' }}×</strong> menos que JSON para los mismos datos.</p>
+      }
+      <p class="footnote">
+        El tiempo incluye la red y la decodificación; con pocos datos lo domina la red, así que puede salir parecido. La
+        diferencia de tamaño crece con el volumen.
+      </p>
+    }
+  </div>
+</section>

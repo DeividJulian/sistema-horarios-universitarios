@@ -2,7 +2,7 @@ import { ScheduleEntry, Subject, hourOf, toApiTime } from '../../core/models';
 import { EMPTY_FILTER, matchesFilter } from './schedule-filter';
 
 describe('matchesFilter', () => {
-  const subject: Subject = { id: 5, nombre: 'Redes', intensidad_horaria: 2, grupo_id: 3, profesor_id: 7 };
+  const subject: Subject = { id: 5, nombre: 'Redes', intensidad_horaria: 2, grupo_id: 3, profesor_id: 7, tipo_aula: 'cualquiera' };
   const entry: ScheduleEntry = { id: 1, materia_id: 5, aula_id: 2, dia_semana: 'Lunes', hora_inicio: '08:00:00', hora_fin: '09:00:00' };
 
   it('shows every block with the empty filter', () => {

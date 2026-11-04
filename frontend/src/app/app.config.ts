@@ -5,6 +5,8 @@ import { provideHttpClient, withFetch, withInterceptors } from '@angular/common/
 import { TitleStrategy, provideRouter, withComponentInputBinding } from '@angular/router';
 
 import { routes } from './app.routes';
+import { environment } from '../environments/environment';
+import { mockApiInterceptor } from './core/api/mocks/mock-api.interceptor';
 import { authInterceptor } from './core/auth/auth.interceptor';
 import { workersInterceptor } from './core/interceptors/workers.interceptor';
 import { PageTitleStrategy } from './core/services/page-title.strategy';
@@ -15,7 +17,7 @@ registerLocaleData(localeEsCo);
 export const appConfig: ApplicationConfig = {
   providers: [
     provideZonelessChangeDetection(),
-    provideHttpClient(withFetch(), withInterceptors([authInterceptor, workersInterceptor])),
+    provideHttpClient(withFetch(), withInterceptors([authInterceptor, workersInterceptor, ...(environment.mockApi ? [mockApiInterceptor] : [])])),
     provideRouter(routes, withComponentInputBinding()),
     { provide: TitleStrategy, useClass: PageTitleStrategy },
     { provide: LOCALE_ID, useValue: 'es-CO' },

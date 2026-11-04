@@ -98,6 +98,34 @@
       } @else {
         <p class="metric-sub">Genera el horario: el sistema reparte las clases sin cruces y luego reduce las horas muertas.</p>
       }
+      @if (auth.isAdmin()) {
+        <div class="protocol" role="group" aria-label="Cómo se comunica la generación con el servidor">
+          <button type="button" [class.active]="optimization.protocol() === 'rest'" [attr.aria-pressed]="optimization.protocol() === 'rest'"
+                  [disabled]="optimization.generating()" (click)="optimization.setProtocol('rest')">REST · JSON</button>
+          <button type="button" [class.active]="optimization.protocol() === 'grpc'" [attr.aria-pressed]="optimization.protocol() === 'grpc'"
+                  [disabled]="optimization.generating()" (click)="optimization.setProtocol('grpc')">gRPC · streaming</button>
+        </div>
+      }
+      @if (optimization.generating() && optimization.protocol() === 'grpc') {
+        <div class="stream" aria-live="polite">
+          <ol class="phases">
+            @for (p of phases; track p.value) {
+              <li [class.current]="streamPhase() === p.value" [class.done]="streamPhase() > p.value">{{ p.label }}</li>
+            }
+          </ol>
+          @if (optimization.progress(); as e) {
+            @if (e.totalSubjects > 0 && streamPhase() <= 2) {
+              <div class="meter" role="progressbar" aria-label="Materias asignadas por el CSP" [attr.aria-valuenow]="e.subjectsPlaced" aria-valuemin="0" [attr.aria-valuemax]="e.totalSubjects">
+                <span [style.width.%]="(e.subjectsPlaced / e.totalSubjects) * 100"></span>
+              </div>
+            }
+            <p class="stream-msg">{{ e.message }} <span class="mono">· {{ e.elapsedSeconds.toFixed(1) }} s</span></p>
+          } @else {
+            <p class="stream-msg">Conectando con el servicio gRPC…</p>
+          }
+          <button type="button" class="btn-ghost cancel" (click)="optimization.cancelGeneration()">Cancelar</button>
+        </div>
+      }
       <div class="action-buttons">
         @if (auth.isAdmin()) {
           <button type="button" class="btn-signal" (click)="optimization.generate()" [disabled]="optimization.generating() || !ready()">

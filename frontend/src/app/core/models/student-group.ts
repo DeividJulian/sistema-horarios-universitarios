@@ -1,10 +1,4 @@
-import { Shift } from './shift';
+import type { GroupCreate, GroupOut } from '../api/generated';
 
-export interface StudentGroup {
-  id: number;
-  nombre: string;
-  num_estudiantes: number;
-  jornada: Shift;
-}
-
-export type StudentGroupInput = Omit<StudentGroup, 'id'>;
+export type StudentGroup = GroupOut;
+export type StudentGroupInput = GroupCreate;

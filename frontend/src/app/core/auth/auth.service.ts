@@ -2,9 +2,12 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { Observable, map, tap } from 'rxjs';
+import * as z from 'zod/mini';
 
 import { API_URL } from '../api/api-url';
 import { CodeSent, LoginResponse, RegisterGroup, RegisterInput, Role, User } from '../models';
+import { zCodeSent, zRegisterGroup, zTokenOut, zUserOut } from '../api/generated/zod.gen';
+import { parseResponse } from '../api/parse';
 
 const SESSION_KEY = 'horarios.sesion';
 /** Prefix of the Service Worker cache that keeps API answers for offline use (public/sw.js). */
@@ -25,11 +28,16 @@ export function tokenExpiry(token: string): number {
   }
 }
 
+/** What is stored in localStorage also comes from outside (an old version, a manual edit): it is parsed too. */
+const zStoredSession = z.object({ token: z.string().check(z.minLength(1)), user: zUserOut });
+
 function readSession(): StoredSession | null {
   try {
     const raw = localStorage.getItem(SESSION_KEY);
     if (!raw) return null;
-    const session = JSON.parse(raw) as StoredSession;
+    const parsed = zStoredSession.safeParse(JSON.parse(raw));
+    if (!parsed.success) return null;
+    const session = parsed.data;
     // An expired token is useless: start signed out instead of failing on the first request
     return tokenExpiry(session.token) * 1000 > Date.now() ? session : null;
   } catch {
@@ -83,17 +91,18 @@ export class AuthService {
 
   /** Student sign-up: creates the account and emails a code to activate it. */
   register(data: RegisterInput): Observable<CodeSent> {
-    return this.http.post<CodeSent>(`${API_URL}/auth/register`, data);
+    return this.http.post(`${API_URL}/auth/register`, data).pipe(parseResponse(zCodeSent, 'POST /auth/register'));
   }
 
   /** Emails a code to enter (also used to resend the sign-up code). */
   requestCode(email: string): Observable<CodeSent> {
-    return this.http.post<CodeSent>(`${API_URL}/auth/login`, { email });
+    return this.http.post(`${API_URL}/auth/login`, { email }).pipe(parseResponse(zCodeSent, 'POST /auth/login'));
   }
 
   /** Trades the emailed code for a session. */
   verify(email: string, codigo: string): Observable<User> {
-    return this.http.post<LoginResponse>(`${API_URL}/auth/verify`, { email, codigo }).pipe(
+    return this.http.post(`${API_URL}/auth/verify`, { email, codigo }).pipe(
+      parseResponse(zTokenOut, 'POST /auth/verify'),
       tap((response) => {
         void clearApiCache();
         this.store({ token: response.access_token, user: response.usuario });
@@ -107,7 +116,7 @@ export class AuthService {
     const session = this.session();
     if (!session) return;
     // A 401 is handled by the interceptor, which closes the session
-    this.http.get<User>(`${API_URL}/auth/me`).subscribe({
+    this.http.get(`${API_URL}/auth/me`).pipe(parseResponse(zUserOut, 'GET /auth/me')).subscribe({
       next: (user) => {
         if (this.session()?.token === session.token) this.store({ token: session.token, user });
       },
@@ -117,7 +126,7 @@ export class AuthService {
 
   /** Groups a student can choose when signing up (public endpoint). */
   registerOptions(): Observable<RegisterGroup[]> {
-    return this.http.get<RegisterGroup[]>(`${API_URL}/auth/register-options`);
+    return this.http.get(`${API_URL}/auth/register-options`).pipe(parseResponse(z.array(zRegisterGroup), 'GET /auth/register-options'));
   }
 
   /** Clears the session and goes back to the login screen (keeping where the user was, to return after signing in). */

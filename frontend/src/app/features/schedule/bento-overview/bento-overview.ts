@@ -118,6 +118,15 @@ export class BentoOverview {
 
   protected readonly hours = computed(() => this.optimization.stats()?.cumplimiento);
 
+  /** Phases of the gRPC stream (values of the Phase enum in proto/horarios/v1/horarios.proto). */
+  protected readonly phases = [
+    { value: 1, label: 'Preparar' },
+    { value: 2, label: 'CSP' },
+    { value: 3, label: 'Recocido' },
+    { value: 4, label: 'Guardar' },
+  ];
+  protected readonly streamPhase = computed(() => this.optimization.progress()?.phase ?? 0);
+
   /** «Generar» the first time, «Re-optimizar» once there is a schedule. */
   protected readonly generateLabel = computed(() =>
     this.optimization.generating() ? 'Optimizando…' : this.catalog.entries().length ? 'Re-optimizar' : 'Generar horario',

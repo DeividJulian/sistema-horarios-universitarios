@@ -9,6 +9,7 @@ import { AuthService } from '../../../core/auth/auth.service';
 import { apiErrorMessage } from '../../../core/http/api-error';
 import { BackupInfo, ConflictReport, Statistics } from '../../../core/models';
 import { ConfirmService } from '../../../core/services/confirm.service';
+import { ProtocolCompare } from '../protocol-compare/protocol-compare';
 import { NotificationService } from '../../../core/services/notification.service';
 import { TabSyncService } from '../../../core/services/tab-sync.service';
 import { CatalogStore } from '../../../core/state/catalog.store';
@@ -21,7 +22,7 @@ const percent = (value: number) => `${value.toLocaleString('es-CO', { maximumFra
 
 @Component({
   selector: 'app-analysis-page',
-  imports: [BarList, StateMessage, DecimalPipe, RouterLink],
+  imports: [BarList, StateMessage, DecimalPipe, RouterLink, ProtocolCompare],
   templateUrl: './analysis-page.html',
   styleUrl: './analysis-page.css',
 })

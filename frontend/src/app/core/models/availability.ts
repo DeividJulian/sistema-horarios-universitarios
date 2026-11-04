@@ -1,11 +1,4 @@
-import { Weekday } from './weekday';
+import type { AvailabilityCreate, AvailabilityOut } from '../api/generated';
 
-export interface Availability {
-  id: number;
-  profesor_id: number;
-  dia_semana: Weekday;
-  hora_inicio: string;
-  hora_fin: string;
-}
-
-export type AvailabilityInput = Omit<Availability, 'id'>;
+export type Availability = AvailabilityOut;
+export type AvailabilityInput = AvailabilityCreate;

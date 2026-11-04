@@ -1,19 +1,28 @@
-import { Injectable, computed, inject, signal } from '@angular/core';
+import { Injectable, Injector, computed, inject, signal } from '@angular/core';
 import { forkJoin } from 'rxjs';
+import * as z from 'zod/mini';
 
 import { AnalysisService } from '../api/analysis.service';
 import { AuthService } from '../auth/auth.service';
 import { Conflict, ConflictKind, GenerationResult, Statistics } from '../models';
+// Only the type: the RPC client (Connect + protobuf-es) is loaded on demand, the first time someone generates by gRPC
+import type { GenerationEvent } from '../rpc/gen/horarios/v1/horarios_pb';
 import { ConfirmService } from '../services/confirm.service';
 import { NotificationService } from '../services/notification.service';
 import { CatalogStore } from './catalog.store';
 import { NoticeStore } from './notice.store';
 
 const LAST_RUN_KEY = 'horarios.ultima-optimizacion';
+const PROTOCOL_KEY = 'horarios.protocolo-generacion';
+
+/** REST: one JSON answer at the end. gRPC: the RPC service streams the progress (Connect, Protobuf). */
+export type GenerationProtocol = 'rest' | 'grpc';
 
 export type ScheduleStatus = 'optimizado' | 'con-conflictos' | 'incompleto' | 'sin-horario';
 
 /** Last optimization run in this browser: when, and the idle hours before and after the simulated annealing. */
+const zLastRun = z.object({ fecha: z.string(), antes: z.optional(z.number()), despues: z.optional(z.number()) });
+
 export interface LastRun {
   fecha: string;
   antes?: number;
@@ -47,12 +56,17 @@ export class OptimizationStore {
   private readonly notices = inject(NoticeStore);
   private readonly confirm = inject(ConfirmService);
   private readonly notify = inject(NotificationService);
+  private readonly injector = inject(Injector);
 
   readonly stats = signal<Statistics | null>(null);
   readonly conflicts = signal<Conflict[]>([]);
   readonly loaded = signal(false);
   readonly lastRun = signal<LastRun | null>(this.readLastRun());
   readonly generating = this.catalog.generating;
+  readonly protocol = signal<GenerationProtocol>(this.readProtocol());
+  /** Last event of the gRPC stream while generating (null with REST or when idle). */
+  readonly progress = signal<GenerationEvent | null>(null);
+  private abort: AbortController | null = null;
 
   /** Students only see their group; the faculty-wide numbers are not for them. */
   readonly available = computed(() => this.auth.hasRole('admin', 'usuario', 'profesor'));
@@ -113,6 +127,7 @@ export class OptimizationStore {
       });
       if (!accepted) return false;
     }
+    if (this.protocol() === 'grpc') return this.generateStreaming();
     return new Promise((resolve) => {
       this.catalog.generateSchedule().subscribe({
         next: (result) => {
@@ -131,6 +146,71 @@ export class OptimizationStore {
         },
       });
     });
+  }
+
+  setProtocol(protocol: GenerationProtocol): void {
+    this.protocol.set(protocol);
+    try {
+      localStorage.setItem(PROTOCOL_KEY, protocol);
+    } catch {
+      // Only remembered until the page reloads
+    }
+  }
+
+  /** Stops the gRPC generation: the server stops before saving, so the previous schedule stays. */
+  cancelGeneration(): void {
+    this.abort?.abort();
+  }
+
+  /** Generation through the RPC service: the same CSP + annealing, with each phase streamed as it runs. */
+  private async generateStreaming(): Promise<boolean> {
+    this.abort = new AbortController();
+    this.catalog.generating.set(true);
+    this.progress.set(null);
+    const { Phase } = await import('../rpc/gen/horarios/v1/horarios_pb');
+    const { ScheduleRpcService, rpcErrorMessage } = await import('../rpc/schedule-rpc.service');
+    const rpc = this.injector.get(ScheduleRpcService);
+    try {
+      for await (const event of rpc.generate(this.abort.signal)) {
+        this.progress.set(event);
+        if (event.phase === Phase.DONE) {
+          const idle = ` Horas muertas: ${event.idleHoursBefore} → ${event.idleHours}.`;
+          this.notify.success(`Horario optimizado por gRPC en ${event.elapsedSeconds.toFixed(1)} s: ${event.totalBlocks} bloques sin cruces.${idle}`);
+          this.saveLastRun({
+            mensaje: event.message,
+            total_bloques: event.totalBlocks,
+            optimizacion: {
+              horas_muertas_antes: event.idleHoursBefore,
+              horas_muertas_despues: event.idleHours,
+              iteraciones: event.iterations,
+              mejoras: event.improvements,
+              segundos: event.elapsedSeconds,
+            },
+          });
+        }
+      }
+      this.catalog.load().subscribe({ error: () => undefined });
+      this.notices.refresh();
+      this.refresh();
+      return true;
+    } catch (error) {
+      const cancelled = this.abort.signal.aborted;
+      if (cancelled) this.notify.info('Generación cancelada: el horario anterior se conserva.');
+      else this.notify.error(rpcErrorMessage(error, 'No se pudo generar el horario.'));
+      return false;
+    } finally {
+      this.catalog.generating.set(false);
+      this.abort = null;
+      this.progress.set(null);
+    }
+  }
+
+  private readProtocol(): GenerationProtocol {
+    try {
+      return localStorage.getItem(PROTOCOL_KEY) === 'grpc' ? 'grpc' : 'rest';
+    } catch {
+      return 'rest';
+    }
   }
 
   private saveLastRun(result: GenerationResult): void {
@@ -152,7 +232,9 @@ export class OptimizationStore {
       const raw = localStorage.getItem(LAST_RUN_KEY);
       if (!raw) return null;
       // Older versions stored only the date
-      return raw.startsWith('{') ? (JSON.parse(raw) as LastRun) : { fecha: raw };
+      if (!raw.startsWith('{')) return { fecha: raw };
+      const parsed = zLastRun.safeParse(JSON.parse(raw));
+      return parsed.success ? parsed.data : null;
     } catch {
       return null;
     }

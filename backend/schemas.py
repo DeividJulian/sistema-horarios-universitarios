@@ -74,7 +74,7 @@ class AvailabilityCreate(BaseModel):
 class AvailabilityOut(BaseModel):
     id: int
     profesor_id: int
-    dia_semana: str
+    dia_semana: Weekday
     hora_inicio: time
     hora_fin: time
 
@@ -91,7 +91,7 @@ class ClassroomOut(BaseModel):
     id: int
     nombre: str
     aforo: int
-    tipo: str
+    tipo: RoomType
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -106,7 +106,7 @@ class GroupOut(BaseModel):
     id: int
     nombre: str
     num_estudiantes: int
-    jornada: str
+    jornada: Shift
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -125,7 +125,7 @@ class SubjectOut(BaseModel):
     intensidad_horaria: int
     grupo_id: int
     profesor_id: int
-    tipo_aula: str
+    tipo_aula: RequiredRoomType
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -134,7 +134,7 @@ class ScheduleEntryOut(BaseModel):
     id: int
     materia_id: int
     aula_id: int
-    dia_semana: str
+    dia_semana: Weekday
     hora_inicio: time
     hora_fin: time
 
@@ -225,7 +225,7 @@ class RegisterRequest(BaseModel):
 class RegisterGroup(BaseModel):
     id: int
     nombre: str
-    jornada: str
+    jornada: Shift
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -262,12 +262,16 @@ class ClassroomChange(BaseModel):
     aviso: NoticeText | None = None
 
 
+# Kind of notice a group receives (API contract, in Spanish)
+NotificationKind = Literal["cancelacion", "restablecida", "cambio_aula", "cambio_horario"]
+
+
 class NotificationOut(BaseModel):
     id: int
     grupo_id: int
     materia_id: int | None
     horario_id: int | None
-    tipo: str
+    tipo: NotificationKind
     titulo: str
     mensaje: str
     creada_en: datetime
@@ -326,3 +330,156 @@ class NoticeDraftOut(BaseModel):
     mensaje: str
     proveedor: str
     modelo: str
+
+
+# ---------- Shared responses: errors and plain messages ----------
+
+
+class ErrorOut(BaseModel):
+    """Every error answers with this shape (see the exception handlers in main.py)."""
+
+    detail: str
+
+
+class MessageOut(BaseModel):
+    mensaje: str
+
+
+class RootOut(BaseModel):
+    mensaje: str
+
+
+class HealthOut(BaseModel):
+    estado: str
+    base_de_datos: str
+
+
+# ---------- Generation, analysis and demo data ----------
+
+
+class OptimizationReport(BaseModel):
+    """Figures of the simulated annealing that improves the CSP schedule."""
+
+    horas_muertas_antes: int
+    horas_muertas_despues: int
+    iteraciones: int
+    mejoras: int
+    segundos: float
+
+
+class GenerationOut(BaseModel):
+    mensaje: str
+    total_bloques: int
+    optimizacion: OptimizationReport | None = None
+
+
+ConflictKind = Literal[
+    "cruce_profesor",
+    "cruce_aula",
+    "cruce_grupo",
+    "sobrecupo",
+    "fuera_de_disponibilidad",
+    "fuera_de_jornada",
+    "tipo_de_aula",
+    "intensidad_incorrecta",
+]
+
+
+class ConflictOut(BaseModel):
+    tipo: ConflictKind
+    descripcion: str
+    horario_ids: List[int]
+
+
+class ConflictReport(BaseModel):
+    total: int
+    hay_conflictos: bool
+    conflictos: List[ConflictOut]
+
+
+class Totals(BaseModel):
+    profesores: int
+    aulas: int
+    grupos: int
+    materias: int
+    bloques_programados: int
+
+
+class Fulfillment(BaseModel):
+    horas_requeridas: int
+    horas_programadas: int
+    porcentaje: float
+
+
+class ClassroomUsage(BaseModel):
+    aula_id: int
+    aula: str
+    aforo: int
+    horas_ocupadas: int
+    ocupacion_pct: float
+
+
+class TeacherLoad(BaseModel):
+    profesor_id: int
+    profesor: str
+    horas_semanales: int
+    dias_con_clase: int
+    franjas_muertas: int
+
+
+class DayLoad(BaseModel):
+    dia: str
+    bloques: int
+
+
+class StatisticsOut(BaseModel):
+    totales: Totals
+    cumplimiento: Fulfillment
+    ocupacion_aulas: List[ClassroomUsage]
+    carga_profesores: List[TeacherLoad]
+    distribucion_por_dia: List[DayLoad]
+
+
+class ReadinessProblem(BaseModel):
+    tipo: str
+    mensaje: str
+    seccion: Literal["aulas", "grupos", "profesores", "materias"]
+    profesor_id: int | None  # always sent: null when the problem is not about one teacher
+
+
+class ReadinessOut(BaseModel):
+    listo: bool
+    problemas: List[ReadinessProblem]
+
+
+class SeedSummary(BaseModel):
+    profesores: int
+    aulas: int
+    grupos: int
+    materias: int
+    horas_semanales: int
+
+
+class BackupSummary(BaseModel):
+    profesores: int
+    aulas: int
+    grupos: int
+    materias: int
+    bloques: int
+
+
+class BackupInfo(BaseModel):
+    existe: bool
+    creado_en: datetime | None = None
+    resumen: BackupSummary | None = None
+
+
+class SeedOut(BaseModel):
+    mensaje: str
+    resumen: SeedSummary
+    respaldo: BackupInfo
+
+
+class RestoreOut(BaseModel):
+    mensaje: str
+    resumen: BackupSummary

@@ -1,12 +1,4 @@
-import { RequiredRoomType } from './room-type';
+import type { SubjectCreate, SubjectOut } from '../api/generated';
 
-export interface Subject {
-  id: number;
-  nombre: string;
-  intensidad_horaria: number;
-  grupo_id: number;
-  profesor_id: number;
-  tipo_aula?: RequiredRoomType;
-}
-
-export type SubjectInput = Omit<Subject, 'id'>;
+export type Subject = SubjectOut;
+export type SubjectInput = SubjectCreate;

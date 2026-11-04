@@ -1,5 +1,4 @@
 import logging
-import time as clock
 from datetime import time
 from typing import List
 
@@ -8,10 +7,11 @@ from sqlalchemy.orm import Session
 
 from database import get_db
 from models import Classroom, ScheduleEntry, Subject, Teacher, User
-from schemas import ScheduleEntryMove, ScheduleEntryOut
+from schemas import GenerationOut, MessageOut, ScheduleEntryMove, ScheduleEntryOut
 from security import get_current_user
 from services.class_changes import delete_cancellations, describe, notify_group
-from services.csp import SHIFT_LABELS, classroom_fits, compute_assignments, shift_range
+from services.generation import GenerationFailed, generate_and_save, schedule_for
+from services.csp import SHIFT_LABELS, classroom_fits, shift_range
 from time_format import format_range
 
 logger = logging.getLogger("schedule.generation")
@@ -19,43 +19,18 @@ logger = logging.getLogger("schedule.generation")
 router = APIRouter(tags=["Horarios"])
 
 
-@router.post("/schedules/generate")
+@router.post("/schedules/generate", response_model=GenerationOut)
 def generate_schedule(db: Session = Depends(get_db)):
-    started = clock.perf_counter()
-    optimization = {}
-    success, assignments, message = compute_assignments(db, stats=optimization)
-    elapsed = clock.perf_counter() - started
-    if not success:
-        logger.warning("Generation failed after %.2f s: %s", elapsed, message)
-        raise HTTPException(status_code=409, detail=message)
-
-    delete_cancellations(db)
-    db.query(ScheduleEntry).delete()
-    for subject, classroom, day, hour in assignments:
-        db.add(
-            ScheduleEntry(
-                materia_id=subject.id,
-                aula_id=classroom.id,
-                dia_semana=day,
-                hora_inicio=hour,
-                hora_fin=time(hour=hour.hour + 1),
-            )
-        )
-    db.commit()
-    logger.info(
-        "Schedule generated: %d blocks in %.2f s (idle hours %s -> %s)",
-        len(assignments), elapsed, optimization.get("horas_muertas_antes"), optimization.get("horas_muertas_despues"),
-    )
-    return {"mensaje": "Horario generado exitosamente", "total_bloques": len(assignments), "optimizacion": optimization}
+    try:
+        total, optimization = generate_and_save(db)
+    except GenerationFailed as e:
+        raise HTTPException(status_code=409, detail=str(e))
+    return {"mensaje": "Horario generado exitosamente", "total_bloques": total, "optimizacion": optimization or None}
 
 
 @router.get("/schedules", response_model=List[ScheduleEntryOut])
 def list_schedule(db: Session = Depends(get_db), user: User = Depends(get_current_user)):
-    query = db.query(ScheduleEntry)
-    if user.rol == "estudiante":
-        # A student only sees the schedule of the group they study in
-        query = query.join(Subject, ScheduleEntry.materia_id == Subject.id).filter(Subject.grupo_id == user.grupo_id)
-    return query.all()
+    return schedule_for(db, user)
 
 
 @router.get("/schedules/group/{group_id}", response_model=List[ScheduleEntryOut])
@@ -166,7 +141,7 @@ def move_entry(entry_id: int, data: ScheduleEntryMove, db: Session = Depends(get
     return entry
 
 
-@router.delete("/schedules/{entry_id}")
+@router.delete("/schedules/{entry_id}", response_model=MessageOut)
 def delete_entry(entry_id: int, db: Session = Depends(get_db)):
     entry = db.query(ScheduleEntry).filter(ScheduleEntry.id == entry_id).first()
     if not entry:

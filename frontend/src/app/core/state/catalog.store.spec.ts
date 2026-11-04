@@ -22,9 +22,9 @@ describe('CatalogStore', () => {
 
   function flushLoad(): void {
     http.expectOne(`${API_URL}/teachers`).flush([{ id: 1, nombre: 'Ana', email: 'ana@x.co' }]);
-    http.expectOne(`${API_URL}/classrooms`).flush([{ id: 1, nombre: 'Aula 101', aforo: 40 }]);
-    http.expectOne(`${API_URL}/groups`).flush([{ id: 1, nombre: '7A', num_estudiantes: 30 }]);
-    http.expectOne(`${API_URL}/subjects`).flush([{ id: 1, nombre: 'Redes', intensidad_horaria: 2, grupo_id: 1, profesor_id: 1 }]);
+    http.expectOne(`${API_URL}/classrooms`).flush([{ id: 1, nombre: 'Aula 101', aforo: 40, tipo: 'general' }]);
+    http.expectOne(`${API_URL}/groups`).flush([{ id: 1, nombre: '7A', num_estudiantes: 30, jornada: 'todo' }]);
+    http.expectOne(`${API_URL}/subjects`).flush([{ id: 1, nombre: 'Redes', intensidad_horaria: 2, grupo_id: 1, profesor_id: 1, tipo_aula: 'cualquiera' }]);
     http.expectOne(`${API_URL}/schedules`).flush([entry]);
   }
 
@@ -67,7 +67,7 @@ describe('CatalogStore', () => {
     flushLoad();
 
     store.saveClassroom(null, { nombre: 'Sala B', aforo: 25 }).subscribe();
-    http.expectOne({ method: 'POST', url: `${API_URL}/classrooms` }).flush({ id: 2, nombre: 'Sala B', aforo: 25 });
+    http.expectOne({ method: 'POST', url: `${API_URL}/classrooms` }).flush({ id: 2, nombre: 'Sala B', aforo: 25, tipo: 'general' });
     expect(store.classrooms().map((c) => c.nombre)).toEqual(['Aula 101', 'Sala B']);
 
     store.deleteClassroom(1).subscribe();

@@ -1,0 +1,9 @@
+# TypeScript code of the RPC contract (proto/, copy of backend/proto): npm run gen:proto. Do not edit the output.
+version: v2
+inputs:
+  - directory: proto
+plugins:
+  - local: protoc-gen-es
+    out: src/app/core/rpc/gen
+    opt:
+      - target=ts

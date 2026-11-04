@@ -95,6 +95,78 @@ La IA del backend (Groq por defecto) **solo aconseja**: nada cambia hasta que la
 - **Nombre del proveedor:** se muestra el que dice `GET /ai/status`, nunca uno escrito a mano. Sin clave en el servidor, los botones dicen «IA no configurada».
 - **Código:** `core/api/ai.service.ts`, `core/models/ai.ts` y `features/schedule/conflict-advisor/`.
 
+## Contrato de la API y tipado de extremo a extremo
+
+La cadena completa tiene una sola fuente de verdad, el contrato OpenAPI del backend:
+
+```
+PostgreSQL → modelos SQLAlchemy → esquemas Pydantic → openapi.json → tipos TypeScript + esquemas Zod → servicios → componentes
+```
+
+- **`openapi/openapi.json`:** copia versionada del contrato del backend (`backend/openapi.json`). Gracias a ella el frontend compila solo, también en Vercel.
+- **`npm run gen:api`:**
+  - copia el contrato desde `../backend` si está;
+  - genera `src/app/core/api/generated/`: `types.gen.ts` con los tipos y `zod.gen.ts` con los esquemas Zod.
+  - **No se edita a mano.**
+- **`npm run check:api`:** falla si el código generado o la copia del contrato están desactualizados. Corre dentro de `npm test`.
+- **Modelos:** los de `core/models` son alias de los tipos generados (`type Teacher = TeacherOut`). Si el backend renombra un campo, el frontend **no compila**: al probar renombrando `TeacherOut.nombre` salieron 17 errores. Los literales con etiquetas propias (días, jornadas, tipos de aula) se comparan con el contrato en tiempo de compilación (`core/models/contract-checks.ts`).
+
+**Herramienta elegida:** [`@hey-api/openapi-ts`](https://heyapi.dev), con versión fija porque está en 0.x.
+- Declara soporte para TypeScript 6, el de este proyecto; `openapi-typescript` 7.x pide TypeScript 5.
+- Genera, desde el mismo contrato, los tipos **y** los esquemas Zod, así que la validación en tiempo de ejecución no se escribe a mano.
+- `ng-openapi-gen` genera servicios atados a Angular, pero no esquemas de validación, y habría reemplazado los servicios con estado optimista que ya existen. Por eso aquí la capa HTTP siguen siendo nuestros servicios, tipados y parseados con lo generado.
+
+### Mocks tipados (trabajar sin backend)
+
+`npm run start:mock` levanta la app con un interceptor (`core/api/mocks`) que responde la API con datos de ejemplo. El código de acceso es `123456`.
+- Los datos se declaran con `satisfies TeacherOut[]`, etc., así que si el contrato cambia dejan de compilar.
+- Una prueba los parsea además con los esquemas Zod generados.
+
+## Parsear, no solo validar (Zod)
+
+Los tipos de TypeScript se borran al compilar. `this.http.get<Teacher[]>(url)` no comprueba nada: solo le *promete* al compilador que llegará un `Teacher[]`. Si el backend cambia, el error aparece lejos de la causa, como un `undefined` en una plantilla.
+
+- **Validar:** responder sí o no y seguir usando el dato original, sin tipo confiable.
+- **Parsear:** convertir el dato desconocido (`unknown`) en un valor tipado **o** fallar en el borde, con un error que dice dónde y qué.
+
+Ejemplo real de este proyecto: la lista de profesores. Antes:
+
+```ts
+list(): Observable<Teacher[]> {
+  return this.http.get<Teacher[]>(this.url); // confía a ciegas
+}
+```
+
+Ahora (`core/api/teacher.service.ts`):
+
+```ts
+list(): Observable<Teacher[]> {
+  return this.http.get(this.url).pipe(parseResponse(z.array(zTeacherOut), 'GET /teachers'));
+}
+```
+
+Si el backend respondiera `[{ "id": "1", "nombre_completo": "Ana" }]`:
+- `parseResponse` lanza `ApiContractError` con el endpoint y los campos (`0.id`, `0.nombre`) y lo registra en la consola;
+- los manejadores de error muestran *«El servidor respondió con datos que la aplicación no esperaba…»*;
+- la pantalla no se rompe: el store queda con un error legible en vez de datos a medias.
+
+Los campos que el contrato no conoce se descartan. Se parsean las **47** llamadas de los servicios, la sesión y la última optimización guardadas en `localStorage`, y el cuerpo de los errores (`{detail}`). Las pruebas están en `core/api/parse.spec.ts`.
+
+Se usa **Zod Mini** con imports `import * as z`, que se puede podar (*tree-shaking*): el bundle inicial pasó de 360 kB a 393 kB. Con el Zod clásico y `import { z }` llegaba a 794 kB por las traducciones de decenas de idiomas.
+
+## gRPC desde el navegador (Connect + Protobuf)
+
+El backend expone el servicio RPC de `proto/horarios/v1/horarios.proto` en `/rpc` (ver el README del backend).
+- **Contrato:** `proto/` es una copia de ese archivo.
+- **Cliente:** `npm run gen:proto` genera `src/app/core/rpc/gen` con `protoc-gen-es` (vía `buf`), y `npm run check:proto`, incluido en `npm test`, verifica que esté al día.
+- **Transporte:** el cliente (`core/rpc/schedule-rpc.service.ts`) usa `@connectrpc/connect-web` con Protobuf binario, que funciona sobre HTTP/1.1 y admite *streaming* del servidor.
+- **Sesión:** envía el mismo JWT que REST.
+- **Carga diferida:** se carga solo al usarlo, así que el bundle inicial no crece.
+
+En la app:
+- **Panel → tarjeta Optimización → interruptor «REST · JSON / gRPC · streaming»** (administrador). Con gRPC se ven en vivo las fases (Preparar, CSP, Recocido, Guardar), la barra de materias asignadas y las horas muertas, más el botón **Cancelar**. El servidor se detiene antes de guardar, así que el horario anterior se conserva.
+- **Análisis → «REST (JSON) vs gRPC (Protobuf)»:** mide en el navegador, contra el servidor real, el tamaño del mensaje, el tamaño con gzip y la mediana de tiempo de `GET /schedules` frente a `ListSchedule`. Con la facultad de prueba (130 bloques): 14.013 B de JSON frente a 1.823 B de Protobuf, es decir, 7,7× menos.
+
 ## Tecnologías
 
 - Angular 22 con componentes standalone, **signals** y detección de cambios sin Zone.js

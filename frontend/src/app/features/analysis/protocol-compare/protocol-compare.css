@@ -1,0 +1,59 @@
+.compare {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+header > div {
+  max-width: 720px;
+}
+
+h2 {
+  margin: 0 0 6px;
+  font-size: 18px;
+}
+
+header .muted {
+  margin: 0;
+  font-size: 13.5px;
+}
+
+code {
+  font-family: var(--f-mono);
+  font-size: 12.5px;
+}
+
+.error {
+  margin: 0;
+  color: var(--danger);
+  font-size: 13.5px;
+}
+
+.win {
+  font-weight: 700;
+  color: var(--ok);
+}
+
+.verdict {
+  margin: 12px 0 0;
+  font-size: 15px;
+}
+
+.verdict strong {
+  font-family: var(--f-mono);
+  color: var(--signal);
+}
+
+.footnote {
+  margin: 6px 0 0;
+  font-size: 12px;
+  color: var(--ink-3);
+}

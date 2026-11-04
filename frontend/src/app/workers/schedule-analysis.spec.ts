@@ -2,7 +2,7 @@ import { Classroom, ScheduleEntry, Subject, Teacher } from '../core/models';
 import { BLOCKS_PER_WEEK, analyzeSchedule } from './schedule-analysis';
 
 const teacher = (id: number, nombre: string): Teacher => ({ id, nombre, email: `${id}@x.co` });
-const subject = (id: number, profesor_id: number): Subject => ({ id, nombre: `M${id}`, intensidad_horaria: 2, grupo_id: 1, profesor_id });
+const subject = (id: number, profesor_id: number): Subject => ({ id, nombre: `M${id}`, intensidad_horaria: 2, grupo_id: 1, profesor_id, tipo_aula: 'cualquiera' });
 const entry = (id: number, materia_id: number, dia_semana: ScheduleEntry['dia_semana'], hour: number, aula_id = 1): ScheduleEntry => ({
   id,
   materia_id,
@@ -16,8 +16,8 @@ describe('analyzeSchedule (Web Worker logic)', () => {
   const teachers = [teacher(1, 'Ana'), teacher(2, 'Luis')];
   const subjects = [subject(10, 1), subject(20, 2)];
   const classrooms: Classroom[] = [
-    { id: 1, nombre: 'Aula 101', aforo: 40 },
-    { id: 2, nombre: 'Aula 102', aforo: 30 },
+    { id: 1, nombre: 'Aula 101', aforo: 40, tipo: 'general' },
+    { id: 2, nombre: 'Aula 102', aforo: 30, tipo: 'general' },
   ];
 
   it('counts idle hours between two classes on the same day', () => {

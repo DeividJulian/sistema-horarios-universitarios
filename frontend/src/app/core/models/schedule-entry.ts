@@ -1,32 +1,11 @@
-import { Weekday } from './weekday';
+import type { GenerationOut, OptimizationReport as OptimizationReportOut, ScheduleEntryMove as ScheduleEntryMoveIn, ScheduleEntryOut } from '../api/generated';
 
-export interface ScheduleEntry {
-  id: number;
-  materia_id: number;
-  aula_id: number;
-  dia_semana: Weekday;
-  hora_inicio: string;
-  hora_fin: string;
-}
+export type ScheduleEntry = ScheduleEntryOut;
 
-export interface ScheduleEntryMove {
-  dia_semana: Weekday;
-  hora_inicio: string;
-  /** Optional: also moves the block to this classroom (for example an option suggested by the AI). */
-  aula_id?: number;
-}
+/** Move a block; aula_id (optional) also changes its classroom, for example an option suggested by the AI. */
+export type ScheduleEntryMove = ScheduleEntryMoveIn;
 
 /** Figures of the metaheuristic phase (simulated annealing) that improves the CSP schedule. */
-export interface OptimizationReport {
-  horas_muertas_antes: number;
-  horas_muertas_despues: number;
-  iteraciones: number;
-  mejoras: number;
-  segundos: number;
-}
+export type OptimizationReport = OptimizationReportOut;
 
-export interface GenerationResult {
-  mensaje: string;
-  total_bloques: number;
-  optimizacion?: OptimizationReport;
-}
+export type GenerationResult = GenerationOut;
