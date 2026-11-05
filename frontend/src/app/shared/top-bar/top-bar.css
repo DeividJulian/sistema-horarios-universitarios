@@ -10,11 +10,11 @@
   display: flex;
   align-items: center;
   gap: 12px 16px;
-  min-height: 76px;
-  padding: 14px 28px;
+  min-height: 72px;
+  padding: 12px 32px;
   border-bottom: 1px solid var(--line);
-  background: rgba(243, 241, 234, 0.92);
-  backdrop-filter: blur(6px);
+  background: color-mix(in srgb, var(--bg) 88%, transparent);
+  backdrop-filter: blur(10px);
 }
 
 .heading {
@@ -29,11 +29,16 @@
   margin: 0;
 }
 
+.heading .eyebrow {
+  font-size: var(--t-xs);
+  color: var(--faint);
+}
+
 .title {
   margin: 0;
   font-family: var(--f-display);
-  font-size: 26px;
-  font-weight: 700;
+  font-size: var(--t-2xl);
+  font-weight: 800;
   letter-spacing: -0.025em;
   line-height: 1.1;
 }
@@ -69,15 +74,16 @@ svg {
   display: grid;
   place-items: center;
   border-radius: 8px;
-  border: 1px solid var(--line-2);
+  border: 1px solid var(--border);
   background: var(--surface);
-  color: var(--ink);
+  color: var(--text);
   cursor: pointer;
   text-decoration: none;
+  transition: border-color 0.15s var(--ease);
 }
 
 .icon-button:hover {
-  border-color: var(--ink);
+  border-color: var(--accent-line);
 }
 
 .menu-toggle {
@@ -92,14 +98,13 @@ svg {
   height: 18px;
   padding: 0 5px;
   border-radius: 999px;
-  background: var(--signal);
-  color: #fff;
-  font-family: var(--f-mono);
+  background: var(--accent);
+  color: var(--accent-ink);
   font-size: 10.5px;
-  font-weight: 600;
+  font-weight: 700;
   display: grid;
   place-items: center;
-  box-shadow: 0 0 0 2px var(--paper);
+  box-shadow: 0 0 0 2px var(--bg);
 }
 
 /* Account: avatar + name + role chip, opens a small menu */
@@ -114,26 +119,27 @@ svg {
   min-height: 40px;
   padding: 3px 12px 3px 4px;
   border-radius: 999px;
-  border: 1px solid var(--line-2);
+  border: 1px solid var(--border);
   background: var(--surface);
   cursor: pointer;
 }
 
 .avatar-button:hover {
-  border-color: var(--ink);
+  border-color: var(--accent-line);
 }
 
 .avatar {
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  background: var(--ink);
-  color: var(--ink-inv);
+  background: var(--surface-3);
+  border: 1px solid var(--border-strong);
+  color: var(--text);
   display: grid;
   place-items: center;
-  font-family: var(--f-mono);
+  font-family: var(--f-display);
   font-size: 12px;
-  font-weight: 600;
+  font-weight: 800;
   flex: none;
 }
 
@@ -168,18 +174,18 @@ svg {
 }
 
 .role.admin {
-  background: var(--ink);
-  color: var(--ink-inv);
+  background: var(--accent-soft);
+  color: var(--accent);
 }
 
 .role.profesor {
-  background: var(--info-tint);
-  color: #1a44a8;
+  background: var(--info-soft);
+  color: var(--info);
 }
 
 .role.estudiante {
-  background: var(--ok-tint);
-  color: #17603d;
+  background: var(--good-soft);
+  color: var(--good);
 }
 
 .menu {
@@ -189,8 +195,8 @@ svg {
   min-width: 240px;
   padding: 6px;
   border-radius: 14px;
-  border: 1px solid var(--line-2);
-  background: var(--surface);
+  border: 1px solid var(--border-strong);
+  background: var(--surface-2);
   box-shadow: var(--sh-2);
   display: flex;
   flex-direction: column;
@@ -225,7 +231,7 @@ svg {
 }
 
 .menu button:hover {
-  background: var(--surface-2);
+  background: var(--surface-3);
 }
 
 .menu .logout {

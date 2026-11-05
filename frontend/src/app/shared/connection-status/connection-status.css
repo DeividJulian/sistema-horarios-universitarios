@@ -14,8 +14,8 @@
   border-radius: 999px;
   border: 1px solid var(--line);
   background: var(--surface);
-  font-size: 12.5px;
-  color: var(--ink-2);
+  font-size: var(--t-xs);
+  color: var(--muted);
   white-space: nowrap;
 }
 
@@ -31,9 +31,9 @@
 }
 
 .chip.warning {
-  border-color: #ebd08a;
-  background: var(--warn-tint);
-  color: #5e3d00;
+  border-color: var(--warn-line);
+  background: var(--warn-soft);
+  color: var(--warn);
 }
 
 /* Small screens: only the problems */

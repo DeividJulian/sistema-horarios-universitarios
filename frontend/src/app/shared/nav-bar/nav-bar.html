@@ -1,14 +1,14 @@
 <nav class="sidebar" aria-label="Navegación principal">
   <a class="brand" routerLink="/horario" (click)="layout.closeSidebar()">
     <svg class="brand-mark" width="34" height="34" viewBox="0 0 34 34" aria-hidden="true">
-      <rect x="1" y="1" width="32" height="32" rx="9" fill="#F3F1EA" />
-      <g fill="#15171C">
+      <rect x="1" y="1" width="32" height="32" rx="9" class="mark-bg" />
+      <g class="mark-cells">
         <rect x="7" y="7" width="5.5" height="5.5" rx="1.2" /><rect x="14.25" y="7" width="5.5" height="5.5" rx="1.2" />
         <rect x="21.5" y="7" width="5.5" height="5.5" rx="1.2" /><rect x="7" y="14.25" width="5.5" height="5.5" rx="1.2" />
         <rect x="21.5" y="14.25" width="5.5" height="5.5" rx="1.2" /><rect x="7" y="21.5" width="5.5" height="5.5" rx="1.2" />
         <rect x="14.25" y="21.5" width="5.5" height="5.5" rx="1.2" /><rect x="21.5" y="21.5" width="5.5" height="5.5" rx="1.2" />
       </g>
-      <rect x="14.25" y="14.25" width="5.5" height="5.5" rx="1.2" fill="#B93C0B" />
+      <rect x="14.25" y="14.25" width="5.5" height="5.5" rx="1.2" class="mark-now" />
     </svg>
     <span class="brand-text">
       <span class="brand-name">Horarios y Aulas</span>
@@ -75,5 +75,16 @@
       }
     </section>
   }
-  <p class="side-foot">CSP + recocido simulado</p>
+  @if (auth.user(); as user) {
+    <div class="me">
+      <span class="me-avatar" aria-hidden="true">{{ initials() }}</span>
+      <span class="me-text">
+        <span class="me-name">{{ user.nombre }}</span>
+        <span class="me-role" [class]="'me-role ' + user.rol">{{ roleLabels[user.rol] }}</span>
+      </span>
+      <button type="button" class="me-logout" (click)="logout()" aria-label="Cerrar sesión" title="Cerrar sesión">
+        <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 4h4v16h-4M10 8l-4 4 4 4M6 12h10" /></svg>
+      </button>
+    </div>
+  }
 </nav>

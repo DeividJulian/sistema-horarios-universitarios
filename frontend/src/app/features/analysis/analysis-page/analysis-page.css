@@ -9,9 +9,10 @@
 
 .page-title {
   margin: 0 0 4px;
-  font-size: 22px;
-  font-weight: 700;
-  letter-spacing: -0.02em;
+  font-size: var(--t-3xl);
+  font-weight: 800;
+  letter-spacing: -0.035em;
+  line-height: 1.05;
 }
 
 .page-header .muted {
@@ -21,7 +22,8 @@
 
 h2 {
   margin: 0 0 8px;
-  font-size: 15px;
+  font-size: var(--t-lg);
+  font-weight: 800;
   display: flex;
   align-items: center;
   gap: 8px;
@@ -32,11 +34,30 @@ h2 {
   margin: 0 0 12px;
 }
 
+/* Totals in one quiet strip, the same as on the schedule page */
 .tiles {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  gap: 12px;
-  margin-bottom: 16px;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  margin-bottom: 20px;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+
+.tiles .tile.panel {
+  padding: 12px 18px;
+  border: 0;
+  border-right: 1px solid var(--border);
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+}
+
+.tiles .tile.panel:first-child {
+  padding-left: 4px;
+}
+
+.tiles .tile.panel:last-child {
+  border-right: 0;
 }
 
 .tile {
@@ -46,13 +67,14 @@ h2 {
 }
 
 .tile-value {
+  font-family: var(--f-display);
   font-size: 28px;
   font-weight: 800;
 }
 
 .tile-label {
-  font-size: 13px;
-  color: var(--text-muted);
+  font-size: var(--t-xs);
+  color: var(--muted);
 }
 
 .grid {
@@ -63,6 +85,7 @@ h2 {
 }
 
 .hero {
+  font-family: var(--f-display);
   font-size: 40px;
   font-weight: 800;
   margin: 4px 0 10px;
@@ -85,7 +108,7 @@ h2 {
 
 .badge-danger {
   color: var(--danger);
-  border-color: #f0b3ac;
+  border-color: var(--bad-line);
 }
 
 .status-icon {
@@ -101,7 +124,7 @@ h2 {
 
 .status-icon.ok {
   color: var(--success);
-  background: rgba(52, 211, 153, 0.12);
+  background: var(--good-soft);
 }
 
 .status-icon.danger {
@@ -181,8 +204,8 @@ h2 {
   margin-top: 12px;
   padding: 12px 14px;
   border-radius: 10px;
-  background: rgba(52, 211, 153, 0.08);
-  border: 1px solid rgba(52, 211, 153, 0.4);
+  background: var(--good-soft);
+  border: 1px solid var(--good-line);
 }
 
 .backup p {
@@ -203,7 +226,7 @@ h2 {
   display: grid;
   place-items: center;
   font-weight: 800;
-  color: #0b1020;
+  color: var(--accent-ink);
   background: var(--ok);
 }
 

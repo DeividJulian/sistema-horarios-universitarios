@@ -1,7 +1,7 @@
 .toasts {
   /* Bottom right, above the status chips: never on top of the top bar or the account menu */
   position: fixed;
-  bottom: 56px;
+  bottom: 24px;
   right: 16px;
   display: flex;
   flex-direction: column;
@@ -11,73 +11,71 @@
 }
 
 .toast {
+  --tone: var(--info);
   display: flex;
   align-items: flex-start;
   gap: 10px;
-  padding: 14px;
-  border-radius: 14px;
-  background: var(--ink);
-  color: var(--ink-inv);
+  padding: 12px 12px 12px 14px;
+  border-radius: var(--r-3);
+  background: var(--surface-2);
+  border: 1px solid var(--border-strong);
+  border-left: 3px solid var(--tone);
+  color: var(--text);
   box-shadow: var(--sh-2);
-  animation: slide-in 160ms ease-out;
+  animation: slide-in 180ms var(--ease);
 }
 
-.toast.success .icon {
-  background: #2e8b5e;
+.toast.success {
+  --tone: var(--good);
 }
 
-.toast.error .icon {
-  background: #d9483b;
-}
-
-.toast.info .icon {
-  background: #3a64cf;
+.toast.error {
+  --tone: var(--bad);
 }
 
 .icon {
   font-weight: 800;
-  width: 28px;
-  height: 28px;
-  border-radius: 8px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
   display: grid;
   place-items: center;
-  font-size: 13px;
+  font-size: 12px;
   flex-shrink: 0;
-  color: #fff;
+  color: var(--accent-ink);
+  background: var(--tone);
 }
 
 p {
   margin: 0;
   flex: 1;
-  font-size: 14px;
+  font-size: var(--t-sm);
   line-height: 1.45;
-  padding-top: 4px;
+  padding-top: 2px;
 }
 
 .close {
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
   background: none;
   border: none;
-  color: var(--ink-inv-2);
+  border-radius: 6px;
+  color: var(--muted);
   font-size: 20px;
   line-height: 1;
   cursor: pointer;
-  padding: 0 2px;
 }
 
 .close:hover {
-  color: #fff;
+  color: var(--text);
+  background: var(--surface-3);
 }
 
 @keyframes slide-in {
   from {
     opacity: 0;
-    transform: translateY(-6px);
+    transform: translateY(8px);
   }
 }
-
-@media (prefers-reduced-motion: reduce) {
-  .toast {
-    animation: none;
-  }
-}
-

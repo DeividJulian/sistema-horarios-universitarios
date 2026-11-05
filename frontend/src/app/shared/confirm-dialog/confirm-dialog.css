@@ -1,31 +1,44 @@
 .dialog {
-  background: var(--panel);
+  background: var(--surface-2);
   color: var(--text);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 22px 24px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--r-4);
+  padding: 24px;
   width: min(440px, calc(100vw - 32px));
-  box-shadow: 0 30px 80px -20px rgba(21, 23, 28, 0.45);
+  box-shadow: var(--sh-2);
+}
+
+.dialog[open] {
+  animation: dialog-in 160ms var(--ease);
 }
 
 .dialog::backdrop {
-  background: rgba(5, 8, 12, 0.65);
+  background: var(--scrim);
+  backdrop-filter: blur(2px);
 }
 
 h2 {
   margin: 0 0 8px;
-  font-size: 18px;
+  font-size: var(--t-xl);
+  font-weight: 800;
 }
 
 p {
-  margin: 0 0 20px;
-  color: var(--text-muted);
-  font-size: 14px;
-  line-height: 1.5;
+  margin: 0 0 22px;
+  color: var(--muted);
+  font-size: var(--t-md);
+  line-height: 1.55;
 }
 
 .actions {
   display: flex;
   justify-content: flex-end;
   gap: 10px;
+}
+
+@keyframes dialog-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px) scale(0.98);
+  }
 }

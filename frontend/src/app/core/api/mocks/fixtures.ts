@@ -111,8 +111,35 @@ export const MOCK_AI_STATUS = {
   modelo: 'openai/gpt-oss-20b',
 } satisfies AiStatus;
 
+/** Other profiles, to see each role without a backend. */
+export const MOCK_TEACHER_USER = {
+  ...MOCK_ADMIN,
+  id: 2,
+  nombre: 'Docente Dos',
+  email: 'profesor@mock.local',
+  rol: 'profesor',
+  profesor_id: 2,
+} satisfies UserOut;
+
+export const MOCK_STUDENT_USER = {
+  ...MOCK_ADMIN,
+  id: 3,
+  nombre: 'Estudiante de prueba',
+  email: 'estudiante@mock.local',
+  rol: 'estudiante',
+  grupo_id: 2,
+} satisfies UserOut;
+
+/** In mock mode the email chooses the profile: "profesor…" is a teacher, "estudiante…" a student, anything else the administrator. */
+export function mockUserFor(email: string): UserOut {
+  const name = email.trim().toLowerCase();
+  if (name.startsWith('profesor')) return MOCK_TEACHER_USER;
+  if (name.startsWith('estudiante')) return MOCK_STUDENT_USER;
+  return MOCK_ADMIN;
+}
+
 /** Unsigned token valid for 8 hours: the frontend only reads its expiry; the mock API does not check it. */
-export function mockToken(): TokenOut {
-  const payload = btoa(JSON.stringify({ sub: '1', rol: 'admin', exp: Math.floor(Date.now() / 1000) + 8 * 3600 })).replace(/=+$/, '');
-  return { access_token: `mock.${payload}.firma`, token_type: 'bearer', usuario: MOCK_ADMIN };
+export function mockToken(user: UserOut = MOCK_ADMIN): TokenOut {
+  const payload = btoa(JSON.stringify({ sub: String(user.id), rol: user.rol, exp: Math.floor(Date.now() / 1000) + 8 * 3600 })).replace(/=+$/, '');
+  return { access_token: `mock.${payload}.firma`, token_type: 'bearer', usuario: user };
 }

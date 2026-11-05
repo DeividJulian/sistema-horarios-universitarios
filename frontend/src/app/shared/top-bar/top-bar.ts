@@ -9,6 +9,7 @@ import { LayoutService } from '../../core/services/layout.service';
 import { TutorialService } from '../../core/services/tutorial.service';
 import { NoticeStore } from '../../core/state/notice.store';
 import { ConnectionStatus } from '../connection-status/connection-status';
+import { initialsOf } from '../nav-bar/nav-bar';
 
 /** Top bar of the workspace: page title, tutorial, notices and the account menu. */
 @Component({
@@ -49,14 +50,7 @@ export class TopBar {
     return role === 'profesor' ? 'Mis clases' : role === 'estudiante' ? 'Mi horario' : 'Panel del horario';
   });
 
-  protected readonly initials = computed(() =>
-    (this.auth.user()?.nombre ?? '')
-      .split(/\s+/)
-      .filter(Boolean)
-      .slice(0, 2)
-      .map((word) => word[0].toUpperCase())
-      .join(''),
-  );
+  protected readonly initials = computed(() => initialsOf(this.auth.user()?.nombre ?? ''));
 
   protected closeMenuOutside(event: MouseEvent): void {
     if (this.menuOpen() && !this.host.nativeElement.querySelector('.account')?.contains(event.target as Node)) {

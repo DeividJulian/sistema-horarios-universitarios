@@ -1,47 +1,85 @@
+/* Loading, empty and error states: a quiet line while loading, a framed invitation to act otherwise */
 .state {
   display: flex;
   align-items: center;
   gap: 14px;
   margin-bottom: 16px;
+  padding: 16px 18px;
+  border-radius: var(--r-3);
+  border: 1px solid var(--border);
+  background: var(--surface);
+}
+
+.state.empty,
+.state.error {
+  flex-direction: column;
+  text-align: center;
+  padding: 36px 24px;
+  border-style: dashed;
+  border-color: var(--border-strong);
+  background: repeating-linear-gradient(180deg, transparent 0 39px, var(--grid) 39px 40px), var(--bg);
 }
 
 .state.error {
-  border-color: #f0b3ac;
+  border-style: solid;
+  border-color: var(--bad-line);
+  background: var(--bad-soft);
 }
 
 .text {
   flex: 1;
+  max-width: 56ch;
 }
 
 strong {
-  font-size: 14px;
+  font-family: var(--f-display);
+  font-size: var(--t-lg);
+  font-weight: 800;
+}
+
+.state.loading strong {
+  font-family: var(--f-body);
+  font-size: var(--t-md);
+  font-weight: 700;
 }
 
 p {
-  margin: 4px 0 0;
-  font-size: 13px;
-  color: var(--text-muted);
+  margin: 6px 0 0;
+  font-size: var(--t-sm);
+  line-height: 1.55;
+  color: var(--muted);
 }
 
 .icon {
-  width: 30px;
-  height: 30px;
-  border-radius: 50%;
+  width: 48px;
+  height: 48px;
+  border-radius: var(--r-3);
   display: grid;
   place-items: center;
-  background: var(--panel-alt);
-  font-weight: 800;
+  background: var(--accent-soft);
+  color: var(--accent);
   flex-shrink: 0;
 }
 
+.icon svg {
+  width: 24px;
+  height: 24px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
 .error .icon {
-  color: var(--danger);
+  background: var(--bad-soft);
+  color: var(--bad);
 }
 
 .spinner {
-  width: 22px;
-  height: 22px;
-  border: 3px solid var(--border);
+  width: 20px;
+  height: 20px;
+  border: 2.5px solid var(--border-strong);
   border-top-color: var(--accent);
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
@@ -51,11 +89,5 @@ p {
 @keyframes spin {
   to {
     transform: rotate(360deg);
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .spinner {
-    animation-duration: 2.4s;
   }
 }

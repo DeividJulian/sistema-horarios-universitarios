@@ -8,9 +8,11 @@ import {
   SchoolDay,
   START_HOURS,
   Subject,
+  Teacher,
   WEEKDAYS,
   Weekday,
   formatHour,
+  formatRange,
   formatShortDate,
   hourOf,
   toIsoDate,
@@ -27,6 +29,16 @@ export interface EntryMove {
   classroomId?: number;
 }
 
+/** Floating card with the full details of the class under the pointer or the keyboard focus. */
+interface Tip {
+  entry: ScheduleEntry;
+  x: number;
+  y: number;
+  below: boolean;
+  note: string | null;
+  kind: 'conflict' | 'cancelled' | null;
+}
+
 export const cellId = (day: Weekday, hour: number) => `${day}-${hour}`;
 
 @Component({
@@ -34,6 +46,7 @@ export const cellId = (day: Weekday, hour: number) => `${day}-${hour}`;
   imports: [CdkDropListGroup, CdkDropList, CdkDrag, HourPipe],
   templateUrl: './schedule-grid.html',
   styleUrl: './schedule-grid.css',
+  host: { '(window:scroll)': 'hideTip()' },
 })
 export class ScheduleGrid {
   readonly entries = input.required<ScheduleEntry[]>();
@@ -41,6 +54,8 @@ export class ScheduleGrid {
   readonly classroomsById = input.required<Map<number, Classroom>>();
   /** To show the group of each class (several groups can share an hour). */
   readonly groupsById = input<Map<number, StudentGroup>>(new Map());
+  /** To show who teaches each class. */
+  readonly teachersById = input<Map<number, Teacher>>(new Map());
   readonly filter = input.required<ScheduleFilter>();
   /** Conflict descriptions per block id (from GET /conflictos). */
   readonly conflicts = input<Map<number, string[]>>(new Map());
@@ -134,6 +149,39 @@ export class ScheduleGrid {
     return subject ? (this.groupsById().get(subject.grupo_id)?.nombre ?? null) : null;
   }
 
+  protected teacherName(entry: ScheduleEntry): string | null {
+    const subject = this.subjectsById().get(entry.materia_id);
+    return subject ? (this.teachersById().get(subject.profesor_id)?.nombre ?? null) : null;
+  }
+
+  protected timeRange(entry: ScheduleEntry): string {
+    return formatRange(hourOf(entry.hora_inicio), hourOf(entry.hora_fin));
+  }
+
+  protected readonly tip = signal<Tip | null>(null);
+
+  /** Shows the details card next to the block (above it, or below when there is no room). */
+  protected showTip(event: Event, entry: ScheduleEntry, date: string | null): void {
+    const target = event.currentTarget as HTMLElement | null;
+    if (!target || target.classList.contains('cdk-drag-dragging')) return;
+    const rect = target.getBoundingClientRect();
+    const cancelled = this.isCancelled(entry, date);
+    const problems = this.conflictsOf(entry);
+    const below = rect.top < 190;
+    this.tip.set({
+      entry,
+      x: Math.min(Math.max(rect.left + rect.width / 2, 150), window.innerWidth - 150),
+      y: below ? rect.bottom + 8 : rect.top - 8,
+      below,
+      note: cancelled ? this.cancelTitle(entry, date) : problems.length ? problems.join(' · ') : null,
+      kind: cancelled ? 'cancelled' : problems.length ? 'conflict' : null,
+    });
+  }
+
+  protected hideTip(): void {
+    this.tip.set(null);
+  }
+
   protected dayNumber(date: string): number {
     return Number(date.slice(8, 10));
   }
@@ -161,7 +209,7 @@ export class ScheduleGrid {
     return `Clase cancelada${reason ? `: ${reason}` : ''}`;
   }
 
-  protected color(entry: ScheduleEntry): { fill: string; ink: string } {
+  protected color(entry: ScheduleEntry): { fill: string; ink: string; edge: string } {
     return subjectColor(entry.materia_id);
   }
 

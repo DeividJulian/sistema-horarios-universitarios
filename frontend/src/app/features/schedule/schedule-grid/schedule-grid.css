@@ -1,14 +1,16 @@
-/* Weekly calendar «Plano»: paper grid, big day numbers, subject-coloured cards and a red "now" line */
+/*
+ * Weekly grid, the centre of the app: hour rows ruled on the dark slate, big day numbers, classes as tinted tiles
+ * with a coloured edge per subject, a turquoise "now" line and conflicts hatched in red.
+ */
 :host {
   display: block;
 }
 
 .grid-scroll {
   overflow-x: auto;
-  border: 1px solid var(--line);
-  border-radius: var(--r-3);
-  background: var(--surface);
-  box-shadow: var(--sh-1);
+  border: 1px solid var(--border);
+  border-radius: var(--r-4);
+  background: var(--bg);
 }
 
 .board {
@@ -21,37 +23,48 @@
   display: flex;
 }
 
-/* ---------- Header: "MIÉ 21 Hoy" ---------- */
+/* ---------- Header: "Jue 5 Hoy" ---------- */
 .header-row {
   position: sticky;
   top: 0;
   z-index: 5;
   background: var(--surface);
-  border-bottom: 1px solid var(--line);
+  border-bottom: 1px solid var(--border-strong);
 }
 
 .hour-cell {
-  width: 82px;
-  min-width: 82px;
-  padding: 6px 8px 0 0;
+  font-family: var(--f-num);
+  width: 84px;
+  min-width: 84px;
+  padding: 0 10px 0 0;
   display: flex;
   justify-content: flex-end;
   align-items: flex-start;
-  font-family: var(--f-mono);
-  font-size: 10.5px;
-  color: var(--ink-3);
+  font-size: var(--t-xs);
+  color: var(--faint);
   white-space: nowrap;
+  transform: translateY(-8px);
+}
+
+.row:not(.header-row) .hour-cell {
+  background: var(--bg);
 }
 
 .hour-cell.corner {
   align-items: flex-end;
   justify-content: center;
-  padding: 0 0 10px;
-  font-size: 10px;
-  letter-spacing: 0.06em;
+  padding: 0 0 12px;
+  font-size: 11px;
+  transform: none;
+  background: var(--surface);
+}
+
+.row:nth-child(2) .hour-cell {
+  transform: translateY(4px);
 }
 
 .day-cell {
+  position: relative;
   flex: 1 1 0;
   min-width: 0;
   padding: 12px 12px 10px;
@@ -59,49 +72,52 @@
   align-items: baseline;
   flex-wrap: wrap;
   gap: 4px 8px;
-  border-left: 1px solid var(--line);
+  border-left: 1px solid var(--border);
 }
 
 .day-name {
-  font-family: var(--f-mono);
-  font-size: 11px;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--ink-3);
+  font-size: var(--t-sm);
+  font-weight: 700;
+  color: var(--muted);
 }
 
 .day-num {
   font-family: var(--f-display);
-  font-size: 28px;
-  font-weight: 700;
+  font-size: 30px;
+  font-weight: 800;
   letter-spacing: -0.04em;
   line-height: 1;
 }
 
 .day-meta {
   margin-left: auto;
-  font-family: var(--f-mono);
-  font-size: 11px;
-  color: var(--ink-3);
+  font-size: var(--t-xs);
+  color: var(--faint);
 }
 
-.day-cell.today .day-num {
-  color: var(--signal);
+/* Today: the column header carries the accent and a bar on top */
+.day-cell.today::before {
+  content: '';
+  position: absolute;
+  left: -1px;
+  right: 0;
+  top: 0;
+  height: 3px;
+  background: var(--accent);
 }
 
+.day-cell.today .day-num,
 .day-cell.today .day-name {
-  color: var(--signal-ink);
+  color: var(--accent);
 }
 
 .today-pill {
-  font-family: var(--f-mono);
-  font-size: 10px;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  background: var(--signal);
-  color: #fff;
-  padding: 2px 6px;
-  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 700;
+  background: var(--accent);
+  color: var(--accent-ink);
+  padding: 1px 7px;
+  border-radius: 999px;
 }
 
 /* ---------- Cells (drop zones) ---------- */
@@ -110,34 +126,40 @@
   flex: 1 1 0;
   min-width: 0;
   min-height: 84px;
-  padding: 4px;
+  padding: 5px;
   display: flex;
-  gap: 4px;
-  border-left: 1px solid var(--line);
+  gap: 5px;
+  border-left: 1px solid var(--border);
   border-top: 1px solid var(--grid);
-  background-image: linear-gradient(rgba(231, 227, 216, 0.55) 1px, transparent 1px);
-  background-size: 100% 50%;
+  /* Half-hour guide */
+  background-image: linear-gradient(90deg, var(--grid) 50%, transparent 50%);
+  background-size: 8px 1px;
   background-position: 0 50%;
-  background-repeat: no-repeat;
+  background-repeat: repeat-x;
+  transition: background-color 0.15s var(--ease);
 }
 
 .cell.today {
-  background-color: #fbf3ec;
+  background-color: color-mix(in srgb, var(--accent) 4%, transparent);
 }
 
 .cell.cdk-drop-list-receiving {
-  outline: 2px dashed var(--signal);
+  outline: 2px dashed var(--accent-line);
   outline-offset: -4px;
-  background-color: rgba(185, 60, 11, 0.07);
 }
 
-/* Red "now" line in today's column */
+.cell.cdk-drop-list-dragging {
+  background-color: var(--accent-soft);
+}
+
+/* Turquoise "now" line in today's column */
 .now {
   position: absolute;
   left: -1px;
   right: 0;
   height: 2px;
-  background: var(--signal);
+  background: var(--accent);
+  box-shadow: 0 0 10px var(--accent-line);
   z-index: 3;
   pointer-events: none;
 }
@@ -150,23 +172,23 @@
   width: 10px;
   height: 10px;
   border-radius: 50%;
-  background: var(--signal);
+  background: var(--accent);
 }
 
 .now-lab {
+  font-family: var(--f-num);
   position: absolute;
   right: 6px;
-  top: -9px;
-  font-family: var(--f-mono);
-  font-size: 10.5px;
-  font-weight: 600;
-  background: var(--signal);
-  color: #fff;
-  padding: 1px 6px;
-  border-radius: 4px;
+  top: -10px;
+  font-size: 11px;
+  font-weight: 700;
+  background: var(--accent);
+  color: var(--accent-ink);
+  padding: 1px 7px;
+  border-radius: 999px;
 }
 
-/* ---------- Class cards ---------- */
+/* ---------- Class tiles ---------- */
 .block {
   flex: 1 1 0;
   min-width: 0;
@@ -174,16 +196,17 @@
   z-index: 1;
   display: flex;
   flex-direction: column;
-  gap: 1px;
-  padding: 6px 8px 7px 9px;
-  border-radius: 10px;
-  border: 1px solid rgba(21, 23, 28, 0.1);
+  gap: 2px;
+  padding: 6px 8px 7px 10px;
+  border-radius: 8px;
+  border: 1px solid color-mix(in srgb, var(--edge, var(--s8-edge)) 22%, transparent);
+  border-left: 3px solid var(--edge, var(--s8-edge));
   background: var(--fill, var(--s8));
-  color: var(--tone, var(--ink));
+  color: var(--tone, var(--text));
   text-align: left;
   cursor: grab;
   overflow: hidden;
-  transition: transform 0.12s ease, box-shadow 0.12s ease;
+  transition: transform 0.15s var(--ease), box-shadow 0.15s var(--ease), border-color 0.15s var(--ease);
 }
 
 .block.readonly {
@@ -191,21 +214,21 @@
 }
 
 .block:hover {
-  transform: translate(-1px, -1px);
-  box-shadow: var(--sh-lift-sm);
+  border-color: color-mix(in srgb, var(--edge, var(--s8-edge)) 60%, transparent);
+  border-left-color: var(--edge, var(--s8-edge));
+  box-shadow: 0 10px 22px -12px rgba(0, 0, 0, 0.9);
   z-index: 2;
 }
 
 .block:focus-visible {
-  outline: 3px solid var(--focus);
-  outline-offset: 1px;
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 8px;
 }
 
 .block.selected {
-  outline: 2px solid var(--ink);
-  outline-offset: 0;
-  box-shadow: var(--sh-lift);
-  transform: translate(-2px, -2px);
+  box-shadow: 0 0 0 2px var(--accent), 0 16px 30px -12px rgba(0, 0, 0, 0.9);
+  transform: translateY(-2px);
   z-index: 4;
 }
 
@@ -217,10 +240,9 @@
 }
 
 .ev-time {
-  font-family: var(--f-mono);
-  font-size: 10.5px;
-  font-weight: 500;
-  opacity: 0.92;
+  font-family: var(--f-num);
+  font-size: 11px;
+  font-weight: 700;
   white-space: nowrap;
 }
 
@@ -230,20 +252,20 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  font-family: var(--f-mono);
-  font-size: 9.5px;
-  font-weight: 600;
-  letter-spacing: 0.04em;
-  padding: 1px 5px;
-  border-radius: 4px;
-  background: rgba(255, 255, 255, 0.62);
+  font-size: 10.5px;
+  font-weight: 700;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--bg) 55%, transparent);
+  color: var(--text);
 }
 
 .ev-title {
-  font-size: 13px;
-  font-weight: 650;
-  line-height: 1.22;
-  color: var(--ink);
+  font-family: var(--f-display);
+  font-size: 13.5px;
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--text);
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
@@ -253,10 +275,10 @@
 .ev-room {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 5px;
   min-width: 0;
   font-size: 11.5px;
-  color: var(--ink-2);
+  color: var(--muted);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -273,9 +295,9 @@
   stroke-linejoin: round;
 }
 
-/* Three or more classes at the same hour: compact cards */
+/* Three or more classes at the same hour: compact tiles */
 .cell.crowded .block {
-  padding: 4px 6px;
+  padding: 4px 6px 4px 8px;
 }
 
 .cell.crowded .ev-title {
@@ -284,7 +306,8 @@
 }
 
 .cell.crowded .ev-code,
-.cell.crowded .ev-room svg {
+.cell.crowded .ev-room svg,
+.cell.crowded .ev-teacher {
   display: none;
 }
 
@@ -295,52 +318,58 @@
   align-items: center;
   gap: 4px;
   margin-bottom: 2px;
-  padding: 2px 6px;
-  border-radius: 4px;
-  font-family: var(--f-mono);
-  font-size: 10px;
+  padding: 1px 7px;
+  border-radius: 999px;
+  font-size: 10.5px;
   font-weight: 700;
-  letter-spacing: 0.07em;
-  text-transform: uppercase;
   white-space: nowrap;
 }
 
 .flag-cancel {
-  background: var(--ink);
-  color: #fff;
+  background: var(--surface-3);
+  color: var(--text);
+  border: 1px solid var(--border-strong);
 }
 
 .flag-conflict {
-  background: var(--danger);
-  color: #fff;
+  background: var(--bad);
+  color: var(--accent-ink);
 }
 
+/* Conflict: red edge, red outline and a red hatch over the tile */
 .block.has-conflict {
-  background: var(--danger-tint);
-  border: 2px solid var(--danger);
+  --edge: var(--bad);
+  border: 1px solid var(--bad);
+  border-left: 3px solid var(--bad);
+  background:
+    repeating-linear-gradient(135deg, transparent 0 8px, color-mix(in srgb, var(--bad) 10%, transparent) 8px 16px),
+    var(--bad-soft);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--bad) 12%, transparent);
 }
 
-.block.has-conflict .ev-time,
-.block.has-conflict .ev-code {
-  color: #a01f15;
+.block.has-conflict .ev-time {
+  color: var(--bad);
 }
 
-/* Cancelled on that date: hatched paper, dashed border and the subject crossed out */
+/* Cancelled on that date: hatched grey, dashed border and the subject crossed out */
 .block.cancelled {
-  background: repeating-linear-gradient(135deg, #eeebe2 0 7px, #e2ded3 7px 14px);
-  border: 1.5px dashed #6a707a;
+  --edge: var(--border-strong);
+  background: repeating-linear-gradient(135deg, var(--surface) 0 7px, var(--surface-2) 7px 14px);
+  border: 1px dashed var(--border-strong);
+  border-left: 3px dashed var(--border-strong);
 }
 
 .block.cancelled .ev-title {
   text-decoration: line-through;
   text-decoration-thickness: 2px;
-  color: var(--ink-2);
+  text-decoration-color: var(--bad);
+  color: var(--muted);
 }
 
 .block.cancelled .ev-time,
 .block.cancelled .ev-room,
 .block.cancelled .ev-code {
-  color: var(--ink-3);
+  color: var(--faint);
 }
 
 /* Drag and drop */
@@ -354,11 +383,11 @@
   border-style: dashed;
 }
 
-/* While the schedule is generated the cards shimmer softly */
+/* While the schedule is generated the tiles shimmer softly */
 .board.busy .block {
   color: transparent;
   border-color: transparent;
-  background: linear-gradient(90deg, #e7e3d8 0%, #f1eee6 50%, #e7e3d8 100%);
+  background: linear-gradient(90deg, var(--surface-2) 0%, var(--surface-3) 50%, var(--surface-2) 100%);
   background-size: 200% 100%;
   animation: shimmer 1.4s ease-in-out infinite;
 }
@@ -376,13 +405,79 @@
   }
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .block {
-    transition: none;
-  }
+/* ---------- Details card on hover or focus ---------- */
+.tip {
+  position: fixed;
+  z-index: 70;
+  width: 260px;
+  transform: translate(-50%, -100%);
+  padding: 12px 14px;
+  border-radius: var(--r-3);
+  background: var(--surface-2);
+  border: 1px solid var(--border-strong);
+  box-shadow: var(--sh-2);
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  animation: tip-in 0.12s var(--ease);
+}
 
-  .board.busy .block {
-    animation: none;
+.tip.below {
+  transform: translate(-50%, 0);
+}
+
+.tip.conflict {
+  border-color: var(--bad-line);
+}
+
+.tip-title {
+  font-family: var(--f-display);
+  font-size: var(--t-md);
+  font-weight: 800;
+  line-height: 1.25;
+}
+
+.tip-time {
+  font-family: var(--f-num);
+  font-size: var(--t-xs);
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.tip dl {
+  margin: 8px 0 0;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 3px 12px;
+  font-size: var(--t-xs);
+}
+
+.tip dt {
+  color: var(--faint);
+}
+
+.tip dd {
+  margin: 0;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.tip-note {
+  margin: 8px 0 0;
+  padding-top: 8px;
+  border-top: 1px solid var(--border);
+  font-size: var(--t-xs);
+  color: var(--muted);
+}
+
+.tip.conflict .tip-note {
+  color: var(--bad);
+}
+
+@keyframes tip-in {
+  from {
+    opacity: 0;
   }
 }
 
@@ -392,7 +487,8 @@
 }
 
 @media (max-width: 640px) {
-  .grid-scroll {
+  .grid-scroll,
+  .tip {
     display: none;
   }
 
@@ -410,10 +506,10 @@
 
   .daypill {
     min-height: 60px;
-    border-radius: 14px;
-    border: 1px solid var(--line-2);
+    border-radius: var(--r-3);
+    border: 1px solid var(--border);
     background: var(--surface);
-    color: var(--ink);
+    color: var(--text);
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -422,42 +518,41 @@
     cursor: pointer;
   }
 
-  .daypill .mono {
-    font-size: 10.5px;
-    letter-spacing: 0.08em;
-    color: var(--ink-3);
+  .daypill .pill-day {
+    font-size: var(--t-xs);
+    font-weight: 700;
+    color: var(--muted);
   }
 
   .daypill .display {
     font-size: 20px;
-    font-weight: 700;
+    font-weight: 800;
   }
 
-  .daypill.today .display {
-    color: var(--signal);
+  .daypill.today .display,
+  .daypill.today .pill-day {
+    color: var(--accent);
   }
 
   .daypill.active {
-    background: var(--ink);
-    border-color: var(--ink);
-    color: var(--ink-inv);
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--accent-ink);
   }
 
-  .daypill.active .mono {
-    color: var(--ink-inv-2);
-  }
-
-  .daypill.active.today .display {
-    color: #f08a5d;
+  .daypill.active .pill-day,
+  .daypill.active.today .display,
+  .daypill.active.today .pill-day {
+    color: var(--accent-ink);
   }
 
   .agenda-empty {
     margin: 0;
     padding: 24px;
     text-align: center;
-    color: var(--ink-2);
-    border: 1px dashed var(--line-2);
-    border-radius: 14px;
+    color: var(--muted);
+    border: 1px dashed var(--border-strong);
+    border-radius: var(--r-3);
   }
 
   .agenda-list {
@@ -476,11 +571,11 @@
   }
 
   .agenda-time {
+  font-family: var(--f-num);
     padding-top: 12px;
     text-align: right;
-    font-family: var(--f-mono);
-    font-size: 11px;
-    color: var(--ink-3);
+    font-size: var(--t-xs);
+      color: var(--faint);
     white-space: nowrap;
   }
 
@@ -494,7 +589,7 @@
     flex: none;
     width: 100%;
     padding: 12px 14px;
-    border-radius: 14px;
+    border-radius: var(--r-3);
     gap: 4px;
     font: inherit;
     cursor: pointer;

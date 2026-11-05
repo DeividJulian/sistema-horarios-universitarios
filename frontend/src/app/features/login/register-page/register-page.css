@@ -1,27 +1,7 @@
 /* Only what the sign-up page adds to the shared theme in ../auth.css */
-
-.field select {
-  width: 100%;
-  padding: 10px 12px;
-  border-radius: 10px;
-  border: 1px solid var(--border);
-  background: var(--bg);
-  color: var(--text);
-  font: inherit;
-}
-
-.field select:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 1px;
-}
-
-.field select[aria-invalid="true"] {
-  border-color: var(--bad);
-}
-
 .admin-note {
   margin: 6px 0 0;
-  font-size: 12px;
+  font-size: var(--t-xs);
   color: var(--muted);
   text-align: center;
 }

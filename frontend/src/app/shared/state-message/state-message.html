@@ -1,8 +1,18 @@
-<div class="state panel" [class]="'state panel ' + kind()" [attr.role]="kind() === 'error' ? 'alert' : 'status'">
-  @if (kind() === 'loading') {
-    <span class="spinner" aria-hidden="true"></span>
-  } @else {
-    <span class="icon" aria-hidden="true">{{ kind() === 'error' ? '!' : '∅' }}</span>
+<div class="state" [class]="'state ' + kind()" [attr.role]="kind() === 'error' ? 'alert' : 'status'">
+  @switch (kind()) {
+    @case ('loading') {
+      <span class="spinner" aria-hidden="true"></span>
+    }
+    @case ('error') {
+      <span class="icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24"><path d="M12 3 2 20h20L12 3zM12 10v4M12 17.5v.5" /></svg>
+      </span>
+    }
+    @default {
+      <span class="icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24"><path d="M8 3v3M16 3v3M4 9h16M5 5h14v15H5zM10 14h4" /></svg>
+      </span>
+    }
   }
   <div class="text">
     <strong>{{ title() }}</strong>
@@ -11,6 +21,6 @@
     }
   </div>
   @if (actionText()) {
-    <button type="button" class="btn-secondary" (click)="action.emit()">{{ actionText() }}</button>
+    <button type="button" [class]="kind() === 'error' ? 'btn-secondary' : 'btn-primary'" (click)="action.emit()">{{ actionText() }}</button>
   }
 </div>

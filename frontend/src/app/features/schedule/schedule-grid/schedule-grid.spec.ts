@@ -46,7 +46,7 @@ describe('ScheduleGrid', () => {
 
   it('the phone agenda lists the classes of the chosen day', async () => {
     const { fixture, page } = render([entry(1, 1, 5, 'Lunes'), entry(2, 2, 6, 'Martes')]);
-    const tuesday = [...page.querySelectorAll<HTMLButtonElement>('.daypill')].find((p) => p.textContent?.includes('MAR'))!;
+    const tuesday = [...page.querySelectorAll<HTMLButtonElement>('.daypill')].find((p) => p.textContent?.includes('Mar'))!;
     tuesday.click();
     await fixture.whenStable();
     fixture.detectChanges();

@@ -10,25 +10,25 @@
   flex-direction: column;
   gap: 4px;
   padding: 12px 14px;
-  border: 1px solid #b9caf5;
-  border-radius: 12px;
-  background: var(--info-tint);
-  color: #183c93;
-  font-size: 14px;
+  border: 1px solid var(--accent-line);
+  border-radius: var(--r-2);
+  background: var(--accent-soft);
+  color: var(--text);
+  font-size: var(--t-md);
   line-height: 1.5;
 }
 
 .sent a {
-  color: var(--ink);
+  color: var(--accent);
   font-weight: 600;
 }
 
 .field .code-input {
   height: 56px;
-  font-family: var(--f-mono);
-  font-size: 26px;
-  font-weight: 600;
-  letter-spacing: 0.5em;
+  font-family: var(--f-display);
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: 0.45em;
   text-align: center;
   font-variant-numeric: tabular-nums;
 }

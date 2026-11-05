@@ -6,12 +6,13 @@ import { ConfirmService } from '../../../core/services/confirm.service';
 import { NotificationService } from '../../../core/services/notification.service';
 import { CatalogStore } from '../../../core/state/catalog.store';
 import { errorMessage } from '../../../shared/forms/error-message';
+import { ListSearch, matchesQuery } from '../../../shared/list-search/list-search';
 import { NAME_RULES } from '../../../shared/forms/validators';
 import { AvailabilityPanel } from '../availability-panel/availability-panel';
 
 @Component({
   selector: 'app-teachers-section',
-  imports: [ReactiveFormsModule, AvailabilityPanel],
+  imports: [ListSearch, ReactiveFormsModule, AvailabilityPanel],
   templateUrl: './teachers-section.html',
 })
 export class TeachersSection {
@@ -31,6 +32,18 @@ export class TeachersSection {
   readonly disponibilidad = input<string | undefined>();
   protected readonly saving = signal(false);
   protected readonly errorMessage = errorMessage;
+
+
+  /** Search box and filter above the list. */
+  protected readonly query = signal('');
+  protected readonly visible = computed(() => {
+    const query = this.query();
+    return this.store.teachers().filter((t) => matchesQuery(query, t.nombre, t.email));
+  });
+
+  protected clearSearch(): void {
+    this.query.set('');
+  }
 
   constructor() {
     effect(() => {

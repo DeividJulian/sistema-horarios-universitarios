@@ -4,9 +4,10 @@
 
 .page-title {
   margin: 0 0 4px;
-  font-size: 22px;
-  font-weight: 700;
-  letter-spacing: -0.02em;
+  font-size: var(--t-3xl);
+  font-weight: 800;
+  letter-spacing: -0.035em;
+  line-height: 1.05;
 }
 
 .page-header .muted {
@@ -23,12 +24,13 @@
 }
 
 .tabs a {
-  padding: 10px 16px;
+  padding: 11px 16px;
   color: var(--text-muted);
   text-decoration: none;
   font-weight: 600;
-  font-size: 14px;
-  border-bottom: 2px solid transparent;
+  font-size: var(--t-md);
+  border-bottom: 3px solid transparent;
+  transition: color 0.15s var(--ease), border-color 0.15s var(--ease);
   margin-bottom: -1px;
   white-space: nowrap;
 }

@@ -1,26 +1,24 @@
 <section class="bento" aria-label="Resumen del horario">
-  <!-- 1. Hero: percentage ring -->
-  <article class="card hero-card">
-    @if (loading()) {
-      <div class="hero-body">
-        <span class="skeleton skeleton-ring"></span>
-        <div class="hero-lines">
-          <span class="skeleton skeleton-line"></span>
-          <span class="skeleton skeleton-line short"></span>
+  <!-- 1. Faculty: efficiency ring and what is left to solve. Teachers and students: their agenda for the day -->
+  @if (faculty()) {
+    <article class="card hero-card" [class.has-conflicts]="!loading() && conflictCount() > 0">
+      @if (loading()) {
+        <div class="hero-body">
+          <span class="skeleton skeleton-ring"></span>
+          <div class="hero-lines">
+            <span class="skeleton skeleton-line"></span>
+            <span class="skeleton skeleton-line short"></span>
+          </div>
         </div>
-      </div>
-    } @else {
-      <div class="hero-body">
-        <svg class="ring" viewBox="0 0 104 104" role="img" [attr.aria-label]="'Eficiencia: ' + percentText() + ' por ciento'">
-          <circle class="ring-track" cx="52" cy="52" r="42" />
-          <circle class="ring-value" cx="52" cy="52" r="42" [attr.stroke-dasharray]="ringLength" [attr.stroke-dashoffset]="ringOffset()" />
-          <circle class="ring-dot" cx="52" cy="10" r="3" />
-          <text class="ring-num" x="52" y="56" text-anchor="middle">{{ percentText() }}%</text>
-          <text class="ring-lab" x="52" y="72" text-anchor="middle">{{ faculty() ? 'EFICIENCIA' : 'SEMANA' }}</text>
-        </svg>
-        <div class="hero-lines">
-          <span class="eyebrow">{{ faculty() ? 'Rendimiento' : 'Tu semana' }}</span>
-          @if (faculty()) {
+      } @else {
+        <div class="hero-body">
+          <svg class="ring" viewBox="0 0 104 104" role="img" [attr.aria-label]="'Eficiencia: ' + percentText() + ' por ciento'">
+            <circle class="ring-track" cx="52" cy="52" r="42" />
+            <circle class="ring-value" cx="52" cy="52" r="42" [attr.stroke-dasharray]="ringLength" [attr.stroke-dashoffset]="ringOffset()" />
+            <text class="ring-num" x="52" y="58" text-anchor="middle">{{ percentText() }}%</text>
+          </svg>
+          <div class="hero-lines">
+            <span class="eyebrow">Eficiencia del horario</span>
             <h2 class="h-card">
               @if (conflictCount() === 0) { Horario sin cruces } @else { {{ conflictCount() }} {{ conflictCount() === 1 ? 'conflicto' : 'conflictos' }} por resolver }
             </h2>
@@ -36,14 +34,50 @@
                 @default { Sin horario }
               }
             </span>
-          } @else {
-            <h2 class="h-card">{{ entries().length }} {{ entries().length === 1 ? 'clase' : 'clases' }} a la semana</h2>
-            <p class="metric-sub">{{ cancelled() }} {{ cancelled() === 1 ? 'cancelada' : 'canceladas' }} en los próximos días</p>
-          }
+          </div>
         </div>
-      </div>
-    }
-  </article>
+      }
+    </article>
+  } @else {
+    <article class="card hero-card agenda-card" aria-labelledby="agenda-title">
+      @if (loading()) {
+        <span class="skeleton skeleton-line"></span>
+        @for (i of [1, 2, 3]; track i) {
+          <span class="skeleton skeleton-row"></span>
+        }
+      } @else if (agenda(); as day) {
+        <header class="card-head">
+          <h2 class="h-card" id="agenda-title">{{ day.label }}</h2>
+          <span class="metric-sub">{{ day.items.length }} {{ day.items.length === 1 ? 'clase' : 'clases' }}{{ day.isToday ? '' : ' · próximo día con clases' }}</span>
+        </header>
+        <ol class="agenda">
+          @for (item of day.items; track item.id) {
+            <li
+              [class]="'agenda-item ' + item.when"
+              [class.cancelled]="item.cancelled"
+              [style.--fill]="item.color.fill"
+              [style.--edge]="item.color.edge"
+              [style.--tone-ink]="item.color.ink"
+            >
+              <span class="agenda-time">{{ hour(item.start) }}<small>{{ hour(item.end) }}</small></span>
+              <span class="agenda-body">
+                <strong>{{ item.subject }}</strong>
+                <span>{{ item.room }}{{ item.who ? ' · ' + item.who : '' }}</span>
+              </span>
+              @if (item.cancelled) {
+                <span class="badge badge-danger">Cancelada</span>
+              } @else if (item.when === 'now') {
+                <span class="badge badge-ok">En curso</span>
+              }
+            </li>
+          }
+        </ol>
+      } @else {
+        <h2 class="h-card" id="agenda-title">Sin clases esta semana</h2>
+        <p class="metric-sub">Cuando el administrador programe tus materias, tu día aparecerá aquí con hora y aula.</p>
+      }
+    </article>
+  }
 
   <!-- 2. Checklist -->
   <article class="card">
@@ -157,10 +191,11 @@
 
   <!-- 4. Totals strip -->
   <div class="stats" aria-label="Totales">
-    @for (s of stats(); track s.label; let last = $last) {
-      <div class="stat" [class.stat-ink]="last">
+    @for (s of stats(); track s.label) {
+      <div class="stat">
+        <svg class="stat-icon" viewBox="0 0 24 24" aria-hidden="true"><path [attr.d]="s.icon" /></svg>
         @if (ready()) {
-          <span class="stat-value mono">{{ s.value }}</span>
+          <span class="stat-value">{{ s.value }}</span>
         } @else {
           <span class="skeleton stat-skeleton"></span>
         }

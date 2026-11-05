@@ -6,11 +6,12 @@ import { ConfirmService } from '../../../core/services/confirm.service';
 import { NotificationService } from '../../../core/services/notification.service';
 import { CatalogStore } from '../../../core/state/catalog.store';
 import { errorMessage } from '../../../shared/forms/error-message';
+import { ListSearch, matchesQuery } from '../../../shared/list-search/list-search';
 import { NAME_RULES, WEEKLY_HOURS_RULES } from '../../../shared/forms/validators';
 
 @Component({
   selector: 'app-subjects-section',
-  imports: [ReactiveFormsModule],
+  imports: [ListSearch, ReactiveFormsModule],
   templateUrl: './subjects-section.html',
 })
 export class SubjectsSection {
@@ -56,6 +57,21 @@ export class SubjectsSection {
     return this.store
       .classrooms()
       .filter((c) => c.aforo >= students && (required === 'cualquiera' || (c.tipo ?? 'general') === required)).length;
+  }
+
+
+  /** Search box and filter above the list. */
+  protected readonly query = signal('');
+  protected readonly groupFilter = signal('');
+  protected readonly visible = computed(() => {
+    const query = this.query();
+    const type = this.groupFilter();
+    return this.store.subjects().filter((s) => matchesQuery(query, s.nombre, this.groupName(s.grupo_id), this.teacherName(s.profesor_id)) && (type === '' || String(s.grupo_id) === type));
+  });
+
+  protected clearSearch(): void {
+    this.query.set('');
+    this.groupFilter.set('');
   }
 
   protected edit(subject: Subject): void {

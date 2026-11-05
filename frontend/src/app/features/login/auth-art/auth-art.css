@@ -1,22 +1,24 @@
+/* Brand panel of the login and sign-up pages: a week being composed on the dark slate */
 :host {
   display: flex;
   flex: 1 1 520px;
 }
 
 .art {
+  position: relative;
   flex: 1;
   min-height: 100vh;
-  padding: 40px 48px;
+  padding: 40px 56px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  gap: 32px;
-  background-color: var(--ink);
-  background-image:
-    linear-gradient(rgba(243, 241, 234, 0.07) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(243, 241, 234, 0.07) 1px, transparent 1px);
-  background-size: 32px 32px;
-  color: var(--ink-inv);
+  gap: 40px;
+  overflow: hidden;
+  background-color: var(--surface);
+  border-right: 1px solid var(--border);
+  /* The ruled paper of a timetable: hour lines only, no square grid */
+  background-image: repeating-linear-gradient(180deg, transparent 0 39px, var(--grid) 39px 40px);
+  color: var(--text);
 }
 
 .brand {
@@ -29,72 +31,129 @@
   margin: 0;
 }
 
+.mark-bg {
+  fill: var(--surface-3);
+  stroke: var(--border-strong);
+}
+
+.mark-cells {
+  fill: var(--muted);
+  opacity: 0.55;
+}
+
+.mark-now {
+  fill: var(--accent);
+}
+
 .brand-name {
   font-family: var(--f-display);
-  font-weight: 700;
-  font-size: 19px;
+  font-weight: 800;
+  font-size: var(--t-xl);
   letter-spacing: -0.02em;
 }
 
 .brand-sub {
-  font-size: 12px;
-  color: var(--ink-inv-2);
+  font-size: var(--t-xs);
+  color: var(--muted);
 }
 
 /* Composed week */
 .week {
   display: grid;
-  grid-template-columns: 44px repeat(5, minmax(0, 1fr));
-  grid-template-rows: 22px repeat(7, 34px);
+  grid-template-columns: 46px repeat(5, minmax(0, 1fr));
+  grid-template-rows: 24px repeat(7, 38px);
   gap: 6px;
-  max-width: 560px;
+  max-width: 580px;
   width: 100%;
+  padding: 16px;
+  border-radius: var(--r-4);
+  background: var(--bg);
+  border: 1px solid var(--border);
 }
 
 .d,
 .h {
-  font-family: var(--f-mono);
-  font-size: 10.5px;
-  letter-spacing: 0.1em;
-  color: #9a9fa9;
+  font-size: var(--t-xs);
+  font-weight: 700;
+  color: var(--faint);
 }
 
 .h {
   grid-column: 1;
-  font-size: 10px;
-  letter-spacing: 0;
-  color: #8d929b;
+  font-weight: 400;
+  font-variant-numeric: tabular-nums;
 }
 
 .d.today {
-  color: #f08a5d;
+  color: var(--accent);
 }
 
 .b {
-  border-radius: 8px;
+  border-radius: 7px;
+  border-left: 3px solid transparent;
 }
 
-.s1 { background: var(--s1); }
-.s2 { background: var(--s2); }
-.s3 { background: var(--s3); }
-.s4 { background: var(--s4); }
-.s6 { background: var(--s6); }
-.s7 { background: var(--s7); }
+.s1 { background: var(--s1); border-left-color: var(--s1-edge); }
+.s2 { background: var(--s2); border-left-color: var(--s2-edge); }
+.s3 { background: var(--s3); border-left-color: var(--s3-edge); }
+.s4 { background: var(--s4); border-left-color: var(--s4-edge); }
+.s6 { background: var(--s6); border-left-color: var(--s6-edge); }
+.s7 { background: var(--s7); border-left-color: var(--s7-edge); }
 
+/* The class the algorithm is placing right now */
 .lifted {
-  background: var(--ink-inv);
-  box-shadow: 4px 4px 0 var(--signal);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 2px;
+  padding: 0 10px;
+  background: var(--surface-3);
+  border: 1px solid var(--accent);
+  border-left-width: 3px;
+  box-shadow: 0 14px 30px -10px rgba(0, 0, 0, 0.8), 0 0 0 4px var(--accent-soft);
+  transform: translate(-4px, -4px);
+}
+
+.lifted i {
+  font-style: normal;
+  font-size: 11.5px;
+  font-weight: 700;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.lifted i + i {
+  font-weight: 400;
+  color: var(--muted);
 }
 
 .empty {
-  border: 1.5px dashed #8d929b;
-  background: repeating-linear-gradient(135deg, transparent 0 6px, rgba(243, 241, 234, 0.12) 6px 12px);
+  border: 1.5px dashed var(--border-strong);
+  background: repeating-linear-gradient(135deg, transparent 0 6px, var(--surface-2) 6px 12px);
 }
 
 .now {
+  position: relative;
   align-self: center;
   height: 2px;
-  background: #e2622b;
+  background: var(--accent);
+  box-shadow: 0 0 12px var(--accent-line);
+}
+
+.now b {
+  position: absolute;
+  left: -6px;
+  top: 50%;
+  transform: translate(-100%, -50%);
+  padding: 1px 6px;
+  border-radius: 5px;
+  background: var(--accent);
+  color: var(--accent-ink);
+  font-size: 10.5px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
 }
 
 .copy {
@@ -107,58 +166,47 @@
 .copy h2 {
   margin: 0;
   font-family: var(--f-display);
-  font-size: 52px;
+  font-size: clamp(38px, 4.4vw, 56px);
   font-weight: 800;
   line-height: 0.98;
   letter-spacing: -0.045em;
-  color: var(--ink-inv);
-}
-
-.copy h2 span {
-  color: #f08a5d;
 }
 
 .copy > p {
   margin: 0;
-  font-size: 16px;
-  color: var(--ink-inv-2);
-  max-width: 440px;
+  font-size: var(--t-lg);
+  line-height: 1.5;
+  color: var(--muted);
+  max-width: 460px;
 }
 
 .steps {
   list-style: none;
   margin: 12px 0 0;
   padding: 0;
-  border-top: 1px solid #2e323a;
+  border-top: 1px solid var(--border);
 }
 
 .steps li {
-  display: grid;
-  grid-template-columns: 48px minmax(0, 1fr);
-  gap: 12px;
-  padding: 18px 0;
-  border-bottom: 1px solid #2e323a;
+  padding: 16px 0 16px 16px;
+  border-bottom: 1px solid var(--border);
+  box-shadow: inset 3px 0 0 var(--border-strong);
 }
 
-.steps .n {
-  font-family: var(--f-mono);
-  font-size: 13px;
-  color: #f08a5d;
+.steps li:first-child {
+  box-shadow: inset 3px 0 0 var(--accent);
 }
 
 .steps p {
   margin: 4px 0 0;
-  font-size: 14px;
-  color: var(--ink-inv-2);
+  font-size: var(--t-md);
+  color: var(--muted);
 }
 
 .foot {
   margin: 0;
-  font-family: var(--f-mono);
-  font-size: 11px;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: #8d929b;
+  font-size: var(--t-xs);
+  color: var(--faint);
 }
 
 /* Small screens: the brand panel gives its place to the form */

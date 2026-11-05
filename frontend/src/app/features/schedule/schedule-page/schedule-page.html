@@ -34,6 +34,7 @@
 <app-bento-overview
   [entries]="visibleEntries()"
   [cancelled]="cancelledThisWeek()"
+  [cancelledKeys]="cancelledKeys()"
   [ready]="store.loaded()"
   (analyze)="analyze()"
 />
@@ -123,7 +124,9 @@
     <app-state-message
       kind="empty"
       title="Todavía no hay un horario"
-      [message]="auth.isAdmin() ? 'Pulsa «Generar horario automáticamente» para que el algoritmo asigne todas las materias sin cruces.' : 'Un administrador todavía no ha generado el horario.'"
+      [message]="auth.isAdmin() ? 'El algoritmo asigna todas las materias sin cruces de profesor, grupo ni aula, y luego reduce las horas libres entre clases.' : 'Un administrador todavía no ha generado el horario. Cuando lo haga, aparecerá aquí.'"
+      [actionText]="auth.isAdmin() ? 'Generar horario' : ''"
+      (action)="generate()"
     />
   } @else if (visibleEntries().length === 0 && !seesEverything()) {
     <app-state-message
@@ -149,6 +152,7 @@
         [subjectsById]="store.subjectsById()"
         [classroomsById]="store.classroomsById()"
         [groupsById]="store.groupsById()"
+        [teachersById]="store.teachersById()"
         [filter]="effectiveFilter()"
         [conflicts]="conflictsByEntry()"
         [days]="days()"

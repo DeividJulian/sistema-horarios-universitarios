@@ -6,6 +6,15 @@
     @if (store.classrooms().length === 0) {
       <p class="muted">Todavía no hay aulas. Sin aulas no se puede generar el horario.</p>
     } @else {
+      <app-list-search [(query)]="query" placeholder="Buscar aula por nombre o tipo" label="Buscar aulas" [total]="store.classrooms().length" [shown]="visible().length">
+          <label class="sr-only" for="classrooms-filter">Tipo de aula</label>
+          <select id="classrooms-filter" class="inline-select" [value]="typeFilter()" (change)="typeFilter.set($any($event.target).value)">
+            <option value="">Todos los tipos</option>
+            @for (t of roomTypes; track t.value) {
+              <option [value]="t.value">{{ t.label }}</option>
+            }
+          </select>
+        </app-list-search>
       <div class="table-scroll">
         <table class="data-table">
           <thead>
@@ -18,7 +27,7 @@
             </tr>
           </thead>
           <tbody>
-            @for (c of store.classrooms(); track c.id) {
+            @for (c of visible(); track c.id) {
               <tr>
                 <td>{{ c.nombre }}</td>
                 <td class="muted">{{ roomTypeLabel(c.tipo) }}</td>
@@ -26,10 +35,14 @@
                 <td class="num">{{ hoursUsed().get(c.id) ?? 0 }}</td>
                 <td>
                   <div class="row-actions">
-                    <button type="button" class="btn-secondary" (click)="edit(c)" [attr.aria-label]="'Editar ' + c.nombre">Editar</button>
-                    <button type="button" class="btn-danger" (click)="remove(c)" [attr.aria-label]="'Eliminar ' + c.nombre">Eliminar</button>
+                    <button type="button" class="btn-secondary" (click)="edit(c)" [attr.aria-label]="'Editar ' + c.nombre"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16v4zM13.5 6.5l4 4" /></svg><span>Editar</span></button>
+                    <button type="button" class="btn-danger" (click)="remove(c)" [attr.aria-label]="'Eliminar ' + c.nombre"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3" /></svg><span>Eliminar</span></button>
                   </div>
                 </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="5" class="no-results">Ningún resultado con esa búsqueda. <button type="button" class="btn-ghost" (click)="clearSearch()">Limpiar búsqueda</button></td>
               </tr>
             }
           </tbody>

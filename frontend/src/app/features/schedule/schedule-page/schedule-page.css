@@ -13,15 +13,16 @@
 
 .greeting {
   margin: 0;
-  font-size: 22px;
-  font-weight: 700;
-  letter-spacing: -0.02em;
+  font-size: var(--t-3xl);
+  font-weight: 800;
+  letter-spacing: -0.035em;
+  line-height: 1.05;
 }
 
 .lead {
-  margin: 6px 0 0;
-  font-size: 14px;
-  max-width: 70ch;
+  margin: 8px 0 0;
+  font-size: var(--t-md);
+  max-width: 68ch;
 }
 
 .lead strong {
@@ -44,18 +45,19 @@
   border-radius: 12px;
   text-decoration: none;
   color: var(--text);
-  font-size: 13.5px;
-  background: rgba(56, 189, 248, 0.08);
-  border: 1px solid rgba(56, 189, 248, 0.35);
+  font-size: var(--t-sm);
+  background: var(--info-soft);
+  border: 1px solid var(--info-line);
+  transition: border-color 0.15s var(--ease);
 }
 
 .notice-banner.cancelacion {
-  background: var(--danger-tint);
-  border-color: #f0b3ac;
+  background: var(--bad-soft);
+  border-color: var(--bad-line);
 }
 
 .notice-banner:hover {
-  filter: brightness(1.15);
+  border-color: var(--text);
 }
 
 .notice-count {
@@ -68,7 +70,7 @@
   place-items: center;
   font-weight: 800;
   font-size: 13px;
-  color: #0b1020;
+  color: var(--accent-ink);
   background: var(--info);
 }
 
@@ -98,8 +100,8 @@
 
 .week {
   margin: 0;
-  font-size: 14px;
-  font-weight: 600;
+  font-size: var(--t-lg);
+  font-weight: 800;
 }
 
 .hint {
@@ -111,8 +113,12 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 13px;
-  margin: 10px 0 0;
+  font-size: var(--t-sm);
+  margin: 12px 0 0;
+  padding: 8px 12px;
+  border-radius: var(--r-2);
+  background: var(--bad-soft);
+  border: 1px solid var(--bad-line);
   color: var(--text);
 }
 
@@ -128,8 +134,8 @@
   place-items: center;
   font-size: 11px;
   font-weight: 800;
-  color: #fff;
-  background: var(--danger);
+  color: var(--accent-ink);
+  background: var(--bad);
 }
 
 /* The calendar is centred; with the details open both share the row */
@@ -196,11 +202,9 @@
 .inspector-eyebrow {
   margin: 0 0 14px;
   text-align: left;
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--ink-3);
+  font-size: var(--t-xs);
+  font-weight: 700;
+  color: var(--faint);
 }
 
 .inspector-icon {
@@ -211,7 +215,7 @@
   display: grid;
   place-items: center;
   color: var(--accent);
-  background: var(--pastel-violet);
+  background: var(--accent-soft);
 }
 
 .inspector-icon svg {
@@ -226,7 +230,9 @@
 
 .inspector-title {
   margin: 0 0 4px;
-  font-weight: 600;
+  font-family: var(--f-display);
+  font-size: var(--t-lg);
+  font-weight: 800;
 }
 
 .inspector-text {

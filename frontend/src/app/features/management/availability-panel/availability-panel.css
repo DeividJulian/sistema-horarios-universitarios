@@ -27,8 +27,8 @@ h2 {
   align-items: center;
   gap: 10px;
   flex-wrap: wrap;
-  background: var(--warn-tint);
-  border: 1px solid #ebd08a;
+  background: var(--warn-soft);
+  border: 1px solid var(--warn-line);
   border-radius: 8px;
   padding: 10px 12px;
   font-size: 13px;
@@ -48,8 +48,8 @@ h2 {
   place-items: center;
   font-weight: 800;
   font-size: 12px;
-  color: #fff;
-  background: var(--ink);
+  color: var(--accent-ink);
+  background: var(--warn);
   flex-shrink: 0;
 }
 
@@ -119,7 +119,8 @@ h2 {
 }
 
 .header-button.hour {
-  font-family: var(--font-mono);
+  font-family: var(--f-num);
+  font-variant-numeric: tabular-nums;
   font-size: 12px;
   color: var(--text-muted);
   white-space: nowrap;
@@ -143,16 +144,17 @@ h2 {
   border-color: var(--accent);
 }
 
+/* Available hour: solid accent, so the free time of the teacher reads at a glance */
 .cell.on {
-  background: var(--ink);
-  border-color: var(--ink);
-  background-image: repeating-linear-gradient(135deg, rgba(255, 255, 255, 0) 0 6px, rgba(255, 255, 255, 0.1) 6px 8px);
+  background: var(--accent);
+  border-color: var(--accent);
+  background-image: repeating-linear-gradient(135deg, transparent 0 6px, color-mix(in srgb, var(--accent-ink) 14%, transparent) 6px 8px);
 }
 
 /* Hours inside the shift of the teacher's groups */
 tr.in-shift .cell:not(.on) {
-  background: var(--signal-tint);
-  border-color: #efc2a9;
+  background: var(--surface-3);
+  border-color: var(--border-strong);
 }
 
 .foot {

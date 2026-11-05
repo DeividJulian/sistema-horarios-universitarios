@@ -6,11 +6,12 @@ import { ConfirmService } from '../../../core/services/confirm.service';
 import { NotificationService } from '../../../core/services/notification.service';
 import { CatalogStore } from '../../../core/state/catalog.store';
 import { errorMessage } from '../../../shared/forms/error-message';
+import { ListSearch, matchesQuery } from '../../../shared/list-search/list-search';
 import { CAPACITY_RULES, NAME_RULES } from '../../../shared/forms/validators';
 
 @Component({
   selector: 'app-groups-section',
-  imports: [ReactiveFormsModule],
+  imports: [ListSearch, ReactiveFormsModule],
   templateUrl: './groups-section.html',
 })
 export class GroupsSection {
@@ -40,6 +41,21 @@ export class GroupsSection {
   /** Classrooms big enough for each group. Zero means the generator can never place its subjects. */
   protected fittingClassrooms(group: StudentGroup): number {
     return this.store.classrooms().filter((c) => c.aforo >= group.num_estudiantes).length;
+  }
+
+
+  /** Search box and filter above the list. */
+  protected readonly query = signal('');
+  protected readonly shiftFilter = signal('');
+  protected readonly visible = computed(() => {
+    const query = this.query();
+    const type = this.shiftFilter();
+    return this.store.groups().filter((g) => matchesQuery(query, g.nombre) && (type === '' || g.jornada === type));
+  });
+
+  protected clearSearch(): void {
+    this.query.set('');
+    this.shiftFilter.set('');
   }
 
   protected edit(group: StudentGroup): void {

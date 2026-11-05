@@ -8,11 +8,12 @@ import { ConfirmService } from '../../../core/services/confirm.service';
 import { NotificationService } from '../../../core/services/notification.service';
 import { CatalogStore } from '../../../core/state/catalog.store';
 import { errorMessage } from '../../../shared/forms/error-message';
+import { ListSearch, matchesQuery } from '../../../shared/list-search/list-search';
 import { NAME_RULES } from '../../../shared/forms/validators';
 
 @Component({
   selector: 'app-users-section',
-  imports: [ReactiveFormsModule],
+  imports: [ListSearch, ReactiveFormsModule],
   templateUrl: './users-section.html',
 })
 export class UsersSection {
@@ -29,6 +30,8 @@ export class UsersSection {
   protected readonly roleLabels = ROLE_LABELS;
   /** Teacher accounts are created automatically from Gestión → Profesores, so they are not offered here. */
   protected readonly roles: Role[] = ['estudiante', 'usuario', 'admin'];
+  /** Every role, for the list filter. */
+  protected readonly allRoles: Role[] = ['admin', 'usuario', 'profesor', 'estudiante'];
 
   protected readonly form = inject(NonNullableFormBuilder).group({
     nombre: ['', NAME_RULES],
@@ -44,6 +47,21 @@ export class UsersSection {
     const order: Record<Role, number> = { admin: 0, usuario: 1, profesor: 2, estudiante: 3 };
     return [...this.users()].sort((a, b) => order[a.rol] - order[b.rol] || a.nombre.localeCompare(b.nombre));
   });
+
+
+  /** Search box and filter above the list. */
+  protected readonly query = signal('');
+  protected readonly roleFilter = signal('');
+  protected readonly visible = computed(() => {
+    const query = this.query();
+    const type = this.roleFilter();
+    return this.sortedUsers().filter((u) => matchesQuery(query, u.nombre, u.email) && (type === '' || u.rol === type));
+  });
+
+  protected clearSearch(): void {
+    this.query.set('');
+    this.roleFilter.set('');
+  }
 
   constructor() {
     this.form.controls.rol.valueChanges.subscribe((rol) => this.selectedRole.set(rol));

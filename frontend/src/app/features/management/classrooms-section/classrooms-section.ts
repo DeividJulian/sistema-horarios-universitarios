@@ -6,11 +6,12 @@ import { ConfirmService } from '../../../core/services/confirm.service';
 import { NotificationService } from '../../../core/services/notification.service';
 import { CatalogStore } from '../../../core/state/catalog.store';
 import { errorMessage } from '../../../shared/forms/error-message';
+import { ListSearch, matchesQuery } from '../../../shared/list-search/list-search';
 import { CAPACITY_RULES, NAME_RULES } from '../../../shared/forms/validators';
 
 @Component({
   selector: 'app-classrooms-section',
-  imports: [ReactiveFormsModule],
+  imports: [ListSearch, ReactiveFormsModule],
   templateUrl: './classrooms-section.html',
 })
 export class ClassroomsSection {
@@ -36,6 +37,21 @@ export class ClassroomsSection {
     for (const e of this.store.entries()) counts.set(e.aula_id, (counts.get(e.aula_id) ?? 0) + 1);
     return counts;
   });
+
+
+  /** Search box and filter above the list. */
+  protected readonly query = signal('');
+  protected readonly typeFilter = signal('');
+  protected readonly visible = computed(() => {
+    const query = this.query();
+    const type = this.typeFilter();
+    return this.store.classrooms().filter((c) => matchesQuery(query, c.nombre, roomTypeLabel(c.tipo)) && (type === '' || c.tipo === type));
+  });
+
+  protected clearSearch(): void {
+    this.query.set('');
+    this.typeFilter.set('');
+  }
 
   protected edit(classroom: Classroom): void {
     this.editing.set(classroom);

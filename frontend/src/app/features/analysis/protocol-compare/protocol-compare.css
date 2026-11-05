@@ -48,7 +48,7 @@ code {
 }
 
 .verdict strong {
-  font-family: var(--f-mono);
+  font-family: var(--f-num);
   color: var(--signal);
 }
 

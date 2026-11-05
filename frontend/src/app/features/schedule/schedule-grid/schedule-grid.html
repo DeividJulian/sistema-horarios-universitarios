@@ -58,7 +58,12 @@
                 [class.readonly]="readonly()"
                 [style.--fill]="tone.fill"
                 [style.--tone]="tone.ink"
-                [attr.title]="cancelled ? cancelTitle(entry, column.date) : problems.length ? problems.join(' · ') : null"
+                [style.--edge]="tone.edge"
+                (mouseenter)="showTip($event, entry, column.date)"
+                (focus)="showTip($event, entry, column.date)"
+                (mouseleave)="hideTip()"
+                (blur)="hideTip()"
+                (cdkDragStarted)="hideTip()"
               >
                 @if (cancelled) {
                   <span class="flag flag-cancel">✕ Cancelada</span>
@@ -77,6 +82,12 @@
                   <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 21h16M6 21V4h12v17M14 12v.5" /></svg>
                   {{ classroomName(entry) }}
                 </span>
+                @if (teacherName(entry); as teacher) {
+                  <span class="ev-room ev-teacher">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16 19v-1a4 4 0 0 0-8 0v1M12 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6z" /></svg>
+                    {{ teacher }}
+                  </span>
+                }
               </div>
             }
           </div>
@@ -85,6 +96,26 @@
     }
   </section>
 </div>
+
+<!-- Details of the class under the pointer or the focus (decorative: the block's aria-label already says it all) -->
+@if (tip(); as t) {
+  <div [class]="'tip ' + (t.below ? 'below ' : '') + (t.kind ?? '')" [style.left.px]="t.x" [style.top.px]="t.y" aria-hidden="true">
+    <strong class="tip-title">{{ subjectName(t.entry) }}</strong>
+    <span class="tip-time">{{ t.entry.dia_semana }} · {{ timeRange(t.entry) }}</span>
+    <dl>
+      <dt>Aula</dt><dd>{{ classroomName(t.entry) }}</dd>
+      @if (groupName(t.entry); as group) {
+        <dt>Grupo</dt><dd>{{ group }}</dd>
+      }
+      @if (teacherName(t.entry); as teacher) {
+        <dt>Profesor</dt><dd>{{ teacher }}</dd>
+      }
+    </dl>
+    @if (t.note) {
+      <p class="tip-note">{{ t.note }}</p>
+    }
+  </div>
+}
 
 <!-- Phones: a strip of days and the agenda of the chosen day -->
 <section class="agenda" aria-label="Agenda del día">
@@ -99,7 +130,7 @@
         [attr.aria-selected]="column.day === agendaDay()"
         (click)="pickedDay.set(column.day)"
       >
-        <span class="mono">{{ column.day.slice(0, 3).toUpperCase() }}</span>
+        <span class="pill-day">{{ column.day.slice(0, 3) }}</span>
         <span class="display">{{ column.date ? dayNumber(column.date) : '' }}</span>
       </button>
     }
@@ -125,6 +156,7 @@
                 [class.cancelled]="cancelled"
                 [style.--fill]="tone.fill"
                 [style.--tone]="tone.ink"
+                [style.--edge]="tone.edge"
                 [attr.aria-label]="ariaLabel(entry, cancelled)"
                 (click)="selected.emit(entry)"
               >

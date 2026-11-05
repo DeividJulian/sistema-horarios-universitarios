@@ -6,17 +6,16 @@
   top: 72px;
   max-height: calc(100vh - 88px);
   overflow-y: auto;
+  background: var(--surface-2);
+  border-color: var(--border-strong);
   box-shadow: var(--sh-2);
 }
 
 .inspector-eyebrow {
   margin: 0 0 8px;
-  font-family: var(--f-mono);
-  font-size: 11px;
-  font-weight: 500;
-  letter-spacing: 0.09em;
-  text-transform: uppercase;
-  color: var(--ink-3);
+  font-size: var(--t-xs);
+  font-weight: 700;
+  color: var(--faint);
 }
 
 .tags {
@@ -39,22 +38,19 @@
 }
 
 .tag.ok {
-  color: #17603d;
-  background: var(--ok-tint);
+  color: var(--good);
+  background: var(--good-soft);
 }
 
 .tag.warn {
-  color: #a01f15;
-  background: var(--danger-tint);
+  color: var(--bad);
+  background: var(--bad-soft);
 }
 
 .tag.bad {
-  color: #fff;
-  background: var(--ink);
-  font-family: var(--f-mono);
+  color: var(--accent-ink);
+  background: var(--bad);
   font-size: 11px;
-  letter-spacing: 0.04em;
-  border-radius: 5px;
 }
 
 .head {
@@ -125,10 +121,10 @@ dd .muted {
   list-style: none;
   padding: 10px 12px;
   margin: 0 0 14px;
-  border: 1px solid #f0b3ac;
-  border-radius: 12px;
-  background: var(--danger-tint);
-  color: #8e1a11;
+  border: 1px solid var(--bad-line);
+  border-radius: var(--r-2);
+  background: var(--bad-soft);
+  color: var(--text);
   font-size: 13px;
   display: flex;
   flex-direction: column;
@@ -148,8 +144,8 @@ dd .muted {
   place-items: center;
   font-size: 10px;
   font-weight: 800;
-  color: #fff;
-  background: var(--danger);
+  color: var(--accent-ink);
+  background: var(--bad);
   flex-shrink: 0;
   margin-top: 1px;
 }
@@ -158,8 +154,8 @@ dd .muted {
   margin: 0 0 14px;
   padding: 10px 12px;
   border-radius: 8px;
-  border: 1px solid #c3beaf;
-  background: repeating-linear-gradient(135deg, #f3f1ea 0 7px, #ebe7dd 7px 14px);
+  border: 1px dashed var(--border-strong);
+  background: repeating-linear-gradient(135deg, var(--surface) 0 7px, var(--surface-2) 7px 14px);
 }
 
 .cancelled h3 {
@@ -297,7 +293,7 @@ dd .muted {
     width: auto;
     max-height: 78vh;
     border-radius: 24px 24px 0 0;
-    box-shadow: 0 -20px 50px -10px rgba(21, 23, 28, 0.35);
+    box-shadow: 0 -20px 50px -10px rgba(0, 0, 0, 0.8);
     padding-top: 26px;
   }
 

@@ -19,14 +19,25 @@ import {
   MOCK_SUBJECTS,
   MOCK_TEACHERS,
   mockToken,
+  mockUserFor,
 } from './fixtures';
 
 /** The code that the mock "emails". */
 export const MOCK_CODE = '123456';
 
+/** The email used to sign in chooses the mock profile; kept so a reload stays on the same role. */
+const MOCK_EMAIL_KEY = 'horarios.mock-email';
+
+function mockEmail(): string {
+  try {
+    return localStorage.getItem(MOCK_EMAIL_KEY) ?? '';
+  } catch {
+    return '';
+  }
+}
+
 const READS: Record<string, unknown> = {
   '/health': { estado: 'ok', base_de_datos: 'mock' },
-  '/auth/me': MOCK_ADMIN,
   '/auth/register-options': MOCK_REGISTER_GROUPS,
   '/teachers': MOCK_TEACHERS,
   '/classrooms': MOCK_CLASSROOMS,
@@ -50,6 +61,7 @@ const fail = (status: number, detail: string, url: string) =>
 function answer(request: HttpRequest<unknown>, path: string) {
   const body = (request.body ?? {}) as Record<string, unknown>;
   if (request.method === 'GET') {
+    if (path === '/auth/me') return ok(mockUserFor(mockEmail()));
     if (path in READS) return ok(READS[path]);
     if (/^\/availability\/\d+$/.test(path)) {
       const id = Number(path.split('/')[2]);
@@ -61,7 +73,16 @@ function answer(request: HttpRequest<unknown>, path: string) {
     return ok({ mensaje: `Código de prueba: ${MOCK_CODE}`, email: String(body['email'] ?? '') } satisfies CodeSent, path === '/auth/register' ? 201 : 200);
   }
   if (path === '/auth/verify') {
-    return body['codigo'] === MOCK_CODE ? ok(mockToken()) : fail(400, `Código incorrecto. En el modo mock el código es ${MOCK_CODE}.`, request.url);
+    if (body['codigo'] === MOCK_CODE) {
+      const email = String(body['email'] ?? '');
+      try {
+        localStorage.setItem(MOCK_EMAIL_KEY, email);
+      } catch {
+        // No storage: the role lasts until the reload
+      }
+      return ok(mockToken(mockUserFor(email)));
+    }
+    return fail(400, `Código incorrecto. En el modo mock el código es ${MOCK_CODE}.`, request.url);
   }
   if (path === '/schedules/generate') {
     return ok({ mensaje: 'Horario generado (mock)', total_bloques: MOCK_SCHEDULE.length, optimizacion: null } satisfies GenerationOut);
