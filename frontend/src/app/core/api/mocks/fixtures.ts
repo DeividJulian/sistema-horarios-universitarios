@@ -130,7 +130,8 @@ export const MOCK_STUDENT_USER = {
   grupo_id: 2,
 } satisfies UserOut;
 
-/** In mock mode the email chooses the profile: "profesor…" is a teacher, "estudiante…" a student, anything else the administrator. */
+/** In mock mode the email chooses the profile: "profesor…" is a teacher, "estudiante…" a student, anything else the administrator.
+ * The demo accounts of the real backend (administrador@gmail.com, profesor@gmail.com) map the same way. */
 export function mockUserFor(email: string): UserOut {
   const name = email.trim().toLowerCase();
   if (name.startsWith('profesor')) return MOCK_TEACHER_USER;

@@ -64,6 +64,15 @@ describe('authentication', () => {
 
   afterEach(() => backend.verify());
 
+  it('demo accounts enter with email and password, without a code', () => {
+    auth.passwordLogin('profesor@gmail.com', 'demo123').subscribe();
+    const request = backend.expectOne(`${API_URL}/auth/password-login`);
+    expect(request.request.body).toEqual({ email: 'profesor@gmail.com', password: 'demo123' });
+    request.flush(loginResponse('profesor'));
+    expect(auth.isLoggedIn()).toBe(true);
+    expect(auth.isTeacher()).toBe(true);
+  });
+
   it('asks for a code by email and trades it for a session', () => {
     auth.requestCode('ana@ucc.edu.co').subscribe();
     const request = backend.expectOne(`${API_URL}/auth/login`);

@@ -25,6 +25,10 @@ import {
 /** The code that the mock "emails". */
 export const MOCK_CODE = '123456';
 
+/** Demo accounts that enter with a password, as in the backend (DEMO_ACCOUNTS). */
+const MOCK_DEMO_EMAILS = ['administrador@gmail.com', 'profesor@gmail.com'];
+const MOCK_DEMO_PASSWORD = 'demo123';
+
 /** The email used to sign in chooses the mock profile; kept so a reload stays on the same role. */
 const MOCK_EMAIL_KEY = 'horarios.mock-email';
 
@@ -69,8 +73,23 @@ function answer(request: HttpRequest<unknown>, path: string) {
     }
     return fail(404, `No hay mock para GET ${path}`, request.url);
   }
+  if ((path === '/auth/login' || path === '/auth/register') && MOCK_DEMO_EMAILS.includes(String(body['email'] ?? '').trim().toLowerCase())) {
+    return fail(path === '/auth/login' ? 400 : 409, 'Esta es una cuenta de demostración: entra con la contraseña.', request.url);
+  }
   if (path === '/auth/login' || path === '/auth/register') {
     return ok({ mensaje: `Código de prueba: ${MOCK_CODE}`, email: String(body['email'] ?? '') } satisfies CodeSent, path === '/auth/register' ? 201 : 200);
+  }
+  if (path === '/auth/password-login') {
+    const email = String(body['email'] ?? '').trim().toLowerCase();
+    if (!MOCK_DEMO_EMAILS.includes(email) || body['password'] !== MOCK_DEMO_PASSWORD) {
+      return fail(401, 'Correo o contraseña incorrectos.', request.url);
+    }
+    try {
+      localStorage.setItem(MOCK_EMAIL_KEY, email);
+    } catch {
+      // No storage: the role lasts until the reload
+    }
+    return ok(mockToken(mockUserFor(email)));
   }
   if (path === '/auth/verify') {
     if (body['codigo'] === MOCK_CODE) {

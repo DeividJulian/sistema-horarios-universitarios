@@ -335,6 +335,16 @@ export const zGenerationOut = z.object({
 });
 
 /**
+ * PasswordLoginRequest
+ *
+ * Only the demo accounts (DEMO_ADMIN_EMAIL, DEMO_TEACHER_EMAIL) enter with a password.
+ */
+export const zPasswordLoginRequest = z.object({
+    email: z.email(),
+    password: z.string().check(z.minLength(1), z.maxLength(128))
+});
+
+/**
  * ReadinessProblem
  */
 export const zReadinessProblem = z.object({
@@ -628,6 +638,13 @@ export const zLoginAuthLoginPostResponse = zCodeSent;
  * Successful Response
  */
 export const zMeAuthMeGetResponse = zUserOut;
+
+export const zPasswordLoginAuthPasswordLoginPostBody = zPasswordLoginRequest;
+
+/**
+ * Successful Response
+ */
+export const zPasswordLoginAuthPasswordLoginPostResponse = zTokenOut;
 
 export const zRegisterAuthRegisterPostBody = zRegisterRequest;
 

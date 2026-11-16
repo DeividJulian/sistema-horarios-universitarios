@@ -617,6 +617,22 @@ export type OptimizationReport = {
 };
 
 /**
+ * PasswordLoginRequest
+ *
+ * Only the demo accounts (DEMO_ADMIN_EMAIL, DEMO_TEACHER_EMAIL) enter with a password.
+ */
+export type PasswordLoginRequest = {
+    /**
+     * Email
+     */
+    email: string;
+    /**
+     * Password
+     */
+    password: string;
+};
+
+/**
  * ReadinessOut
  */
 export type ReadinessOut = {
@@ -1352,6 +1368,59 @@ export type MeAuthMeGetResponses = {
 };
 
 export type MeAuthMeGetResponse = MeAuthMeGetResponses[keyof MeAuthMeGetResponses];
+
+export type PasswordLoginAuthPasswordLoginPostData = {
+    body: PasswordLoginRequest;
+    path?: never;
+    query?: never;
+    url: '/auth/password-login';
+};
+
+export type PasswordLoginAuthPasswordLoginPostErrors = {
+    /**
+     * Solicitud incorrecta (por ejemplo, un código de verificación inválido o vencido)
+     */
+    400: ErrorOut;
+    /**
+     * Sin sesión, o token inválido o vencido
+     */
+    401: ErrorOut;
+    /**
+     * El recurso no existe
+     */
+    404: ErrorOut;
+    /**
+     * Conflicto con los datos actuales (duplicado, cruce de horario, etc.)
+     */
+    409: ErrorOut;
+    /**
+     * Datos de entrada inválidos
+     */
+    422: ErrorOut;
+    /**
+     * Demasiadas solicitudes (espera entre códigos o límite de la IA)
+     */
+    429: ErrorOut;
+    /**
+     * Error interno de la base de datos
+     */
+    500: ErrorOut;
+    /**
+     * Falló un servicio externo (correo o IA)
+     */
+    502: ErrorOut;
+};
+
+export type PasswordLoginAuthPasswordLoginPostError = PasswordLoginAuthPasswordLoginPostErrors[keyof PasswordLoginAuthPasswordLoginPostErrors];
+
+export type PasswordLoginAuthPasswordLoginPostResponses = {
+    /**
+     * Successful Response
+     */
+    200: TokenOut;
+};
+
+export type PasswordLoginAuthPasswordLoginPostResponse = PasswordLoginAuthPasswordLoginPostResponses[keyof PasswordLoginAuthPasswordLoginPostResponses];
 
 export type RegisterAuthRegisterPostData = {
     body: RegisterRequest;

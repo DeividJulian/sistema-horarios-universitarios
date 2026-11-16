@@ -21,36 +21,37 @@ Proyecto final de Programación Orientada a la Web — Universidad Cooperativa d
 
 ## Diseño
 
-Sistema de diseño **«Plano»**, hecho en Claude Design, aplicado en toda la aplicación.
-- **Paleta:** papel cálido (`#F3F1EA`), tinta (`#15171C`) y un solo acento «señal» naranja quemado (`#B93C0B`) para la acción principal, la IA y el «ahora».
-- **Tipografía:** Bricolage Grotesque en los títulos, Geist en el texto y Geist Mono en las cifras.
-- **Tokens:** están en `src/styles.css`.
-
-- **Inicio de sesión y registro:** panel de marca en tinta, con cuadrícula de plano, una semana ilustrada y el titular; el formulario va sobre papel. En celular solo queda el formulario.
-- **Barra lateral en tinta (248 px):** la opción activa se ve invertida. Abajo está la tarjeta de estado: Optimizado / Con conflictos, eficiencia con medidor y el botón «Re-optimizar horario». En celular se abre con el botón de menú.
-- **Barra superior:** fecha y título grande, pestañas sincronizadas, Tutorial, campana con contador y cuenta con su rol.
-- **Tarjetas de resumen:**
-  - anillo de eficiencia;
-  - restricciones resueltas;
-  - optimización con las horas muertas antes → después del recocido simulado;
-  - franja de totales.
-- **Calendario:**
-  - días con número grande y la píldora «Hoy», y la línea roja del «ahora»;
-  - tarjetas con el color de la materia, la hora, el grupo y el aula;
-  - **varias clases por casilla**, cuando varios grupos coinciden en la misma hora;
-  - estados *Conflicto* (rojo) y *Cancelada* (rayada, con el nombre tachado).
-- **Celular:** franja de días con la agenda del día elegido, y el inspector como hoja inferior.
-- **Inspector**, tablas, pestañas, avisos y diálogos con los mismos componentes. Las notificaciones van en tinta.
-- **Esqueletos de carga** con efecto shimmer en lugar de ruedas de carga.
+Sistema de diseño **«Pizarra»**: modo oscuro, el mismo estilo del login, aplicado en toda la aplicación.
+- **Tokens** (`src/styles.css`): fondo `#0a1316`, superficies `#101c20` y `#16272c`, borde `#23393f`, texto `#e6ebf5`, texto secundario `#94a3c0`, acento turquesa `#2dd4bf` y estados (bien `#34d399`, aviso `#fbbf24`, error `#f87171`, información `#60a5fa`), radio de 12 px. Ningún componente usa colores sueltos.
+- **Tipografía:** Schibsted Grotesk en los títulos y las horas; Atkinson Hyperlegible Next en el texto, pensada para leerse bien en tamaño pequeño. Escala de 12 a 32 px y espaciado en múltiplos de 4 px.
+- **Navegación:** barra lateral con la ruta activa marcada en turquesa, el estado del horario y, abajo, nombre, rol y cerrar sesión. En celular se abre con el botón de menú y se cierra con Escape.
+- **Inicio por rol:** el administrador ve la eficiencia, los conflictos y la optimización; el profesor y el estudiante, su **agenda de hoy** con hora, materia y aula.
+- **Cuadrícula semanal (el centro de la app):** días en columnas y horas en filas; cada clase con el color de su materia, su aula, su grupo y su profesor; una ficha de detalle al pasar el cursor o enfocar con el teclado; conflictos con borde y rayado rojo; canceladas tachadas; línea turquesa del «ahora».
+- **Tablas de gestión:** buscador (ignora mayúsculas y tildes), filtro, conteo de resultados, encabezado fijo y acciones con icono y etiqueta accesible.
+- **Estados vacíos, de carga y de error** con mensaje útil y acción sugerida; notificaciones y diálogos con los mismos tokens.
 
 La eficiencia es el porcentaje de clases programadas sin conflictos sobre las horas que requieren las materias (`core/state/optimization.store.ts`).
 
 ## Inicio de sesión y roles
 
-Toda la aplicación exige iniciar sesión, **sin contraseñas**:
+Toda la aplicación exige iniciar sesión. Lo normal es **sin contraseñas**:
 1. La persona escribe su correo.
 2. El backend le envía un código de 6 dígitos (Brevo en producción).
 3. Al escribirlo o pegarlo, la aplicación entra sola.
+
+### Cuentas de prueba
+
+Para probar y presentar el proyecto:
+
+| Rol | Correo | Cómo entra |
+|---|---|---|
+| Administrador | `administrador@gmail.com` | Pestaña **Con contraseña**: `demo123` |
+| Profesor | `profesor@gmail.com` | Pestaña **Con contraseña**: `demo123` |
+| Estudiante | La cuenta de estudiante que ya existe (correo de Deivid) | Pestaña **Código por correo**: llega un código de 6 dígitos a ese correo |
+
+- Solo esas dos cuentas aceptan contraseña (`POST /auth/password-login`); a sus correos nunca se envía un código. Si alguien pide el código para una de ellas, el formulario cambia solo a la pestaña de contraseña.
+- El profesor de prueba tiene clases después de cargar los datos de demostración o de la facultad.
+- En `npm run start:mock` funcionan igual, con la misma contraseña.
 
 El token JWT se guarda en `localStorage`, con `try/catch` por si el navegador lo bloquea, y se descarta si ya venció. Al abrir la app se confirma con `GET /auth/me`. El rol no se elige en el login: lo decide el backend y cada persona llega a su vista.
 
@@ -62,7 +63,7 @@ El token JWT se guarda en `localStorage`, con `try/catch` por si el navegador lo
 | **Consulta** | Ve el horario de toda la facultad y el análisis, sin modificar nada. |
 
 Piezas (`core/auth/` y `features/login/`):
-- **`AuthService`:** con signals; tiene `register`, `requestCode`, `verify`, `refreshProfile` y `logout`.
+- **`AuthService`:** con signals; tiene `register`, `requestCode`, `verify`, `passwordLogin` (cuentas de prueba), `refreshProfile` y `logout`.
 - **Interceptor:**
   - pone el `Bearer` solo en las peticiones a nuestro backend;
   - ante un `401` cierra la sesión, salvo en las rutas `/auth/`, donde solo significa código incorrecto (`/auth/me` sí la cierra).
@@ -118,7 +119,7 @@ PostgreSQL → modelos SQLAlchemy → esquemas Pydantic → openapi.json → tip
 
 ### Mocks tipados (trabajar sin backend)
 
-`npm run start:mock` levanta la app con un interceptor (`core/api/mocks`) que responde la API con datos de ejemplo. El código de acceso es `123456`.
+`npm run start:mock` levanta la app con un interceptor (`core/api/mocks`) que responde la API con datos de ejemplo. El código de acceso es `123456`; el correo elige el rol (`profesor@…` entra como profesor, `estudiante@…` como estudiante y cualquier otro como administrador). Las cuentas de prueba entran con `demo123`.
 - Los datos se declaran con `satisfies TeacherOut[]`, etc., así que si el contrato cambia dejan de compilar.
 - Una prueba los parsea además con los esquemas Zod generados.
 

@@ -9,7 +9,13 @@
 
     <p class="eyebrow">Acceso al sistema</p>
     <h1 id="login-title">Iniciar sesión</h1>
-    <p class="lead">Sin contraseñas: escribe tu correo y te enviamos un código de 6 dígitos para entrar.</p>
+    <p class="lead">
+      @if (mode() === 'code') {
+        Escribe tu correo y te enviamos un código de 6 dígitos para entrar.
+      } @else {
+        Las cuentas de prueba (administrador y profesor) entran con correo y contraseña.
+      }
+    </p>
     <p class="profiles">Perfiles: Administrador, Profesor y Estudiante. El sistema reconoce tu perfil al ingresar.</p>
 
     <p class="server" [class]="'server ' + server()" role="status">
@@ -22,6 +28,11 @@
     </p>
 
     @if (step() === 'email') {
+      <div class="mode" role="group" aria-label="Cómo quieres entrar">
+        <button type="button" [class.active]="mode() === 'code'" [attr.aria-pressed]="mode() === 'code'" (click)="setMode('code')">Código por correo</button>
+        <button type="button" [class.active]="mode() === 'password'" [attr.aria-pressed]="mode() === 'password'" (click)="setMode('password')">Con contraseña</button>
+      </div>
+
       <form [formGroup]="form" (ngSubmit)="submit()" novalidate class="form">
         <div class="field">
           <label class="field-label" for="login-email">Correo</label>
@@ -42,11 +53,28 @@
           }
         </div>
 
+        @if (mode() === 'password') {
+          <div class="field">
+            <label class="field-label" for="login-password">Contraseña</label>
+            <input
+              id="login-password"
+              formControlName="password"
+              type="password"
+              autocomplete="current-password"
+              [attr.aria-invalid]="!!passwordError()"
+              [attr.aria-describedby]="passwordError() ? 'login-password-error' : null"
+            />
+            @if (passwordError(); as msg) {
+              <span class="field-error" id="login-password-error">{{ msg }}</span>
+            }
+          </div>
+        }
+
         <button type="submit" class="btn-primary submit" [disabled]="submitting()" [attr.aria-busy]="submitting()">
           @if (submitting()) {
-            <span class="spinner" aria-hidden="true"></span> Enviando código…
+            <span class="spinner" aria-hidden="true"></span> {{ mode() === 'password' ? 'Entrando…' : 'Enviando código…' }}
           } @else {
-            Enviarme el código
+            {{ mode() === 'password' ? 'Entrar' : 'Enviarme el código' }}
           }
         </button>
 

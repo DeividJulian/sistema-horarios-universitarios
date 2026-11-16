@@ -47,7 +47,10 @@ export function afterLoginUrl(volver: string | undefined): string {
   return volver && volver.startsWith('/') && !volver.startsWith('//') && !volver.startsWith('/login') ? volver : '/horario';
 }
 
-/** Passwordless login: email first, then the six-digit code that arrives there. */
+/**
+ * Login: email first, then the six-digit code that arrives there. The two demo accounts
+ * (administrador@gmail.com, profesor@gmail.com) enter with a password instead.
+ */
 @Component({
   selector: 'app-login-page',
   imports: [ReactiveFormsModule, RouterLink, CodeStep, AuthArt],
@@ -65,7 +68,11 @@ export class LoginPage {
 
   protected readonly form = inject(NonNullableFormBuilder).group({
     email: [rememberedEmail(), [Validators.required, Validators.email]],
+    password: [''],
   });
+
+  /** How to enter: the emailed code (everybody) or the password (demo accounts). */
+  protected readonly mode = signal<'code' | 'password'>('code');
 
   protected readonly step = signal<'email' | 'code'>('email');
   protected readonly email = signal('');
@@ -93,10 +100,25 @@ export class LoginPage {
     return 'Escribe un correo válido, por ejemplo nombre@ucc.edu.co.';
   }
 
+  protected passwordError(): string | null {
+    const control = this.form.controls.password;
+    return this.mode() === 'password' && control.touched && !control.value ? 'Escribe la contraseña.' : null;
+  }
+
+  protected setMode(mode: 'code' | 'password'): void {
+    this.mode.set(mode);
+    this.error.set(null);
+    this.noAccount.set(false);
+  }
+
   protected submit(): void {
     if (this.submitting()) return; // no double submission while waiting for the answer
-    if (this.form.invalid) {
+    if (this.form.controls.email.invalid || (this.mode() === 'password' && !this.form.controls.password.value)) {
       this.form.markAllAsTouched();
+      return;
+    }
+    if (this.mode() === 'password') {
+      this.submitPassword();
       return;
     }
     const email = this.form.controls.email.value.trim().toLowerCase();
@@ -129,8 +151,43 @@ export class LoginPage {
         },
         error: (err: unknown) => {
           if (err instanceof HttpErrorResponse && err.status === 0) this.server.set('down');
+          // A demo account asked for a code: it enters with the password, so switch to that form
+          if (err instanceof HttpErrorResponse && err.status === 400 && /contraseña/i.test(String(err.error?.detail ?? ''))) {
+            this.mode.set('password');
+          }
           this.noAccount.set(err instanceof HttpErrorResponse && err.status === 404);
           this.error.set(loginErrorMessage(err));
+        },
+      });
+  }
+
+  /** Demo accounts: email + password, straight into the app. */
+  private submitPassword(): void {
+    const email = this.typedEmail();
+    this.submitting.set(true);
+    this.error.set(null);
+    this.noAccount.set(false);
+    this.form.disable({ emitEvent: false });
+    const slowTimer = setTimeout(() => this.slow.set(true), SLOW_MS);
+    this.auth
+      .passwordLogin(email, this.form.controls.password.value)
+      .pipe(
+        finalize(() => {
+          clearTimeout(slowTimer);
+          this.submitting.set(false);
+          this.slow.set(false);
+          this.form.enable({ emitEvent: false });
+        }),
+      )
+      .subscribe({
+        next: (user) => {
+          this.server.set('ready');
+          this.form.controls.password.reset('');
+          this.enter(user);
+        },
+        error: (err: unknown) => {
+          if (err instanceof HttpErrorResponse && err.status === 0) this.server.set('down');
+          this.error.set(apiErrorMessage(err, 'No se pudo iniciar sesión. Intenta de nuevo.'));
         },
       });
   }

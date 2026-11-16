@@ -111,6 +111,18 @@ export class AuthService {
     );
   }
 
+  /** Demo accounts only (administrador@gmail.com, profesor@gmail.com): email + password give the session. */
+  passwordLogin(email: string, password: string): Observable<User> {
+    return this.http.post(`${API_URL}/auth/password-login`, { email, password }).pipe(
+      parseResponse(zTokenOut, 'POST /auth/password-login'),
+      tap((response) => {
+        void clearApiCache();
+        this.store({ token: response.access_token, user: response.usuario });
+      }),
+      map((response) => response.usuario),
+    );
+  }
+
   /** On opening the app: confirms with the server that the saved session is still valid and refreshes the user. */
   refreshProfile(): void {
     const session = this.session();
