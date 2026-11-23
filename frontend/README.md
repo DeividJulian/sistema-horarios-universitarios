@@ -14,7 +14,7 @@ Proyecto final de Programación Orientada a la Web — Universidad Cooperativa d
 |---|---|---|
 | Registro | `/registro` | El estudiante crea su cuenta con nombre, correo y grupo, y la activa con el código que le llega al correo |
 | Inicio de sesión | `/login` | Sin contraseña: correo → código de 6 dígitos por correo, con «Reenviar código» y cuenta regresiva; indicador de conexión con el servidor y mensajes claros si el servidor está despertando |
-| Horario | `/horario` | Calendario semanal, generación automática (CSP + recocido simulado, con las horas muertas antes → después), arrastrar y soltar bloques, filtros por profesor/grupo/aula, detalle de cada bloque, mover por teclado, eliminar bloques y conflictos resaltados en rojo |
+| Horario | `/horario` | Calendario semanal, generación automática (CSP + recocido simulado, con las horas muertas antes → después), arrastrar y soltar bloques, filtros por profesor/grupo/aula, detalle de cada bloque, mover por teclado, eliminar bloques y conflictos resaltados en rojo. El administrador crea **horarios nuevos con nombre** sin perder los anteriores, elige cuál está activo, los renombra o los elimina; los demás roles ven cuál es el activo |
 | Gestión | `/gestion/...` | CRUD de profesores (con su disponibilidad), aulas, grupos, materias y usuarios, con las mismas validaciones que el backend. Solo administradores. |
 | Avisos | `/avisos` | Cancelaciones y cambios de aula u horario de las clases (cada rol ve los suyos) |
 | Análisis | `/analisis` | Totales, cumplimiento de horas, ocupación de aulas, bloques por día, carga de profesores, lista de conflictos y carga de datos de demostración |
@@ -52,6 +52,7 @@ Para probar y presentar el proyecto:
 - Solo esas dos cuentas aceptan contraseña (`POST /auth/password-login`); a sus correos nunca se envía un código. Si alguien pide el código para una de ellas, el formulario cambia solo a la pestaña de contraseña.
 - El profesor de prueba tiene clases después de cargar los datos de demostración o de la facultad.
 - En `npm run start:mock` funcionan igual, con la misma contraseña.
+- Deben seguir activas hasta el 30 de noviembre de 2026, mientras se califica el proyecto.
 
 El token JWT se guarda en `localStorage`, con `try/catch` por si el navegador lo bloquea, y se descarta si ya venció. Al abrir la app se confirma con `GET /auth/me`. El rol no se elige en el login: lo decide el backend y cada persona llega a su vista.
 

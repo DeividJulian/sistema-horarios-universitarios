@@ -28,11 +28,14 @@ import { EMPTY_FILTER, ScheduleFilter, matchesFilter } from '../schedule-filter'
 import { ScheduleFilters } from '../schedule-filters/schedule-filters';
 import { CancelRequest, ClassroomChangeRequest, EntryDetails } from '../entry-details/entry-details';
 import { GettingStarted } from '../getting-started/getting-started';
+import { SavedSchedules } from '../saved-schedules/saved-schedules';
 import { EntryMove, ScheduleGrid } from '../schedule-grid/schedule-grid';
 
 @Component({
   selector: 'app-schedule-page',
-  imports: [ScheduleFilters, ScheduleGrid, AnalysisPanel, BentoOverview, StateMessage, RouterLink, EntryDetails, GettingStarted],
+  imports: [
+    ScheduleFilters, ScheduleGrid, AnalysisPanel, BentoOverview, StateMessage, RouterLink, EntryDetails, GettingStarted, SavedSchedules,
+  ],
   templateUrl: './schedule-page.html',
   styleUrl: './schedule-page.css',
 })
@@ -273,6 +276,13 @@ export class SchedulePage {
 
   protected occupiedDrop(): void {
     this.notify.info('A esa hora ya hay otra clase del mismo grupo, profesor o aula. Elige otra casilla.');
+  }
+
+  /** Another schedule became the active one: its blocks replace the calendar (selection and cancellations go). */
+  protected scheduleChanged(): void {
+    this.selectedId.set(null);
+    this.reload();
+    this.notices.refresh();
   }
 
   protected reload(): void {

@@ -254,8 +254,7 @@ export const zGroupOut = z.object({
  * HealthOut
  */
 export const zHealthOut = z.object({
-    base_de_datos: z.string(),
-    estado: z.string()
+    status: z.string()
 });
 
 /**
@@ -405,6 +404,49 @@ export const zRestoreOut = z.object({
  */
 export const zRootOut = z.object({
     mensaje: z.string()
+});
+
+/**
+ * SavedScheduleCreate
+ */
+export const zSavedScheduleCreate = z.object({
+    nombre: z.string().check(z.minLength(2), z.maxLength(100))
+});
+
+/**
+ * SavedScheduleOut
+ */
+export const zSavedScheduleOut = z.object({
+    activo: z.boolean(),
+    creado_en: z.iso.datetime({ offset: true }),
+    id: z.int(),
+    nombre: z.string(),
+    total_bloques: z.int()
+});
+
+/**
+ * SavedScheduleActivated
+ */
+export const zSavedScheduleActivated = z.object({
+    bloques_omitidos: z.int(),
+    horario: zSavedScheduleOut,
+    mensaje: z.string()
+});
+
+/**
+ * SavedScheduleCreated
+ */
+export const zSavedScheduleCreated = z.object({
+    horario: zSavedScheduleOut,
+    mensaje: z.string(),
+    optimizacion: z.nullish(zOptimizationReport)
+});
+
+/**
+ * SavedScheduleRename
+ */
+export const zSavedScheduleRename = z.object({
+    nombre: z.string().check(z.minLength(2), z.maxLength(100))
 });
 
 /**
@@ -799,6 +841,49 @@ export const zHealthHealthGetResponse = zHealthOut;
  * Successful Response
  */
 export const zListNotificationsNotificationsGetResponse = z.array(zNotificationOut);
+
+/**
+ * Response List Saved Schedules Saved Schedules Get
+ *
+ * Successful Response
+ */
+export const zListSavedSchedulesSavedSchedulesGetResponse = z.array(zSavedScheduleOut);
+
+export const zCreateSavedScheduleSavedSchedulesPostBody = zSavedScheduleCreate;
+
+/**
+ * Successful Response
+ */
+export const zCreateSavedScheduleSavedSchedulesPostResponse = zSavedScheduleCreated;
+
+export const zDeleteSavedScheduleSavedSchedulesScheduleIdDeletePath = z.object({
+    schedule_id: z.int()
+});
+
+/**
+ * Successful Response
+ */
+export const zDeleteSavedScheduleSavedSchedulesScheduleIdDeleteResponse = zMessageOut;
+
+export const zRenameSavedScheduleSavedSchedulesScheduleIdPatchBody = zSavedScheduleRename;
+
+export const zRenameSavedScheduleSavedSchedulesScheduleIdPatchPath = z.object({
+    schedule_id: z.int()
+});
+
+/**
+ * Successful Response
+ */
+export const zRenameSavedScheduleSavedSchedulesScheduleIdPatchResponse = zSavedScheduleOut;
+
+export const zActivateSavedScheduleSavedSchedulesScheduleIdActivatePostPath = z.object({
+    schedule_id: z.int()
+});
+
+/**
+ * Successful Response
+ */
+export const zActivateSavedScheduleSavedSchedulesScheduleIdActivatePostResponse = zSavedScheduleActivated;
 
 /**
  * Response List Schedule Schedules Get

@@ -473,13 +473,9 @@ export type GroupOut = {
  */
 export type HealthOut = {
     /**
-     * Base De Datos
+     * Status
      */
-    base_de_datos: string;
-    /**
-     * Estado
-     */
-    estado: string;
+    status: string;
 };
 
 /**
@@ -725,6 +721,79 @@ export type RootOut = {
      * Mensaje
      */
     mensaje: string;
+};
+
+/**
+ * SavedScheduleActivated
+ */
+export type SavedScheduleActivated = {
+    /**
+     * Bloques Omitidos
+     */
+    bloques_omitidos: number;
+    horario: SavedScheduleOut;
+    /**
+     * Mensaje
+     */
+    mensaje: string;
+};
+
+/**
+ * SavedScheduleCreate
+ */
+export type SavedScheduleCreate = {
+    /**
+     * Nombre
+     */
+    nombre: string;
+};
+
+/**
+ * SavedScheduleCreated
+ */
+export type SavedScheduleCreated = {
+    horario: SavedScheduleOut;
+    /**
+     * Mensaje
+     */
+    mensaje: string;
+    optimizacion?: OptimizationReport | null;
+};
+
+/**
+ * SavedScheduleOut
+ */
+export type SavedScheduleOut = {
+    /**
+     * Activo
+     */
+    activo: boolean;
+    /**
+     * Creado En
+     */
+    creado_en: string;
+    /**
+     * Id
+     */
+    id: number;
+    /**
+     * Nombre
+     */
+    nombre: string;
+    /**
+     * Total Bloques
+     */
+    total_bloques: number;
+};
+
+/**
+ * SavedScheduleRename
+ */
+export type SavedScheduleRename = {
+    /**
+     * Nombre
+     */
+    nombre: string;
 };
 
 /**
@@ -2313,6 +2382,10 @@ export type HealthHealthGetErrors = {
      * Error interno de la base de datos
      */
     500: ErrorOut;
+    /**
+     * La base de datos no responde
+     */
+    503: HealthOut;
 };
 
 export type HealthHealthGetError = HealthHealthGetErrors[keyof HealthHealthGetErrors];
@@ -2372,6 +2445,248 @@ export type ListNotificationsNotificationsGetResponses = {
 };
 
 export type ListNotificationsNotificationsGetResponse = ListNotificationsNotificationsGetResponses[keyof ListNotificationsNotificationsGetResponses];
+
+export type ListSavedSchedulesSavedSchedulesGetData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/saved-schedules';
+};
+
+export type ListSavedSchedulesSavedSchedulesGetErrors = {
+    /**
+     * Sin sesión, o token inválido o vencido
+     */
+    401: ErrorOut;
+    /**
+     * El rol del usuario no permite esta acción
+     */
+    403: ErrorOut;
+    /**
+     * El recurso no existe
+     */
+    404: ErrorOut;
+    /**
+     * Conflicto con los datos actuales (duplicado, cruce de horario, etc.)
+     */
+    409: ErrorOut;
+    /**
+     * Datos de entrada inválidos
+     */
+    422: ErrorOut;
+    /**
+     * Error interno de la base de datos
+     */
+    500: ErrorOut;
+};
+
+export type ListSavedSchedulesSavedSchedulesGetError = ListSavedSchedulesSavedSchedulesGetErrors[keyof ListSavedSchedulesSavedSchedulesGetErrors];
+
+export type ListSavedSchedulesSavedSchedulesGetResponses = {
+    /**
+     * Response List Saved Schedules Saved Schedules Get
+     *
+     * Successful Response
+     */
+    200: Array<SavedScheduleOut>;
+};
+
+export type ListSavedSchedulesSavedSchedulesGetResponse = ListSavedSchedulesSavedSchedulesGetResponses[keyof ListSavedSchedulesSavedSchedulesGetResponses];
+
+export type CreateSavedScheduleSavedSchedulesPostData = {
+    body: SavedScheduleCreate;
+    path?: never;
+    query?: never;
+    url: '/saved-schedules';
+};
+
+export type CreateSavedScheduleSavedSchedulesPostErrors = {
+    /**
+     * Sin sesión, o token inválido o vencido
+     */
+    401: ErrorOut;
+    /**
+     * El rol del usuario no permite esta acción
+     */
+    403: ErrorOut;
+    /**
+     * El recurso no existe
+     */
+    404: ErrorOut;
+    /**
+     * Conflicto con los datos actuales (duplicado, cruce de horario, etc.)
+     */
+    409: ErrorOut;
+    /**
+     * Datos de entrada inválidos
+     */
+    422: ErrorOut;
+    /**
+     * Error interno de la base de datos
+     */
+    500: ErrorOut;
+};
+
+export type CreateSavedScheduleSavedSchedulesPostError = CreateSavedScheduleSavedSchedulesPostErrors[keyof CreateSavedScheduleSavedSchedulesPostErrors];
+
+export type CreateSavedScheduleSavedSchedulesPostResponses = {
+    /**
+     * Successful Response
+     */
+    201: SavedScheduleCreated;
+};
+
+export type CreateSavedScheduleSavedSchedulesPostResponse = CreateSavedScheduleSavedSchedulesPostResponses[keyof CreateSavedScheduleSavedSchedulesPostResponses];
+
+export type DeleteSavedScheduleSavedSchedulesScheduleIdDeleteData = {
+    body?: never;
+    path: {
+        /**
+         * Schedule Id
+         */
+        schedule_id: number;
+    };
+    query?: never;
+    url: '/saved-schedules/{schedule_id}';
+};
+
+export type DeleteSavedScheduleSavedSchedulesScheduleIdDeleteErrors = {
+    /**
+     * Sin sesión, o token inválido o vencido
+     */
+    401: ErrorOut;
+    /**
+     * El rol del usuario no permite esta acción
+     */
+    403: ErrorOut;
+    /**
+     * El recurso no existe
+     */
+    404: ErrorOut;
+    /**
+     * Conflicto con los datos actuales (duplicado, cruce de horario, etc.)
+     */
+    409: ErrorOut;
+    /**
+     * Datos de entrada inválidos
+     */
+    422: ErrorOut;
+    /**
+     * Error interno de la base de datos
+     */
+    500: ErrorOut;
+};
+
+export type DeleteSavedScheduleSavedSchedulesScheduleIdDeleteError = DeleteSavedScheduleSavedSchedulesScheduleIdDeleteErrors[keyof DeleteSavedScheduleSavedSchedulesScheduleIdDeleteErrors];
+
+export type DeleteSavedScheduleSavedSchedulesScheduleIdDeleteResponses = {
+    /**
+     * Successful Response
+     */
+    200: MessageOut;
+};
+
+export type DeleteSavedScheduleSavedSchedulesScheduleIdDeleteResponse = DeleteSavedScheduleSavedSchedulesScheduleIdDeleteResponses[keyof DeleteSavedScheduleSavedSchedulesScheduleIdDeleteResponses];
+
+export type RenameSavedScheduleSavedSchedulesScheduleIdPatchData = {
+    body: SavedScheduleRename;
+    path: {
+        /**
+         * Schedule Id
+         */
+        schedule_id: number;
+    };
+    query?: never;
+    url: '/saved-schedules/{schedule_id}';
+};
+
+export type RenameSavedScheduleSavedSchedulesScheduleIdPatchErrors = {
+    /**
+     * Sin sesión, o token inválido o vencido
+     */
+    401: ErrorOut;
+    /**
+     * El rol del usuario no permite esta acción
+     */
+    403: ErrorOut;
+    /**
+     * El recurso no existe
+     */
+    404: ErrorOut;
+    /**
+     * Conflicto con los datos actuales (duplicado, cruce de horario, etc.)
+     */
+    409: ErrorOut;
+    /**
+     * Datos de entrada inválidos
+     */
+    422: ErrorOut;
+    /**
+     * Error interno de la base de datos
+     */
+    500: ErrorOut;
+};
+
+export type RenameSavedScheduleSavedSchedulesScheduleIdPatchError = RenameSavedScheduleSavedSchedulesScheduleIdPatchErrors[keyof RenameSavedScheduleSavedSchedulesScheduleIdPatchErrors];
+
+export type RenameSavedScheduleSavedSchedulesScheduleIdPatchResponses = {
+    /**
+     * Successful Response
+     */
+    200: SavedScheduleOut;
+};
+
+export type RenameSavedScheduleSavedSchedulesScheduleIdPatchResponse = RenameSavedScheduleSavedSchedulesScheduleIdPatchResponses[keyof RenameSavedScheduleSavedSchedulesScheduleIdPatchResponses];
+
+export type ActivateSavedScheduleSavedSchedulesScheduleIdActivatePostData = {
+    body?: never;
+    path: {
+        /**
+         * Schedule Id
+         */
+        schedule_id: number;
+    };
+    query?: never;
+    url: '/saved-schedules/{schedule_id}/activate';
+};
+
+export type ActivateSavedScheduleSavedSchedulesScheduleIdActivatePostErrors = {
+    /**
+     * Sin sesión, o token inválido o vencido
+     */
+    401: ErrorOut;
+    /**
+     * El rol del usuario no permite esta acción
+     */
+    403: ErrorOut;
+    /**
+     * El recurso no existe
+     */
+    404: ErrorOut;
+    /**
+     * Conflicto con los datos actuales (duplicado, cruce de horario, etc.)
+     */
+    409: ErrorOut;
+    /**
+     * Datos de entrada inválidos
+     */
+    422: ErrorOut;
+    /**
+     * Error interno de la base de datos
+     */
+    500: ErrorOut;
+};
+
+export type ActivateSavedScheduleSavedSchedulesScheduleIdActivatePostError = ActivateSavedScheduleSavedSchedulesScheduleIdActivatePostErrors[keyof ActivateSavedScheduleSavedSchedulesScheduleIdActivatePostErrors];
+
+export type ActivateSavedScheduleSavedSchedulesScheduleIdActivatePostResponses = {
+    /**
+     * Successful Response
+     */
+    200: SavedScheduleActivated;
+};
+
+export type ActivateSavedScheduleSavedSchedulesScheduleIdActivatePostResponse = ActivateSavedScheduleSavedSchedulesScheduleIdActivatePostResponses[keyof ActivateSavedScheduleSavedSchedulesScheduleIdActivatePostResponses];
 
 export type ListScheduleSchedulesGetData = {
     body?: never;

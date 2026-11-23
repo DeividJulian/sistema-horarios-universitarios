@@ -1,0 +1,70 @@
+@if (active(); as current) {
+  <section class="panel saved" aria-labelledby="saved-title">
+    <header class="saved-head">
+      <div>
+        <h2 id="saved-title">Horarios <span class="badge">{{ schedules().length }}</span></h2>
+        <p class="muted">
+          Horario activo: <strong>{{ current.nombre }}</strong> · {{ blocks(current) }}
+          @if (!auth.isAdmin() && others().length > 0) {
+            · solo un administrador puede cambiarlo
+          }
+        </p>
+      </div>
+    </header>
+
+    @if (auth.isAdmin()) {
+      <form class="saved-create" (submit)="$event.preventDefault(); create()" novalidate>
+        <label class="field">
+          <span class="field-label">Nombre del horario nuevo</span>
+          <input
+            type="text"
+            [formControl]="name"
+            placeholder="Por ejemplo, Semestre 2026-2 o Propuesta B"
+            maxlength="100"
+            [attr.aria-invalid]="name.invalid && name.touched"
+          />
+        </label>
+        <button type="submit" class="btn-primary" [disabled]="creating() || busy()">
+          {{ creating() ? 'Generando…' : 'Crear horario nuevo' }}
+        </button>
+      </form>
+      @if (name.invalid && name.touched) {
+        <p class="error-text" role="alert">Escribe un nombre de 2 a 100 caracteres.</p>
+      }
+      <p class="hint muted">Se genera con los datos actuales y queda activo. El horario activo de ahora se guarda y puedes volver a él.</p>
+    }
+
+    <ul class="saved-list">
+      @for (s of schedules(); track s.id) {
+        <li [class.is-active]="s.activo">
+          @if (renamingId() === s.id) {
+            <input type="text" class="search-input rename" [formControl]="newName" maxlength="100" aria-label="Nuevo nombre" (keydown.enter)="saveRename(s)" />
+            <div class="row-actions">
+              <button type="button" class="btn-primary" (click)="saveRename(s)">Guardar</button>
+              <button type="button" class="btn-ghost" (click)="renamingId.set(null)">Cancelar</button>
+            </div>
+          } @else {
+            <div class="saved-name">
+              <strong>{{ s.nombre }}</strong>
+              @if (s.activo) {
+                <span class="badge badge-ok">Activo</span>
+              }
+              <span class="muted small">{{ blocks(s) }}</span>
+            </div>
+            @if (auth.isAdmin()) {
+              <div class="row-actions">
+                @if (!s.activo) {
+                  <button type="button" class="btn-secondary" (click)="activate(s)" [disabled]="busy() || creating()">Activar</button>
+                }
+                <button type="button" class="btn-ghost" (click)="startRename(s)" [attr.aria-label]="'Renombrar ' + s.nombre">Renombrar</button>
+                @if (!s.activo) {
+                  <button type="button" class="btn-danger" (click)="remove(s)" [attr.aria-label]="'Eliminar ' + s.nombre">Eliminar</button>
+                }
+              </div>
+            }
+          }
+        </li>
+      }
+    </ul>
+  </section>
+}

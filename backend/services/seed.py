@@ -3,7 +3,10 @@ from datetime import time
 from sqlalchemy.orm import Session
 
 import config
-from models import Cancellation, Classroom, Notification, TeacherAvailability, StudentGroup, ScheduleEntry, Subject, Teacher, User
+from models import (
+    Cancellation, Classroom, Notification, SavedSchedule, ScheduleEntry, StudentGroup, Subject, Teacher, TeacherAvailability,
+    User,
+)
 from services.csp import shift_range
 
 WEEKDAYS = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes"]
@@ -17,6 +20,8 @@ def delete_all(db: Session) -> None:
     # Order matters: tables that depend on others go first
     for model in (Cancellation, Notification, ScheduleEntry, Subject, TeacherAvailability, StudentGroup, Classroom, Teacher):
         db.query(model).delete()
+    # Saved schedules point to the subjects and classrooms just deleted (the active one keeps its name)
+    db.query(SavedSchedule).filter(SavedSchedule.activo.is_(False)).delete(synchronize_session=False)
     # Teacher accounts are created again for the new teachers; students lose their (deleted) group
     db.query(User).filter(User.rol == "profesor").delete()
     db.query(User).filter(User.grupo_id.isnot(None)).update({User.grupo_id: None})

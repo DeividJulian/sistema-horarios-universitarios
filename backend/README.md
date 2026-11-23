@@ -104,7 +104,7 @@ Para presentar el proyecto hay dos cuentas que entran con **contraseña**, porqu
 - `POST /auth/password-login` con `{"email", "password"}` devuelve el token. Solo funciona con esas dos cuentas; cualquier otra responde `401`.
 - A esos correos nunca se les envía un código: `/auth/login` responde `400` y `/auth/register` `409`.
 - La cuenta de administrador se crea sola al arrancar. El profesor es el profesor con el correo `profesor@gmail.com`: al cargar los datos de demostración o de la facultad, un profesor recibe ese correo (Carlos Mendoza o Fernando Salas) y tiene clases. Si ya hay datos sin ese profesor, al arrancar se crea «Profesor (demo)» sin materias, y el administrador le asigna las que quiera.
-- Se configuran con `DEMO_ACCOUNTS` (`true` por defecto), `DEMO_ADMIN_EMAIL`, `DEMO_TEACHER_EMAIL` y `DEMO_PASSWORD`. **Después de la presentación conviene poner `DEMO_ACCOUNTS=false` en Render**, porque la contraseña es pública.
+- Se configuran con `DEMO_ACCOUNTS` (`true` por defecto), `DEMO_ADMIN_EMAIL`, `DEMO_TEACHER_EMAIL` y `DEMO_PASSWORD`. **Deben seguir activas hasta el 30 de noviembre de 2026, mientras se califica el proyecto.** Después conviene poner `DEMO_ACCOUNTS=false` en Render, porque la contraseña es pública.
 
 ### Código por correo
 
@@ -172,6 +172,7 @@ El script importa la app contra SQLite en memoria, así que nunca toca la base r
 | Grupos | `POST /groups`, `GET /groups`, `PUT /groups/{id}`, `DELETE /groups/{id}` | Igual |
 | Materias | `POST /subjects`, `GET /subjects`, `PUT /subjects/{id}`, `DELETE /subjects/{id}` | Igual |
 | Horarios | `POST /schedules/generate`, `GET /schedules`, `GET /schedules/group/{id}`, `GET /schedules/teacher/{id}`, `GET /schedules/classroom/{id}`, `PUT /schedules/{id}`, `DELETE /schedules/{id}` | Igual (el estudiante solo recibe su grupo) |
+| Horarios guardados | `GET /saved-schedules`, `POST /saved-schedules`, `POST /saved-schedules/{id}/activate`, `PATCH /saved-schedules/{id}`, `DELETE /saved-schedules/{id}` | Leer: con sesión · Crear, activar, renombrar y eliminar: administrador |
 | Cambios de clase | `POST /schedules/{id}/cancellations`, `DELETE /cancellations/{id}`, `PATCH /schedules/{id}/classroom` | Profesor de esa clase o administrador |
 | Cancelaciones y avisos | `GET /cancellations`, `GET /notifications` | Con sesión (cada rol ve lo suyo) |
 | Análisis | `GET /conflicts`, `GET /statistics`, `GET /diagnostics` | Con sesión, excepto estudiantes |
@@ -195,6 +196,16 @@ Todos los errores responden `{"detail": "mensaje"}`:
 - `409`: conflicto (correo o aula duplicados, borrar algo en uso, mover un bloque a una franja ocupada, o no hay horario posible).
 - `422`: datos inválidos (correo mal formado, horas que no son en punto, rangos invertidos, etc.).
 - `500`: error interno de base de datos.
+
+## Varios horarios
+
+El administrador puede tener **varios horarios con nombre** (por ejemplo «Semestre 2026-2» o «Propuesta B») y elegir cuál está activo. Todos ven el activo.
+
+- `POST /saved-schedules` con `{"nombre"}` guarda el horario actual tal como está y genera uno nuevo con los datos de ahora, que queda activo. Si el generador no puede ubicar todas las materias responde `409` y no cambia nada.
+- `POST /saved-schedules/{id}/activate` cambia el horario activo. El que estaba activo queda guardado bloque por bloque. Las cancelaciones de clases eran del horario anterior, así que se borran. Si mientras tanto se borró una materia o un aula, sus bloques se omiten y la respuesta dice cuántos (`bloques_omitidos`).
+- No se puede borrar el horario activo (`409`). Los nombres no se repiten, sin importar mayúsculas.
+- El horario activo sigue en la tabla `horarios`, así que el análisis, los choques, los cambios de clase, la IA y gRPC funcionan igual que antes. Los otros guardan sus bloques en la tabla `horarios_guardados`. Al arrancar, el horario que ya existía queda como «Horario principal».
+- Al cargar los datos de demostración se borran los horarios guardados, porque apuntaban a materias y aulas que ya no existen.
 
 ## Cómo funciona el algoritmo
 

@@ -719,18 +719,13 @@
       },
       "HealthOut": {
         "properties": {
-          "base_de_datos": {
-            "title": "Base De Datos",
-            "type": "string"
-          },
-          "estado": {
-            "title": "Estado",
+          "status": {
+            "title": "Status",
             "type": "string"
           }
         },
         "required": [
-          "estado",
-          "base_de_datos"
+          "status"
         ],
         "title": "HealthOut",
         "type": "object"
@@ -1118,6 +1113,119 @@
           "mensaje"
         ],
         "title": "RootOut",
+        "type": "object"
+      },
+      "SavedScheduleActivated": {
+        "properties": {
+          "bloques_omitidos": {
+            "title": "Bloques Omitidos",
+            "type": "integer"
+          },
+          "horario": {
+            "$ref": "#/components/schemas/SavedScheduleOut"
+          },
+          "mensaje": {
+            "title": "Mensaje",
+            "type": "string"
+          }
+        },
+        "required": [
+          "mensaje",
+          "horario",
+          "bloques_omitidos"
+        ],
+        "title": "SavedScheduleActivated",
+        "type": "object"
+      },
+      "SavedScheduleCreate": {
+        "properties": {
+          "nombre": {
+            "maxLength": 100,
+            "minLength": 2,
+            "title": "Nombre",
+            "type": "string"
+          }
+        },
+        "required": [
+          "nombre"
+        ],
+        "title": "SavedScheduleCreate",
+        "type": "object"
+      },
+      "SavedScheduleCreated": {
+        "properties": {
+          "horario": {
+            "$ref": "#/components/schemas/SavedScheduleOut"
+          },
+          "mensaje": {
+            "title": "Mensaje",
+            "type": "string"
+          },
+          "optimizacion": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/OptimizationReport"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "mensaje",
+          "horario"
+        ],
+        "title": "SavedScheduleCreated",
+        "type": "object"
+      },
+      "SavedScheduleOut": {
+        "properties": {
+          "activo": {
+            "title": "Activo",
+            "type": "boolean"
+          },
+          "creado_en": {
+            "format": "date-time",
+            "title": "Creado En",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "nombre": {
+            "title": "Nombre",
+            "type": "string"
+          },
+          "total_bloques": {
+            "title": "Total Bloques",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "nombre",
+          "activo",
+          "total_bloques",
+          "creado_en"
+        ],
+        "title": "SavedScheduleOut",
+        "type": "object"
+      },
+      "SavedScheduleRename": {
+        "properties": {
+          "nombre": {
+            "maxLength": 100,
+            "minLength": 2,
+            "title": "Nombre",
+            "type": "string"
+          }
+        },
+        "required": [
+          "nombre"
+        ],
+        "title": "SavedScheduleRename",
         "type": "object"
       },
       "ScheduleEntryMove": {
@@ -4140,6 +4248,7 @@
     },
     "/health": {
       "get": {
+        "description": "Para el monitoreo: comprueba la conexión con la base de datos. Es pública y no devuelve datos.",
         "operationId": "health_health_get",
         "responses": {
           "200": {
@@ -4161,6 +4270,16 @@
               }
             },
             "description": "Error interno de la base de datos"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthOut"
+                }
+              }
+            },
+            "description": "La base de datos no responde"
           }
         },
         "summary": "Health"
@@ -4254,6 +4373,491 @@
         "summary": "List Notifications",
         "tags": [
           "Cambios de clase y avisos"
+        ]
+      }
+    },
+    "/saved-schedules": {
+      "get": {
+        "operationId": "list_saved_schedules_saved_schedules_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/SavedScheduleOut"
+                  },
+                  "title": "Response List Saved Schedules Saved Schedules Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "Sin sesión, o token inválido o vencido"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "El rol del usuario no permite esta acción"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "El recurso no existe"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "Conflicto con los datos actuales (duplicado, cruce de horario, etc.)"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "Datos de entrada inválidos"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "Error interno de la base de datos"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Listar los horarios",
+        "tags": [
+          "Horarios guardados"
+        ]
+      },
+      "post": {
+        "description": "Guarda el horario actual tal como está y genera uno nuevo, que queda activo.",
+        "operationId": "create_saved_schedule_saved_schedules_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SavedScheduleCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SavedScheduleCreated"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "Sin sesión, o token inválido o vencido"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "El rol del usuario no permite esta acción"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "El recurso no existe"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "Conflicto con los datos actuales (duplicado, cruce de horario, etc.)"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "Datos de entrada inválidos"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "Error interno de la base de datos"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Crear un horario nuevo",
+        "tags": [
+          "Horarios guardados"
+        ]
+      }
+    },
+    "/saved-schedules/{schedule_id}": {
+      "delete": {
+        "operationId": "delete_saved_schedule_saved_schedules__schedule_id__delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "schedule_id",
+            "required": true,
+            "schema": {
+              "title": "Schedule Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MessageOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "Sin sesión, o token inválido o vencido"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "El rol del usuario no permite esta acción"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "El recurso no existe"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "Conflicto con los datos actuales (duplicado, cruce de horario, etc.)"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "Datos de entrada inválidos"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "Error interno de la base de datos"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Eliminar un horario guardado",
+        "tags": [
+          "Horarios guardados"
+        ]
+      },
+      "patch": {
+        "operationId": "rename_saved_schedule_saved_schedules__schedule_id__patch",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "schedule_id",
+            "required": true,
+            "schema": {
+              "title": "Schedule Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SavedScheduleRename"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SavedScheduleOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "Sin sesión, o token inválido o vencido"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "El rol del usuario no permite esta acción"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "El recurso no existe"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "Conflicto con los datos actuales (duplicado, cruce de horario, etc.)"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "Datos de entrada inválidos"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "Error interno de la base de datos"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Renombrar un horario",
+        "tags": [
+          "Horarios guardados"
+        ]
+      }
+    },
+    "/saved-schedules/{schedule_id}/activate": {
+      "post": {
+        "description": "El horario elegido pasa a ser el que ven todos; el que estaba activo queda guardado.",
+        "operationId": "activate_saved_schedule_saved_schedules__schedule_id__activate_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "schedule_id",
+            "required": true,
+            "schema": {
+              "title": "Schedule Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SavedScheduleActivated"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "Sin sesión, o token inválido o vencido"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "El rol del usuario no permite esta acción"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "El recurso no existe"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "Conflicto con los datos actuales (duplicado, cruce de horario, etc.)"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "Datos de entrada inválidos"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "Error interno de la base de datos"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Activar un horario",
+        "tags": [
+          "Horarios guardados"
         ]
       }
     },

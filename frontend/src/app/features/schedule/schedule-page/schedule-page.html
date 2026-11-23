@@ -100,6 +100,10 @@
   }
 
   @if (seesEverything()) {
+    <app-saved-schedules (changed)="scheduleChanged()" />
+  }
+
+  @if (seesEverything()) {
     <app-schedule-filters
       [teachers]="store.teachers()"
       [groups]="store.groups()"

@@ -12,10 +12,14 @@ from sqlalchemy.orm import Session
 import models  # noqa: F401  (registers the tables on Base)
 from database import Base, SessionLocal, engine, get_db
 from migrations import apply_migrations
-from routers import ai, analysis, auth, availability, class_changes, classrooms, groups, schedules, seed, subjects, teachers, users
+from routers import (
+    ai, analysis, auth, availability, class_changes, classrooms, groups, saved_schedules, schedules, seed, subjects,
+    teachers, users,
+)
 from schemas import ErrorOut, HealthOut, RootOut
 from security import authorize
 from services.rpc import create_rpc_app
+from services.saved_schedules import ensure_active
 from services.users import ensure_admin, ensure_demo_accounts, sync_accounts
 
 logging.basicConfig(
@@ -31,6 +35,7 @@ with SessionLocal() as session:
     ensure_admin(session)  # first administrator from ADMIN_EMAIL
     ensure_demo_accounts(session)  # administrador@gmail.com and profesor@gmail.com, with the demo password
     sync_accounts(session)  # one account per teacher
+    ensure_active(session)  # the current blocks become the schedule "Horario principal"
 
 # Error codes each group of routes can answer, all with the shape {"detail": "text"} (see the handlers below)
 ERROR_TEXT = {
@@ -79,7 +84,7 @@ app.include_router(class_changes.router, responses=errors(401, 403, 404, 409, 42
 app.include_router(ai.router, responses=errors(401, 403, 404, 422, 429, 502, 503))
 
 # Data: every signed-in user can read, only administrators can create, edit, delete or generate
-for data_router in (teachers, availability, classrooms, groups, subjects, schedules, analysis, seed):
+for data_router in (teachers, availability, classrooms, groups, subjects, schedules, saved_schedules, analysis, seed):
     app.include_router(data_router.router, dependencies=[Depends(authorize)], responses=errors(401, 403, 404, 409, 422))
 
 
@@ -150,7 +155,16 @@ def root():
     return {"mensaje": "API Sistema de Horarios funcionando"}
 
 
-@app.get("/health", response_model=HealthOut)
+@app.get(
+    "/health",
+    response_model=HealthOut,
+    responses={503: {"model": HealthOut, "description": "La base de datos no responde"}},
+)
 def health(db: Session = Depends(get_db)):
-    db.execute(text("SELECT 1"))
-    return {"estado": "ok", "base_de_datos": "conectada"}
+    """Para el monitoreo: comprueba la conexión con la base de datos. Es pública y no devuelve datos."""
+    try:
+        db.execute(text("SELECT 1"))
+    except Exception as exc:  # a health check must never answer an uncontrolled 500
+        logger.error("Health check: the database is not responding", exc_info=exc)
+        return JSONResponse(status_code=503, content={"status": "error"})
+    return {"status": "ok"}

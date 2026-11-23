@@ -25,10 +25,11 @@ Cada carpeta tiene su propio README con la instalación, los endpoints y las pru
 
 | Rol | Correo | Contraseña | Puede |
 |---|---|---|---|
-| Administrador | `admin@horarios.edu.co` | `Admin2026*` | Todo: gestionar datos y usuarios, generar y ajustar el horario |
-| Profesor | el correo registrado de cada profesor | `Profesor2026*` | Ver sus clases, cancelarlas en una fecha o cambiarlas de aula (avisa a los estudiantes) |
-| Estudiante | `estudiante@horarios.edu.co` | `Estudiante2026*` | Ver solo el horario de su grupo y sus avisos |
-| Consulta | `usuario@horarios.edu.co` | `Usuario2026*` | Ver todo sin modificar |
+| Administrador | `administrador@gmail.com` | `demo123` | Todo: gestionar datos y usuarios, generar y ajustar el horario, y crear más horarios y elegir cuál está activo |
+| Profesor | `profesor@gmail.com` | `demo123` | Ver sus clases, cancelarlas en una fecha o cambiarlas de aula (avisa a los estudiantes) |
+| Estudiante | la cuenta de estudiante que ya existe | No usa contraseña: entra con el código de 6 dígitos que llega a su correo | Ver solo el horario de su grupo y sus avisos |
+
+En el login, las dos primeras entran con la pestaña **Con contraseña** (`demo123`, sin espacios). Las demás cuentas entran con un código al correo. Deben seguir activas hasta el 30 de noviembre de 2026, mientras se califica el proyecto.
 
 ## Ejecución local
 

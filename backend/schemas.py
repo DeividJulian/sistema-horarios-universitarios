@@ -357,8 +357,7 @@ class RootOut(BaseModel):
 
 
 class HealthOut(BaseModel):
-    estado: str
-    base_de_datos: str
+    status: str
 
 
 # ---------- Generation, analysis and demo data ----------
@@ -378,6 +377,38 @@ class GenerationOut(BaseModel):
     mensaje: str
     total_bloques: int
     optimizacion: OptimizationReport | None = None
+
+
+# ---------- Saved schedules (several named schedules, one active) ----------
+
+
+class SavedScheduleCreate(BaseModel):
+    nombre: Name
+
+
+class SavedScheduleRename(BaseModel):
+    nombre: Name
+
+
+class SavedScheduleOut(BaseModel):
+    id: int
+    nombre: str
+    activo: bool
+    total_bloques: int
+    creado_en: datetime
+
+
+class SavedScheduleCreated(BaseModel):
+    mensaje: str
+    horario: SavedScheduleOut
+    optimizacion: OptimizationReport | None = None
+
+
+class SavedScheduleActivated(BaseModel):
+    mensaje: str
+    horario: SavedScheduleOut
+    # Blocks of the saved schedule whose subject or classroom was deleted meanwhile
+    bloques_omitidos: int
 
 
 ConflictKind = Literal[

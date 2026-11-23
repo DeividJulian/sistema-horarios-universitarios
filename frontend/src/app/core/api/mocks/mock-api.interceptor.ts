@@ -2,7 +2,7 @@ import { HttpErrorResponse, HttpInterceptorFn, HttpRequest, HttpResponse } from 
 import { delay, of, throwError } from 'rxjs';
 
 import { API_URL } from '../api-url';
-import type { CodeSent, ErrorOut, GenerationOut, MessageOut } from '../generated';
+import type { CodeSent, ErrorOut, GenerationOut, MessageOut, SavedScheduleActivated, SavedScheduleCreated, SavedScheduleOut } from '../generated';
 import {
   MOCK_ADMIN,
   MOCK_AI_STATUS,
@@ -40,8 +40,14 @@ function mockEmail(): string {
   }
 }
 
+const MOCK_SAVED_SCHEDULES: SavedScheduleOut[] = [
+  { id: 1, nombre: 'Horario principal', activo: true, total_bloques: 0, creado_en: '2026-11-01T12:00:00+00:00' },
+  { id: 2, nombre: 'Propuesta B', activo: false, total_bloques: 0, creado_en: '2026-11-10T12:00:00+00:00' },
+];
+
 const READS: Record<string, unknown> = {
-  '/health': { estado: 'ok', base_de_datos: 'mock' },
+  '/saved-schedules': MOCK_SAVED_SCHEDULES,
+  '/health': { status: 'ok' },
   '/auth/register-options': MOCK_REGISTER_GROUPS,
   '/teachers': MOCK_TEACHERS,
   '/classrooms': MOCK_CLASSROOMS,
@@ -105,6 +111,14 @@ function answer(request: HttpRequest<unknown>, path: string) {
   }
   if (path === '/schedules/generate') {
     return ok({ mensaje: 'Horario generado (mock)', total_bloques: MOCK_SCHEDULE.length, optimizacion: null } satisfies GenerationOut);
+  }
+  if (path === '/saved-schedules' && request.method === 'POST') {
+    const horario = { ...MOCK_SAVED_SCHEDULES[0], id: 3, nombre: String(body['nombre'] ?? 'Nuevo') };
+    return ok({ mensaje: `Horario «${horario.nombre}» creado (mock)`, horario, optimizacion: null } satisfies SavedScheduleCreated, 201);
+  }
+  if (/^\/saved-schedules\/\d+\/activate$/.test(path)) {
+    const horario = { ...MOCK_SAVED_SCHEDULES[1], activo: true };
+    return ok({ mensaje: `Ahora el horario activo es «${horario.nombre}» (mock)`, horario, bloques_omitidos: 0 } satisfies SavedScheduleActivated);
   }
   if (path.startsWith('/ai/')) return fail(503, 'La IA no está disponible en el modo mock.', request.url);
   if (request.method === 'DELETE') return ok({ mensaje: 'Eliminado (mock)' } satisfies MessageOut);

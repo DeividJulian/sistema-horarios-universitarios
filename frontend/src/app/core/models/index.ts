@@ -3,6 +3,7 @@ export * from './analysis';
 export * from './availability';
 export * from './classroom';
 export * from './room-type';
+export * from './saved-schedule';
 export * from './schedule-entry';
 export * from './shift';
 export * from './student-group';

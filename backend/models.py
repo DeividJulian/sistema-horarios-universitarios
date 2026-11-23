@@ -142,3 +142,16 @@ class Backup(Base):
     creado_en = Column(DateTime(timezone=True), nullable=False, server_default=func.now())
     # JSON: {"resumen": {...}, "tablas": {"profesores": [...], ...}, "usuarios": {...}}
     contenido = Column(Text, nullable=False)
+
+
+class SavedSchedule(Base):
+    """A named schedule. The active one lives in the "horarios" table (everything else reads it from there);
+    the others keep their blocks here as JSON until an administrator activates them."""
+
+    __tablename__ = "horarios_guardados"
+    id = Column(Integer, primary_key=True, index=True)
+    nombre = Column(String, nullable=False, unique=True)
+    activo = Column(Boolean, nullable=False, default=False)
+    # JSON list of {"materia_id", "aula_id", "dia_semana", "hora_inicio"}; empty while the schedule is active
+    bloques = Column(Text, nullable=True)
+    creado_en = Column(DateTime(timezone=True), nullable=False, server_default=func.now())
